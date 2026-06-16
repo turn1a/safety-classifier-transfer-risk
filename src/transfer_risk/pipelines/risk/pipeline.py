@@ -2,7 +2,11 @@
 
 from kedro.pipeline import Pipeline, node
 
-from transfer_risk.pipelines.risk.nodes import fit_regressors, run_ablation
+from transfer_risk.pipelines.risk.nodes import (
+    fit_regressors,
+    run_ablation,
+    track_run_metrics,
+)
 
 
 def create_pipeline() -> Pipeline:
@@ -25,6 +29,17 @@ def create_pipeline() -> Pipeline:
                 ],
                 outputs="ablation_results",
                 name="run_ablation",
+            ),
+            node(
+                track_run_metrics,
+                inputs=[
+                    "master_results_table",
+                    "ablation_results",
+                    "regressors",
+                    "thresholds",
+                ],
+                outputs="run_metrics",
+                name="track_run_metrics",
             ),
         ]
     )

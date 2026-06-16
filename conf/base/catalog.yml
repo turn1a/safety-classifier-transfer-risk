@@ -101,8 +101,11 @@ transfer_results:
       layer: model_output
 
 master_results_table:
-  type: pandas.ParquetDataset
-  filepath: data/07_model_output/master_results_table.parquet
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: pandas.ParquetDataset
+    filepath: data/07_model_output/master_results_table.parquet
+  artifact_path: tables
   metadata:
     kedro-viz:
       layer: model_output
@@ -119,30 +122,50 @@ regressors:
       layer: model_output
 
 ablation_results:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: json.JSONDataset
+    filepath: data/07_model_output/ablation_results.json
+  artifact_path: results
+  metadata:
+    kedro-viz:
+      layer: model_output
+
+# Headline run scalars (also logged as MLflow metrics by the track_run_metrics node).
+run_metrics:
   type: json.JSONDataset
-  filepath: data/07_model_output/ablation_results.json
+  filepath: data/07_model_output/run_metrics.json
   metadata:
     kedro-viz:
       layer: model_output
 
 # --- reporting stage -------------------------------------------------------
 fig_cka_heatmap:
-  type: matplotlib.MatplotlibDataset
-  filepath: data/08_reporting/fig_cka_heatmap.png
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: matplotlib.MatplotlibDataset
+    filepath: data/08_reporting/fig_cka_heatmap.png
+  artifact_path: figures
   metadata:
     kedro-viz:
       layer: reporting
 
 fig_transfer_scatter:
-  type: matplotlib.MatplotlibDataset
-  filepath: data/08_reporting/fig_transfer_scatter.png
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: matplotlib.MatplotlibDataset
+    filepath: data/08_reporting/fig_transfer_scatter.png
+  artifact_path: figures
   metadata:
     kedro-viz:
       layer: reporting
 
 fig_regression_ablation:
-  type: matplotlib.MatplotlibDataset
-  filepath: data/08_reporting/fig_regression_ablation.png
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: matplotlib.MatplotlibDataset
+    filepath: data/08_reporting/fig_regression_ablation.png
+  artifact_path: figures
   metadata:
     kedro-viz:
       layer: reporting

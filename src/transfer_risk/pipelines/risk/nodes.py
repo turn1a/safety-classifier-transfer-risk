@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import logging
+import math
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -121,3 +122,57 @@ def run_ablation(
         p_value,
     )
     return result
+
+
+def track_run_metrics(
+    master: pd.DataFrame,
+    ablation: dict[str, Any],
+    regressors: dict[str, Any],
+    thresholds: dict[str, float],
+) -> dict[str, float]:
+    """Log the headline run scalars to MLflow and return them as a flat dict.
+
+    Gathers the cross-surrogate aggregates — mean/max transfer rate, the
+    similarity-vs-transfer Spearman correlations, random-forest feature importances, the
+    ablation effect/p-value, and the calibrated thresholds — and logs them as metrics on
+    the active MLflow run (opened by kedro-mlflow). The same dict is returned so it is
+    also persisted locally (``run_metrics``) for inspection.
+
+    Args:
+        master: master results table (one row per surrogate x recipe).
+        ablation: the ablation result dict.
+        regressors: the regression result dict (feature names, importances, spearman).
+        thresholds: the calibrated ``{"r1", "r2"}`` thresholds.
+
+    Returns:
+        Flat ``{metric_name: value}`` dict of the logged run metrics.
+    """
+    transfer = master["transfer_rate"]
+    metrics: dict[str, float] = {
+        "transfer_rate_mean": float(transfer.mean()),
+        "transfer_rate_max": float(transfer.max()),
+        "n_observations": float(len(master)),
+        "threshold_r1": float(thresholds["r1"]),
+        "threshold_r2": float(thresholds["r2"]),
+        "ablation_effect_pp": float(ablation["effect_size_pp"]),
+        "ablation_p_value": float(ablation["empirical_p_value"]),
+    }
+    for feature, importance in zip(
+        regressors["feature_names"], regressors["random_forest_importances"], strict=False
+    ):
+        metrics[f"rf_importance_{feature}"] = float(importance)
+    for feature, stats in regressors.get("spearman", {}).items():
+        metrics[f"spearman_{feature}_rho"] = float(stats["rho"])
+        metrics[f"spearman_{feature}_p"] = float(stats["p"])
+    _log_mlflow_metrics(metrics)
+    logger.info("Logged %d run metrics to MLflow", len(metrics))
+    return metrics
+
+
+def _log_mlflow_metrics(metrics: dict[str, float]) -> None:
+    """Log the finite metrics to the active MLflow run, if kedro-mlflow has opened one."""
+    import mlflow  # noqa: PLC0415  # optional tracking glue; imported only when used
+
+    if mlflow.active_run() is None:
+        return
+    mlflow.log_metrics({key: value for key, value in metrics.items() if math.isfinite(value)})
