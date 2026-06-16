@@ -1,0 +1,35 @@
+# Console (rich) + rotating-file logging, auto-discovered by Kedro (overridable via the
+# KEDRO_LOGGING_CONFIG env var). Node logs (transfer_risk.*) and Kedro's own logs go to
+# both the rich console and logs/run.log (10 MB x 5 rotations).
+version: 1
+disable_existing_loggers: false
+
+formatters:
+  file:
+    format: "%(asctime)s %(levelname)-8s %(name)s: %(message)s"
+    datefmt: "%Y-%m-%d %H:%M:%S"
+
+handlers:
+  console:
+    class: kedro.logging.RichHandler
+    rich_tracebacks: true
+
+  run_file:
+    class: logging.handlers.RotatingFileHandler
+    level: INFO
+    formatter: file
+    filename: logs/run.log
+    maxBytes: 10485760 # 10 MB
+    backupCount: 5
+    encoding: utf8
+    delay: true
+
+loggers:
+  kedro:
+    level: INFO
+  transfer_risk:
+    level: INFO
+
+root:
+  handlers: [console, run_file]
+  level: INFO

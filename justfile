@@ -1,8 +1,9 @@
 # transfer-risk task runner — https://just.systems
 # Install: `brew install just`. List recipes: `just --list`.
 
-# Opt out of kedro-telemetry for every recipe.
-export DO_NOT_TRACK := "1"
+# Load .env (telemetry opt-out, optional HF token, Apple-Silicon/torch runtime flags)
+# into every recipe's environment. See .env.example.
+set dotenv-load := true
 
 default: check
 

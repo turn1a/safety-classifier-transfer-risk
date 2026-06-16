@@ -27,7 +27,8 @@ conf/local/**
 data/**
 !data/**/
 !data/**/.gitkeep
-logs/
+logs/*
+!logs/.gitkeep
 .viz/
 build/
 

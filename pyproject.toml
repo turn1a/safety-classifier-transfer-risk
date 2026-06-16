@@ -20,6 +20,7 @@ dependencies = [
     "pyarrow<19",
     "pydantic>=2.13.4",
     "pydantic-settings>=2.14.1",
+    "python-dotenv>=1.2.2",
     "scikit-learn>=1.9.0",
     "scipy>=1.17.1",
     "seaborn>=0.13.2",
@@ -208,6 +209,11 @@ exclude_lines = [
 ]
 show_missing = true
 skip_covered = true
+
+# --- mdformat --------------------------------------------------------------
+[tool.mdformat]
+# Keep each paragraph on a single line (no hard wrapping); diffs change words, not rewraps.
+wrap = "no"
 
 [tool.uv.sources]
 textattack = { git = "https://github.com/turn1a/TextAttack", rev = "transformers-5-compat" }
