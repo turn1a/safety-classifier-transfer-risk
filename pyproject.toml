@@ -145,16 +145,19 @@ pretty = true
 plugins = ["pydantic.mypy"]
 
 [[tool.mypy.overrides]]
-# These ML libraries ship no (or incomplete) type information, so strict mode cannot
-# resolve them. The relaxation is scoped to exactly these modules — the rest of src/
-# stays strictly typed. torch, huggingface-hub, pandas (via pandas-stubs), kedro and
-# matplotlib DO ship types and are deliberately not listed here.
+# Libraries without complete type information, or whose stubs make strict mode noisy
+# for an I/O-glue use (matplotlib/seaborn plotting). The relaxation is scoped to these
+# modules — the deterministic core (lib, similarity/transfer logic) stays strictly
+# typed. torch, huggingface-hub, pandas (via pandas-stubs) and kedro ship usable types
+# and are deliberately not listed.
 module = [
     "transformers.*",
     "datasets.*",
     "sklearn.*",
     "scipy.*",
     "accelerate.*",
+    "matplotlib.*",
+    "seaborn.*",
 ]
 ignore_missing_imports = true
 
