@@ -67,6 +67,7 @@ def fit_regressors(master: pd.DataFrame, params: dict[str, Any], seed: int) -> d
 
 
 def _random_subset(pool: list[str], size: int, rng: Any) -> list[str]:
+    """Draw ``size`` distinct names from ``pool`` (returns the whole pool if it is smaller)."""
     if size >= len(pool):
         return pool
     return [str(item) for item in rng.choice(pool, size=size, replace=False)]

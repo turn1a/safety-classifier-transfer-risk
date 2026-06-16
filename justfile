@@ -17,9 +17,10 @@ fmt:
     uv run ruff format .
     uv run mdformat .
 
-# Lint (ruff). Fails on any diagnostic — never ignore.
+# Lint (ruff + docstring coverage). Fails on any diagnostic — never ignore.
 lint:
     uv run ruff check .
+    uv run interrogate src
 
 # Type-check src/ (mypy strict).
 type:

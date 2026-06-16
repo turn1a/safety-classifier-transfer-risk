@@ -60,6 +60,18 @@ repos:
         pass_filenames: false
         args: [src]
 
+  # Docstring coverage — public AND private (ruff D only covers public)
+  - repo: local
+    hooks:
+      - id: interrogate
+        name: interrogate
+        entry: uv run interrogate
+        language: system
+        types: [python]
+        files: ^src/
+        pass_filenames: false
+        args: [src]
+
   # Tests — pre-PUSH stage only (keeps commit cadence fast)
   - repo: local
     hooks:

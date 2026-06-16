@@ -66,6 +66,7 @@ def _transformer_representations(
     batch_size: int,
     device: torch.device,
 ) -> list[FloatArray]:
+    """Return one pooled ``(n_texts, d)`` matrix per transformer layer (embeddings skipped)."""
     tokenizer = AutoTokenizer.from_pretrained(source)
     model = (
         AutoModelForSequenceClassification.from_pretrained(source, output_hidden_states=True)
@@ -101,6 +102,7 @@ def _bilstm_representations(
     batch_size: int,
     device: torch.device,
 ) -> list[FloatArray]:
+    """Return the BiLSTM's two pooled layer matrices (mean embedding, mean LSTM output)."""
     config = json.loads((Path(source) / "config.json").read_text())
     vocab = config["vocab"]
     model = BiLSTMClassifier(

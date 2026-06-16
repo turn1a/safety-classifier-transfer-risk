@@ -43,6 +43,7 @@ build-backend = "uv_build"
 
 [dependency-groups]
 dev = [
+    "interrogate>=1.7.0",
     "mdformat>=1.0.0",
     "mdformat-frontmatter>=2.1.2",
     "mdformat-gfm>=1.0.0",
@@ -209,6 +210,22 @@ exclude_lines = [
 ]
 show_missing = true
 skip_covered = true
+
+# --- interrogate (docstring coverage: public AND private) ------------------
+[tool.interrogate]
+# ruff's D rules enforce Google-style docstrings on public APIs only; interrogate adds
+# private, nested, magic, and __init__ so every function/method/module carries one.
+# fail-under = 100 makes any undocumented object a hard failure.
+fail-under = 100
+ignore-init-method = false
+ignore-init-module = false
+ignore-magic = false
+ignore-semiprivate = false
+ignore-private = false
+ignore-nested-functions = false
+ignore-nested-classes = false
+ignore-module = false
+exclude = ["tests", "docs"]
 
 # --- mdformat --------------------------------------------------------------
 [tool.mdformat]
