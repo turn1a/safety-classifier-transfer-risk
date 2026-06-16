@@ -11,7 +11,12 @@ def create_pipeline() -> Pipeline:
         [
             node(
                 evaluate_transfer,
-                inputs=["adversarial_examples", "params:transfer"],
+                inputs=[
+                    "adversarial_examples",
+                    "surrogate_registry",
+                    "params:transfer",
+                    "params:device",
+                ],
                 outputs="transfer_results",
                 name="evaluate_transfer",
             ),

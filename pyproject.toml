@@ -65,6 +65,9 @@ source_dir = "src"
 target-version = "py313"
 line-length = 100
 src = ["src"]
+# scripts/ holds subenv-only entry points (e.g. the TextAttack runner) that import
+# packages absent from the main env; they are validated by running, not by lint.
+extend-exclude = ["scripts"]
 
 [tool.ruff.lint]
 select = [

@@ -16,6 +16,7 @@ def create_pipeline() -> Pipeline:
                     "surrogate_checkpoints",
                     "surrogate_selection",
                     "params:attacks",
+                    "params:seed",
                 ],
                 outputs="adversarial_examples",
                 name="run_attacks",

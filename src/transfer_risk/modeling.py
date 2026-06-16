@@ -122,3 +122,34 @@ def _bilstm_representations(
             for index, rep in enumerate(model.representations(ids)):
                 per_layer[index].append(rep.cpu().numpy().astype(np.float64))
     return [np.concatenate(chunks, axis=0).astype(np.float64) for chunks in per_layer]
+
+
+def load_transformer(source: str, device: torch.device) -> tuple[Any, Any]:
+    """Load a transformer classifier + tokenizer for inference (no hidden states)."""
+    tokenizer = AutoTokenizer.from_pretrained(source)
+    model = AutoModelForSequenceClassification.from_pretrained(source).to(device).eval()
+    return model, tokenizer
+
+
+def predict(
+    model: Any,
+    tokenizer: Any,
+    texts: list[str],
+    *,
+    max_seq_len: int,
+    batch_size: int,
+    device: torch.device,
+) -> list[int]:
+    """Predict class labels for a list of texts with a loaded transformer classifier."""
+    predictions: list[int] = []
+    with torch.no_grad():
+        for start in range(0, len(texts), batch_size):
+            encoded = tokenizer(
+                texts[start : start + batch_size],
+                truncation=True,
+                max_length=max_seq_len,
+                padding=True,
+                return_tensors="pt",
+            ).to(device)
+            predictions.extend(model(**encoded).logits.argmax(dim=-1).cpu().tolist())
+    return predictions

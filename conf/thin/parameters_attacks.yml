@@ -1,0 +1,16 @@
+# Thin attacks overrides (self-contained; Kedro replaces the whole `attacks` block).
+# One fast char-level recipe over a handful of examples.
+attacks:
+  recipes:
+    - deepwordbug
+  eval_set_size: 12
+  query_budget: 200
+  max_seq_len: 256
+  subenv:
+    python: "3.11"
+    packages:
+      - "textattack==0.3.10"
+      - "transformers<5"
+      - "numpy<2"
+      - "torch"
+      - "sentencepiece"

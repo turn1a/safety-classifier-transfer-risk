@@ -1,11 +1,28 @@
-# Attacks stage: TextAttack classification recipes (SPEC.md §8). The recipe set
-# spans Vassilev's failure modes (char-level, lexical/synonym, contextual).
+# Attacks stage: TextAttack recipes (SPEC.md §8). TextAttack 0.3.10 cannot run on the
+# main env (its `flair` dependency imports TransfoXLTokenizer, removed in transformers
+# 5.x), so each recipe runs in an isolated subenv (Python 3.11 + transformers<5),
+# resolved on the fly by `uv run --no-project` and invoked as a subprocess
+# (scripts/run_textattack.py).
+#
+# textfooler is omitted for now: its default semantic constraint is the Universal
+# Sentence Encoder (TensorFlow). The four recipes below still span Vassilev's failure
+# modes — char-level (deepwordbug), MLM-contextual (bert-attack, bae), and saliency
+# synonym (pwws). Adding textfooler needs TF in the subenv or a sentence-transformers
+# constraint swap.
 attacks:
   recipes:
-    - textfooler
+    - deepwordbug
     - bert-attack
     - bae
     - pwws
-    - deepwordbug
-  eval_set_size: 500      # prompts the surrogate originally classified correctly
-  query_budget: 2000      # raise if transfer rates are uniformly low (SPEC.md §11)
+  eval_set_size: 500 # injection prompts attacked per surrogate
+  query_budget: 2000 # raise if transfer rates are uniformly low (SPEC.md §11)
+  max_seq_len: 256
+  subenv:
+    python: "3.11"
+    packages:
+      - "textattack==0.3.10"
+      - "transformers<5"
+      - "numpy<2"
+      - "torch"
+      - "sentencepiece"

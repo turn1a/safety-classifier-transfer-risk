@@ -3,3 +3,4 @@
 transfer:
   target: protectai/deberta-v3-base-prompt-injection-v2
   batch_size: 64
+  max_seq_len: 256
