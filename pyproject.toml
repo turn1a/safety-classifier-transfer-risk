@@ -159,6 +159,8 @@ module = [
     "matplotlib.*",
     "seaborn.*",
     "textattack.*",
+    "nltk.*",
+    "sentence_transformers.*",
 ]
 ignore_missing_imports = true
 

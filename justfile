@@ -12,6 +12,11 @@ install:
     uv sync
     uv run pre-commit install --install-hooks
 
+# Download the offline NLP assets the attacks need (NLTK data, counter-fitted
+# embeddings, the sentence-transformers encoder). Run once before a full attack run.
+setup-data:
+    uv run python -m transfer_risk.scripts.fetch_assets
+
 # Auto-fix formatting (ruff + mdformat).
 fmt:
     uv run ruff format .
