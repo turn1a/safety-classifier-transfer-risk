@@ -8,13 +8,13 @@ returns manifest metadata (validation accuracy, parameter count).
 
 from __future__ import annotations
 
-import json
 from typing import TYPE_CHECKING, Any
 
 import torch
 from torch.nn.functional import cross_entropy
 from transformers import AutoModelForSequenceClassification, AutoTokenizer
 
+from transfer_risk.datasets.surrogate_model_dataset import SurrogateModelDataset
 from transfer_risk.pipelines.models.bilstm import BiLSTMClassifier, build_vocab, encode, pad_batch
 
 if TYPE_CHECKING:
@@ -62,9 +62,9 @@ def finetune_transformer(
             outputs = model(**encoded, labels=targets)
             outputs.loss.backward()
             optimizer.step()
-    output_dir.mkdir(parents=True, exist_ok=True)
-    model.save_pretrained(output_dir)
-    tokenizer.save_pretrained(output_dir)
+    SurrogateModelDataset(str(output_dir)).save(
+        {"kind": "transformer", "model": model, "tokenizer": tokenizer}
+    )
     accuracy = _transformer_accuracy(model, tokenizer, val_df, max_seq_len, batch_size, device)
     return {
         "val_accuracy": accuracy,
@@ -141,8 +141,6 @@ def train_bilstm(
             loss.backward()  # type: ignore[no-untyped-call]
             optimizer.step()
     accuracy = _bilstm_accuracy(model, vocab, val_df, max_len, batch_size, device)
-    output_dir.mkdir(parents=True, exist_ok=True)
-    torch.save(model.state_dict(), output_dir / "model.pt")
     config = {
         "vocab": vocab,
         "embed_dim": params["embed_dim"],
@@ -151,7 +149,8 @@ def train_bilstm(
         "dropout": params["dropout"],
         "max_seq_len": max_len,
     }
-    (output_dir / "config.json").write_text(json.dumps(config))
+    bundle = {"kind": "bilstm", "model": model, "config": config}
+    SurrogateModelDataset(str(output_dir)).save(bundle)
     return {
         "val_accuracy": accuracy,
         "num_params": sum(p.numel() for p in model.parameters()),

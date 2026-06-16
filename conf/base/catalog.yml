@@ -60,11 +60,21 @@ surrogate_registry:
       layer: primary
 
 # A manifest of trained/recorded surrogates ({name -> kind, source, val_accuracy,
-# num_params, ...}); the model weights themselves are saved by the node under
-# data/06_models/<name>/ (HF format) or as a BiLSTM checkpoint, not pickled here.
+# num_params, ...}). Each trained checkpoint is persisted by the SurrogateModelDataset
+# below under data/06_models/<name>/; this JSON is the lightweight provenance index.
 surrogate_checkpoints:
   type: json.JSONDataset
   filepath: data/06_models/surrogate_manifest.json
+  metadata:
+    kedro-viz:
+      layer: models
+
+# Per-surrogate checkpoint (a HuggingFace classifier dir or a BiLSTM). The training nodes
+# save through this dataset; load `surrogate.<name>` for a ready (model + tokenizer/config)
+# bundle. No built-in kedro-datasets class covers a custom-head classifier + the BiLSTM.
+"surrogate.{name}":
+  type: transfer_risk.datasets.surrogate_model_dataset.SurrogateModelDataset
+  filepath: data/06_models/{name}
   metadata:
     kedro-viz:
       layer: models
