@@ -1,0 +1,14 @@
+# Similarity stage: per-layer CKA + DBS, then empirical r1/r2 calibration.
+# Do NOT hardcode the paper's CNN-derived thresholds — recalibrate on text
+# (SPEC.md §3.1 step 3).
+similarity:
+  n_probe: 1000           # fixed probe-set size (start 1000-2000)
+  pooling: cls            # cls | mean (hidden-state pooling)
+  cka:
+    mode: minibatch       # linear | minibatch
+    batch_size: 64
+  dbs:
+    box: 1                # diagonal-box half-width
+  thresholds:
+    r1_quantile: 0.75     # high-similarity cut (M1)
+    r2_quantile: 0.25     # low-similarity cut (M2)

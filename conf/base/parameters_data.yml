@@ -1,0 +1,14 @@
+# Data stage: build one canonical, deduplicated prompt-injection dataset behind a
+# loader so every surrogate trains on identical data (SPEC.md §6).
+data:
+  sources:
+    - deepset/prompt-injections
+    - jackhhao/jailbreak-classification
+    - Lakera/gandalf_ignore_instructions
+    - xTRam1/safe-guard-prompt-injection
+  dedup_across_sources: true
+  max_seq_len: 256
+  splits:
+    train: 0.8
+    val: 0.1
+    test: 0.1

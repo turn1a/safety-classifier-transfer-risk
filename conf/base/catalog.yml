@@ -1,0 +1,158 @@
+# Data Catalog — every artifact the pipelines read or write.
+#
+# Datasets not listed here default to in-memory. Paths follow the Kedro data-
+# engineering convention (data/NN_<layer>/). The `metadata.kedro-viz.layer`
+# keys group nodes by layer in `kedro viz`.
+#
+# In this scaffold the producing nodes are stubs, so running a domain pipeline
+# raises NotImplementedError before anything is written; the entries below define
+# the intended shape and are what `kedro viz` renders.
+
+# --- data stage ------------------------------------------------------------
+canonical_dataset:
+  type: pandas.ParquetDataset
+  filepath: data/03_primary/canonical_dataset.parquet
+  metadata:
+    kedro-viz:
+      layer: primary
+
+task_splits:
+  type: pickle.PickleDataset
+  filepath: data/05_model_input/task_splits.pkl
+  metadata:
+    kedro-viz:
+      layer: model_input
+
+# --- models stage ----------------------------------------------------------
+surrogate_registry:
+  type: json.JSONDataset
+  filepath: data/03_primary/surrogate_registry.json
+  metadata:
+    kedro-viz:
+      layer: primary
+
+surrogate_checkpoints:
+  type: pickle.PickleDataset
+  filepath: data/06_models/surrogate_checkpoints.pkl
+  metadata:
+    kedro-viz:
+      layer: models
+
+# --- similarity stage ------------------------------------------------------
+probe_set:
+  type: pandas.ParquetDataset
+  filepath: data/05_model_input/probe_set.parquet
+  metadata:
+    kedro-viz:
+      layer: model_input
+
+cka_matrices:
+  type: pickle.PickleDataset
+  filepath: data/04_feature/cka_matrices.pkl
+  metadata:
+    kedro-viz:
+      layer: feature
+
+similarity_table:
+  type: pandas.ParquetDataset
+  filepath: data/07_model_output/similarity_table.parquet
+  metadata:
+    kedro-viz:
+      layer: model_output
+
+thresholds:
+  type: json.JSONDataset
+  filepath: data/07_model_output/thresholds.json
+  metadata:
+    kedro-viz:
+      layer: model_output
+
+surrogate_selection:
+  type: json.JSONDataset
+  filepath: data/07_model_output/surrogate_selection.json
+  metadata:
+    kedro-viz:
+      layer: model_output
+
+# --- attacks stage ---------------------------------------------------------
+adversarial_examples:
+  type: pickle.PickleDataset
+  filepath: data/07_model_output/adversarial_examples.pkl
+  metadata:
+    kedro-viz:
+      layer: model_output
+
+# --- transfer stage --------------------------------------------------------
+transfer_results:
+  type: pandas.ParquetDataset
+  filepath: data/07_model_output/transfer_results.parquet
+  metadata:
+    kedro-viz:
+      layer: model_output
+
+master_results_table:
+  type: pandas.ParquetDataset
+  filepath: data/07_model_output/master_results_table.parquet
+  metadata:
+    kedro-viz:
+      layer: model_output
+
+# --- risk stage ------------------------------------------------------------
+regressors:
+  type: pickle.PickleDataset
+  filepath: data/06_models/regressors.pkl
+  metadata:
+    kedro-viz:
+      # Trained late, from the model_output table — kept in the model_output band
+      # so the viz layer ordering stays acyclic (models are trained before the
+      # CKA "feature" stage in this pipeline).
+      layer: model_output
+
+ablation_results:
+  type: json.JSONDataset
+  filepath: data/07_model_output/ablation_results.json
+  metadata:
+    kedro-viz:
+      layer: model_output
+
+# --- reporting stage -------------------------------------------------------
+fig_cka_heatmap:
+  type: matplotlib.MatplotlibDataset
+  filepath: data/08_reporting/fig_cka_heatmap.png
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+fig_transfer_scatter:
+  type: matplotlib.MatplotlibDataset
+  filepath: data/08_reporting/fig_transfer_scatter.png
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+fig_regression_ablation:
+  type: matplotlib.MatplotlibDataset
+  filepath: data/08_reporting/fig_regression_ablation.png
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+# --- smoke (wiring check) --------------------------------------------------
+smoke_report:
+  type: json.JSONDataset
+  filepath: data/08_reporting/smoke_report.json
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+# --- dataset factory -------------------------------------------------------
+# Per-surrogate hidden-state captures. With this factory, adding a surrogate
+# needs no new catalog entry — the similarity pipeline will address datasets as
+# `hidden_states.<surrogate>` once it is implemented (SPEC.md §5 model-agnostic
+# requirement).
+"hidden_states.{surrogate}":
+  type: pickle.PickleDataset
+  filepath: data/04_feature/hidden_states_{surrogate}.pkl
+  metadata:
+    kedro-viz:
+      layer: feature

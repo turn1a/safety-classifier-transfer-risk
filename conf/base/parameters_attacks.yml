@@ -1,0 +1,11 @@
+# Attacks stage: TextAttack classification recipes (SPEC.md §8). The recipe set
+# spans Vassilev's failure modes (char-level, lexical/synonym, contextual).
+attacks:
+  recipes:
+    - textfooler
+    - bert-attack
+    - bae
+    - pwws
+    - deepwordbug
+  eval_set_size: 500      # prompts the surrogate originally classified correctly
+  query_budget: 2000      # raise if transfer rates are uniformly low (SPEC.md §11)

@@ -1,0 +1,11 @@
+# Risk stage: regression (transfer rate ~ similarity features) and the headline
+# CKA-guided-vs-random ablation (SPEC.md §3.1 steps 6-7).
+risk:
+  decision_tree:
+    max_depth: 6          # matches Klause & Bunzel
+  random_forest:
+    n_estimators: 200
+    max_depth: 8
+  ablation:
+    n_bootstrap: 20       # >= 20 reseeds for the paired t-test
+    alpha: 0.05

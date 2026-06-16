@@ -1,0 +1,10 @@
+/* Minor tweaks on top of the cosmo theme. */
+
+.navbar-brand {
+  font-weight: 600;
+}
+
+/* Slightly tighter code blocks for the method walk-throughs. */
+pre code {
+  font-size: 0.85em;
+}

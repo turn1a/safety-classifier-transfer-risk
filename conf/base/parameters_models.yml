@@ -1,0 +1,26 @@
+# Models stage. The surrogate layer is model-agnostic: adding a model is a single
+# entry here, never a code change (SPEC.md §5). Final M1/M2 membership is decided
+# empirically from computed CKA, not from these pool labels.
+models:
+  target: protectai/deberta-v3-base-prompt-injection-v2
+  surrogates:
+    high_similarity_pool:
+      - protectai/deberta-v3-base-prompt-injection
+      - protectai/deberta-v3-small-prompt-injection-v2
+      - deepset/deberta-v3-base-injection
+      - meta-llama/Llama-Prompt-Guard-2-86M
+    low_similarity_pool:
+      - meta-llama/Llama-Prompt-Guard-2-22M
+      - bert-base-uncased
+      - roberta-base
+      - google/electra-small-discriminator
+      - xlnet-base-cased
+    outlier:
+      kind: bilstm_attention  # the deliberate non-transformer floor of the range
+  finetune:
+    optimizer: adamw
+    lr: 2.0e-5
+    batch_size: 32
+    epochs: 3
+    max_seq_len: 256
+    mixed_precision: false  # off on MPS for stability (SPEC.md §7)

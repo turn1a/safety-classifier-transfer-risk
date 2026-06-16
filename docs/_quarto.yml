@@ -1,0 +1,35 @@
+project:
+  type: website
+  output-dir: _site
+
+website:
+  title: "safety-classifier-transfer-risk"
+  description: "Measuring adversarial transferability risk for text safety classifiers."
+  reader-mode: true
+  navbar:
+    left:
+      - href: index.qmd
+        text: Home
+      - href: posts/index.qmd
+        text: Blog
+    right:
+      - icon: github
+        href: https://github.com/turn1a/safety-classifier-transfer-risk
+        aria-label: GitHub
+  page-footer:
+    left: "MIT licensed. Built with Kedro + Quarto."
+    right: "© 2026 Aspen Hazel Olszewska"
+
+format:
+  html:
+    theme: cosmo
+    css: styles.css
+    toc: true
+    code-copy: true
+    code-overflow: wrap
+
+# Cache executed cells so CI renders without re-running heavy code. With no
+# executable cells yet this is a no-op, but it is the right default for the
+# computational essays to come.
+execute:
+  freeze: auto

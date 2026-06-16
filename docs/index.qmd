@@ -1,0 +1,42 @@
+---
+title: "safety-classifier-transfer-risk"
+subtitle: "Measuring adversarial transferability risk for text safety classifiers"
+---
+
+This project ports the Cox & Bunzel (2025) transferability-risk method from the
+image domain to text safety classifiers. It estimates how easily a target
+classifier (a prompt-injection detector) can be fooled by adversarial examples
+crafted on *other* models, and predicts which surrogates produce successful
+transfer.
+
+## Measurement, not certification
+
+The tool quantifies and compares how leaky a filter is. It does not certify
+robustness. Vassilev (2025) proves complete guardrails are impossible: the set of
+adversarial prompts that evade any finite checker is infinite, so no classifier
+can cover it. The useful question is "how leaky is this filter, relative to
+others?", not "is this filter safe?".
+
+## The method in one paragraph
+
+Fix a deterministic probe set; compute layer-by-layer CKA similarity between each
+surrogate and the target, reduced to mean CKA and Diagonal Box Similarity;
+calibrate thresholds from the observed distribution and split surrogates into
+high- and low-similarity pools; attack the surrogates with TextAttack; feed the
+adversarial examples to the frozen target and record the transfer rate; then fit
+a regression predicting transfer rate from similarity, and test whether
+CKA-guided selection beats random selection.
+
+## Framing
+
+Three papers bracket the work: Cox & Bunzel (2025, arXiv:2511.05102) for the
+method, Klause & Bunzel (2025, arXiv:2501.18629) for the empirical grounding and
+DBS, and Vassilev (2025, arXiv:2512.10100) for why the goal is measurement. The
+target is a prompt-injection detector, so the project measures the robustness of a
+mitigation for OWASP LLM01: Prompt Injection.
+
+## This site
+
+The [blog](posts/index.qmd) documents the build as a series of computational
+essays. The code, the full specification, and reproduction instructions are in the
+[GitHub repository](https://github.com/turn1a/safety-classifier-transfer-risk).

@@ -1,0 +1,3 @@
+# Keep mdformat (run via `just fmt`) off the canonical engineering spec and the
+# reference material so they stay byte-for-byte as written.
+exclude = ["SPEC.md", "refs/**"]

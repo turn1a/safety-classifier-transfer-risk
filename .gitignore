@@ -1,0 +1,45 @@
+# Python-generated files
+__pycache__/
+*.py[oc]
+build/
+dist/
+wheels/
+*.egg-info/
+.coverage*
+htmlcov/
+
+# Tool caches
+.mypy_cache/
+.pytest_cache/
+.ruff_cache/
+
+# Virtual environments
+.venv/
+
+# Environment / secrets — NEVER commit
+.env
+.env.local
+*.credentials.json
+
+# Kedro — local config and generated data (keep the layer .gitkeep placeholders)
+conf/local/**
+!conf/local/.gitkeep
+data/**
+!data/**/
+!data/**/.gitkeep
+logs/
+.viz/
+build/
+
+# MLflow — local tracking store and artifacts
+mlflow.db
+mlruns/
+mlartifacts/
+
+# Quarto — rendered site and scratch
+docs/_site/
+docs/.quarto/
+.quarto/
+
+# macOS
+.DS_Store

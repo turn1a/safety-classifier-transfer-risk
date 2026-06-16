@@ -1,0 +1,186 @@
+[project]
+name = "transfer-risk"
+version = "0.1.0"
+description = "Measure adversarial transferability risk for text safety classifiers: CKA-guided surrogate selection, transfer evaluation, and risk regression."
+authors = [
+    { name = "Aspen Hazel Olszewska", email = "aspen.olszewska@proton.me" }
+]
+requires-python = ">=3.13,<3.14"
+dependencies = [
+    "kedro>=1.4.0",
+    "kedro-datasets>=9.4.0",
+    "kedro-mlflow>=2.0.3",
+    "kedro-viz>=12.4.0",
+    "matplotlib>=3.11.0",
+    "numpy>=2.4.6",
+    "pandas<3",
+    "pyarrow<19",
+    "pydantic>=2.13.4",
+    "pydantic-settings>=2.14.1",
+    "seaborn>=0.13.2",
+]
+
+[project.scripts]
+transfer-risk = "transfer_risk.__main__:main"
+
+[project.urls]
+Repository = "https://github.com/turn1a/safety-classifier-transfer-risk"
+Changelog = "https://github.com/turn1a/safety-classifier-transfer-risk/blob/main/CHANGELOG.md"
+
+[build-system]
+requires = ["uv_build>=0.11.21,<0.12.0"]
+build-backend = "uv_build"
+
+[dependency-groups]
+dev = [
+    "mdformat>=1.0.0",
+    "mdformat-frontmatter>=2.1.2",
+    "mdformat-gfm>=1.0.0",
+    "mypy>=2.1.0",
+    "nbstripout>=0.9.1",
+    "pandas-stubs>=3.0.3.260530",
+    "pre-commit>=4.6.0",
+    "pytest>=9.1.0",
+    "pytest-cov>=7.1.0",
+    "ruff>=0.15.17",
+]
+
+# --- kedro -----------------------------------------------------------------
+[tool.kedro]
+package_name = "transfer_risk"
+project_name = "safety-classifier-transfer-risk"
+kedro_init_version = "1.4.0"
+source_dir = "src"
+
+# --- ruff ------------------------------------------------------------------
+[tool.ruff]
+target-version = "py313"
+line-length = 100
+src = ["src"]
+
+[tool.ruff.lint]
+select = [
+    "A",    # flake8-builtins
+    "ARG",  # flake8-unused-arguments
+    "B",    # flake8-bugbear
+    "C4",   # flake8-comprehensions
+    "DTZ",  # flake8-datetimez
+    "E",    # pycodestyle errors
+    "EM",   # flake8-errmsg
+    "F",    # pyflakes
+    "FBT",  # flake8-boolean-trap
+    "I",    # isort
+    "ICN",  # flake8-import-conventions
+    "ISC",  # flake8-implicit-str-concat
+    "N",    # pep8-naming
+    "PLC",  # pylint convention
+    "PLE",  # pylint errors
+    "PLR",  # pylint refactor
+    "PLW",  # pylint warnings
+    "Q",    # flake8-quotes
+    "RUF",  # Ruff-specific rules
+    "S",    # flake8-bandit
+    "T20",  # flake8-print
+    "TID",  # flake8-tidy-imports
+    "UP",   # pyupgrade
+    "W",    # pycodestyle warnings
+    "YTT",  # flake8-2020
+    "D",    # pydocstyle (google convention)
+    "SIM",  # flake8-simplify
+    "PTH",  # flake8-use-pathlib
+    "TC",   # flake8-type-checking
+    "RET",  # flake8-return
+    "LOG",  # flake8-logging
+]
+ignore = [
+    # Both rules conflict with `ruff format`, per Ruff's own guidance.
+    "ISC001",
+    "COM812",
+]
+fixable = ["ALL"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*" = [
+    "S101",     # assert is how a test asserts
+    "PLR2004",  # comparing against literal expected values is normal in tests
+    "D",        # test functions are self-documenting; no docstring required
+]
+# Stub functions declare the real inputs the next phase will use, but their bodies
+# only `raise NotImplementedError`, so the arguments read as unused. Scoped to the
+# stub files; drop an entry once that file's functions are implemented.
+"src/transfer_risk/pipelines/**/nodes.py" = ["ARG001"]
+"src/transfer_risk/lib/*.py" = ["ARG001"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.pylint]
+max-statements = 60
+max-args = 8
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
+skip-magic-trailing-comma = false
+line-ending = "auto"
+
+# --- mypy ------------------------------------------------------------------
+[tool.mypy]
+python_version = "3.13"
+strict = true
+warn_unreachable = true
+extra_checks = true
+show_error_codes = true
+pretty = true
+plugins = ["pydantic.mypy"]
+# mypy checks src/ only (see the justfile / pre-commit). Every third-party library
+# imported there — kedro, matplotlib — ships py.typed, and pandas is typed via the
+# pandas-stubs dev dependency, so no ignore_missing_imports overrides are needed.
+# Add one (with a reason) only when a new dependency genuinely ships no types.
+
+# --- pytest ----------------------------------------------------------------
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
+python_classes = ["Test*"]
+python_functions = ["test_*"]
+addopts = [
+    "-v",
+    "--tb=short",
+    "--strict-markers",
+    "--strict-config",
+    "--cov=src/transfer_risk",
+    "--cov-report=term-missing",
+    "--cov-branch",
+]
+filterwarnings = [
+    "error",
+    "ignore::DeprecationWarning",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests needing heavy ML deps or network (gated by TRANSFER_RISK_INTEGRATION=1)",
+]
+
+# --- coverage --------------------------------------------------------------
+[tool.coverage.run]
+source = ["src"]
+branch = true
+
+[tool.coverage.report]
+# SCAFFOLD: the gate is 0 while the pipelines are skeletons. It ramps to 90% on
+# src/transfer_risk/lib (the pure, deterministic core) once that core lands — see
+# AGENTS.md. The heavy torch / TextAttack I/O nodes stay outside the gate.
+fail_under = 0
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+    "class .*\\bProtocol\\):",
+    "@(abc\\.)?abstractmethod",
+    "if TYPE_CHECKING:",
+]
+show_missing = true
+skip_covered = true

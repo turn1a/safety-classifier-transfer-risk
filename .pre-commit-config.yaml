@@ -1,0 +1,73 @@
+# Pre-commit hooks for transfer-risk.
+# Install: `just install` (runs `uv run pre-commit install --install-hooks`).
+# Run all: `uv run pre-commit run --all-files`.
+
+default_install_hook_types: [pre-commit, pre-push]
+
+repos:
+  # File hygiene (fast)
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: trailing-whitespace
+      - id: end-of-file-fixer
+      - id: check-yaml
+      - id: check-toml
+      - id: check-merge-conflict
+      - id: check-case-conflict
+      - id: check-added-large-files
+        args: [--maxkb=2048]  # reference PDFs (refs/) are ~0.5 MB; bigger files belong in LFS
+      - id: debug-statements
+      - id: detect-private-key
+
+  # Ruff — lint + format (fast)
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.15.17
+    hooks:
+      - id: ruff
+        args: [--fix, --exit-non-zero-on-fix]
+        types_or: [python, pyi]
+      - id: ruff-format
+        types_or: [python, pyi]
+
+  # Markdown formatting (pure Python)
+  - repo: https://github.com/executablebooks/mdformat
+    rev: 1.0.0
+    hooks:
+      - id: mdformat
+        additional_dependencies:
+          - mdformat-gfm
+          - mdformat-frontmatter
+
+  # Strip notebook outputs (notebooks are exploratory; keep diffs clean)
+  - repo: local
+    hooks:
+      - id: nbstripout
+        name: nbstripout
+        entry: uv run nbstripout
+        language: system
+        files: \.ipynb$
+
+  # mypy via uv (uses the project env so plugins / overrides apply)
+  - repo: local
+    hooks:
+      - id: mypy
+        name: mypy
+        entry: uv run mypy
+        language: system
+        types: [python]
+        files: ^src/
+        pass_filenames: false
+        args: [src]
+
+  # Tests — pre-PUSH stage only (keeps commit cadence fast)
+  - repo: local
+    hooks:
+      - id: pytest
+        name: pytest
+        entry: uv run pytest
+        language: system
+        types: [python]
+        pass_filenames: false
+        always_run: true
+        stages: [pre-push]

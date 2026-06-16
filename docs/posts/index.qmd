@@ -1,0 +1,10 @@
+---
+title: "Blog"
+subtitle: "Building a transferability-risk mapper for text safety classifiers, one phase at a time."
+listing:
+  contents: "*.qmd"
+  sort: "date desc"
+  type: default
+  categories: true
+  fields: [date, title, description, reading-time]
+---

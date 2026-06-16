@@ -1,0 +1,5 @@
+# Transfer stage: feed every adversarial example to the frozen target and record
+# the fraction that flip its prediction (SPEC.md §3.1 step 5).
+transfer:
+  target: protectai/deberta-v3-base-prompt-injection-v2
+  batch_size: 64

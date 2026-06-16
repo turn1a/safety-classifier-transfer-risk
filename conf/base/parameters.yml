@@ -1,0 +1,16 @@
+# Global parameters shared across pipelines.
+# Per-stage parameters live in parameters_<stage>.yml and are referenced in
+# pipelines as `params:<stage>` (e.g. `params:similarity`).
+
+# Single root seed. transfer_risk.lib.seeds derives independent per-component
+# seeds (Python, NumPy, PyTorch, TextAttack) from this. No unseeded randomness.
+seed: 20260616
+
+project:
+  name: safety-classifier-transfer-risk
+  version: 0.1.0
+
+device:
+  # Resolved at runtime to "mps" on Apple Silicon, else "cpu".
+  policy: mps_or_cpu
+  allow_mps_fallback: true
