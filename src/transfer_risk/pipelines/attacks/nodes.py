@@ -61,16 +61,20 @@ def _subenv_command(
 def run_attacks(
     splits: dict[str, pd.DataFrame],
     manifest: dict[str, Any],
-    selection: dict[str, Any],
     params: dict[str, Any],
     seed: int,
 ) -> dict[str, Any]:
-    """Run each recipe against each selected surrogate (M1 and M2) in the isolated subenv."""
+    """Run each recipe against every surrogate in the isolated subenv.
+
+    The whole pool is attacked (not just the CKA-selected M1/M2) so the risk stage's
+    ablation can compare the CKA-guided subset against random subsets drawn from all of
+    them; attacking only the selected set would make that comparison degenerate.
+    """
     eval_size = int(params["eval_set_size"])
     query_budget = int(params["query_budget"])
     recipes = params["recipes"]
     subenv = params["subenv"]
-    targets = list(dict.fromkeys([*selection["M1"], *selection["M2"]]))
+    targets = list(manifest.keys())
     test_df = splits["test"]
     injections = test_df.loc[test_df["label"] == 1, "text"].head(eval_size).tolist()
     examples = [{"text": text, "label": 1} for text in injections]

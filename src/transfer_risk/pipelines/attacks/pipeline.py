@@ -14,7 +14,6 @@ def create_pipeline() -> Pipeline:
                 inputs=[
                     "task_splits",
                     "surrogate_checkpoints",
-                    "surrogate_selection",
                     "params:attacks",
                     "params:seed",
                 ],
