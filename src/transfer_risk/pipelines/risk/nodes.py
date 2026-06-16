@@ -12,6 +12,7 @@ from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import cross_val_score
 from sklearn.tree import DecisionTreeRegressor
 
+from transfer_risk.lib.ablation import ablation_statistics
 from transfer_risk.lib.seeds import derive_seeds
 
 if TYPE_CHECKING:
@@ -67,13 +68,6 @@ def fit_regressors(master: pd.DataFrame, params: dict[str, Any], seed: int) -> d
     return result
 
 
-def _random_subset(pool: list[str], size: int, rng: Any) -> list[str]:
-    """Draw ``size`` distinct names from ``pool`` (returns the whole pool if it is smaller)."""
-    if size >= len(pool):
-        return pool
-    return [str(item) for item in rng.choice(pool, size=size, replace=False)]
-
-
 def run_ablation(
     master: pd.DataFrame,
     selection: dict[str, Any],
@@ -82,44 +76,35 @@ def run_ablation(
 ) -> dict[str, Any]:
     """Compare CKA-guided selection vs random selection on max transfer rate.
 
-    Guided selection is M1 + M2. For each of ``n_bootstrap`` reseeds a random subset of
-    the same size is drawn from the surrogate pool; the empirical p-value is the
+    Guided selection is M1 + M2. The pure :func:`ablation_statistics` draws ``n_bootstrap``
+    random subsets of the same size from the full pool; the empirical p-value is the
     fraction of random subsets whose max transfer rate matches or beats the guided one.
     """
     per_surrogate = master.groupby("surrogate")["transfer_rate"].max()
-    pool = [str(name) for name in per_surrogate.index]
-    guided = [name for name in [*selection["M1"], *selection["M2"]] if name in pool]
+    per_surrogate_max = {str(name): float(value) for name, value in per_surrogate.items()}
+    pool = list(per_surrogate_max)
+    guided = [name for name in [*selection["M1"], *selection["M2"]] if name in per_surrogate_max]
     if not guided:
         return {"effect_size_pp": 0.0, "empirical_p_value": 1.0, "note": "no guided surrogates"}
-    guided_max = float(per_surrogate.loc[guided].max())
-    size = len(guided)
     n_bootstrap = int(params["ablation"]["n_bootstrap"])
     rng = np.random.default_rng(derive_seeds(seed).numpy)
-    random_maxes = np.array(
-        [
-            float(per_surrogate.loc[_random_subset(pool, size, rng)].max())
-            for _ in range(n_bootstrap)
-        ]
+    stats = ablation_statistics(per_surrogate_max, guided, pool, n_bootstrap, rng)
+    met = bool(
+        stats["effect_size_pp"] >= _SUCCESS_EFFECT_PP
+        and stats["empirical_p_value"] < params["ablation"]["alpha"]
     )
-    effect_pp = (guided_max - float(random_maxes.mean())) * 100.0
-    p_value = float((random_maxes >= guided_max).mean())
-    met = bool(effect_pp >= _SUCCESS_EFFECT_PP and p_value < params["ablation"]["alpha"])
-    result = {
+    result: dict[str, Any] = {
         "guided_surrogates": guided,
-        "guided_max_transfer": guided_max,
-        "random_max_mean": float(random_maxes.mean()),
-        "random_max_std": float(random_maxes.std()),
-        "effect_size_pp": effect_pp,
-        "empirical_p_value": p_value,
+        **stats,
         "n_bootstrap": n_bootstrap,
         "success_criterion_met": met,
     }
     logger.info(
         "Ablation: guided=%.3f random=%.3f effect=%.1fpp p=%.3f",
-        guided_max,
-        result["random_max_mean"],
-        effect_pp,
-        p_value,
+        stats["guided_max_transfer"],
+        stats["random_max_mean"],
+        stats["effect_size_pp"],
+        stats["empirical_p_value"],
     )
     return result
 

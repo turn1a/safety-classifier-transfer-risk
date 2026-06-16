@@ -33,3 +33,19 @@ def test_default_chain_excludes_smoke() -> None:
     default_node_names = {node.name for node in pipelines["__default__"].nodes}
     assert "record_environment" not in default_node_names
     assert "build_canonical_dataset" in default_node_names
+
+
+def test_default_chain_is_connected_end_to_end() -> None:
+    """The full chain has no dangling data inputs and produces the reporting outputs."""
+    default = register_pipelines()["__default__"]
+    # Every free input is a parameter: no node consumes a dataset that nothing produces.
+    # (The raw HuggingFace sources are loaded inside the data node, not as pipeline inputs.)
+    free_inputs = default.inputs()
+    assert free_inputs, "the default pipeline should declare parameter inputs"
+    assert all(name.startswith("params:") for name in free_inputs), free_inputs
+    # The chain terminates in the three reporting figures.
+    figures = {"fig_cka_heatmap", "fig_transfer_scatter", "fig_regression_ablation"}
+    assert figures <= default.all_outputs()
+    # ...and spans data ingestion, attacks, and metric tracking.
+    node_names = {node.name for node in default.nodes}
+    assert {"build_canonical_dataset", "run_attacks", "track_run_metrics"} <= node_names

@@ -8,6 +8,7 @@ from typing import Any
 import pandas as pd
 
 from transfer_risk.devices import resolve_device
+from transfer_risk.lib.transfer import transfer_rate
 from transfer_risk.modeling import load_transformer, predict
 
 logger = logging.getLogger(__name__)
@@ -47,8 +48,7 @@ def evaluate_transfer(
             batch_size=batch_size,
             device=device,
         )
-        transferred = sum(1 for prediction in target_preds if prediction == 0)
-        rate = transferred / len(successful)
+        rate = transfer_rate(target_preds)
         rows.append(
             {
                 "surrogate": surrogate,
@@ -58,7 +58,7 @@ def evaluate_transfer(
             }
         )
         logger.info(
-            "%s/%s: %d/%d transferred (%.3f)", surrogate, recipe, transferred, len(successful), rate
+            "%s/%s: transfer rate %.3f over %d successful", surrogate, recipe, rate, len(successful)
         )
     return pd.DataFrame(rows)
 
