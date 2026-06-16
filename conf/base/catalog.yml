@@ -4,9 +4,30 @@
 # engineering convention (data/NN_<layer>/). The `metadata.kedro-viz.layer`
 # keys group nodes by layer in `kedro viz`.
 #
-# In this scaffold the producing nodes are stubs, so running a domain pipeline
-# raises NotImplementedError before anything is written; the entries below define
-# the intended shape and are what `kedro viz` renders.
+# Raw training sources are pulled straight from the HuggingFace Hub via HFDataset;
+# every downstream artifact is written under data/NN_<layer>/.
+
+# --- raw stage (HuggingFace sources) ---------------------------------------
+raw_deepset:
+  type: kedro_datasets.huggingface.HFDataset
+  dataset_name: deepset/prompt-injections
+  metadata:
+    kedro-viz:
+      layer: raw
+
+raw_jackhhao:
+  type: kedro_datasets.huggingface.HFDataset
+  dataset_name: jackhhao/jailbreak-classification
+  metadata:
+    kedro-viz:
+      layer: raw
+
+raw_lakera:
+  type: kedro_datasets.huggingface.HFDataset
+  dataset_name: Lakera/gandalf_ignore_instructions
+  metadata:
+    kedro-viz:
+      layer: raw
 
 # --- data stage ------------------------------------------------------------
 canonical_dataset:

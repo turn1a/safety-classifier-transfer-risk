@@ -6,7 +6,6 @@ import logging
 from typing import Any
 
 import pandas as pd
-from datasets import load_dataset
 
 from transfer_risk.lib.seeds import derive_seeds
 from transfer_risk.pipelines.data.harmonize import (
@@ -18,21 +17,38 @@ from transfer_risk.pipelines.data.harmonize import (
 logger = logging.getLogger(__name__)
 
 
-def build_canonical_dataset(params: dict[str, Any]) -> tuple[pd.DataFrame, dict[str, Any]]:
-    """Load the configured sources, harmonise schemas, and deduplicate.
+def _flatten_rows(dataset: Any) -> list[dict[str, Any]]:
+    """Flatten a HuggingFace ``DatasetDict`` (or bare ``Dataset``) into a list of row dicts."""
+    splits = dataset.values() if hasattr(dataset, "values") else [dataset]
+    return [dict(row) for split in splits for row in split]
+
+
+def build_canonical_dataset(
+    raw_deepset: Any,
+    raw_jackhhao: Any,
+    raw_lakera: Any,
+    params: dict[str, Any],
+) -> tuple[pd.DataFrame, dict[str, Any]]:
+    """Harmonise the catalog-loaded HuggingFace sources and deduplicate.
+
+    The three raw sources are ``HFDataset`` catalog inputs, in the same order as
+    ``params["train_sources"]``; each is adapted to ``(text, label)`` by its spec.
 
     Args:
+        raw_deepset: deepset/prompt-injections (text + label).
+        raw_jackhhao: jackhhao/jailbreak-classification (prompt + type).
+        raw_lakera: Lakera/gandalf_ignore_instructions (text; all injections).
         params: The ``data`` parameter block (``train_sources``, ``min_chars``, ...).
 
     Returns:
         The canonical ``(text, label, source)`` table, plus an audit dict (row counts,
         duplicates removed, cross-source overlaps, class balance).
     """
-    frames: list[pd.DataFrame] = []
-    for spec in params["train_sources"]:
-        dataset = load_dataset(spec["id"])
-        rows = [dict(row) for split in dataset.values() for row in split]
-        frames.append(adapt_source(rows, spec))
+    loaded = [raw_deepset, raw_jackhhao, raw_lakera]
+    frames = [
+        adapt_source(_flatten_rows(dataset), spec)
+        for dataset, spec in zip(loaded, params["train_sources"], strict=True)
+    ]
     combined = pd.concat(frames, ignore_index=True)
     canonical, audit = clean_and_dedup(combined, min_chars=params["min_chars"])
     logger.info("Canonical prompt-injection dataset built: %s", audit)

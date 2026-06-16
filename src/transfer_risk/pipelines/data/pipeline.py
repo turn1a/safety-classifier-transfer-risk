@@ -11,7 +11,7 @@ def create_pipeline() -> Pipeline:
         [
             node(
                 build_canonical_dataset,
-                inputs="params:data",
+                inputs=["raw_deepset", "raw_jackhhao", "raw_lakera", "params:data"],
                 outputs=["canonical_dataset", "dataset_audit"],
                 name="build_canonical_dataset",
             ),

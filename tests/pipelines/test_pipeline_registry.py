@@ -38,11 +38,14 @@ def test_default_chain_excludes_smoke() -> None:
 def test_default_chain_is_connected_end_to_end() -> None:
     """The full chain has no dangling data inputs and produces the reporting outputs."""
     default = register_pipelines()["__default__"]
-    # Every free input is a parameter: no node consumes a dataset that nothing produces.
-    # (The raw HuggingFace sources are loaded inside the data node, not as pipeline inputs.)
+    # The only free inputs are parameters and the raw HuggingFace source datasets: no node
+    # consumes an intermediate dataset that nothing in the pipeline produces.
+    raw_sources = {"raw_deepset", "raw_jackhhao", "raw_lakera"}
     free_inputs = default.inputs()
     assert free_inputs, "the default pipeline should declare parameter inputs"
-    assert all(name.startswith("params:") for name in free_inputs), free_inputs
+    assert all(name.startswith("params:") or name in raw_sources for name in free_inputs), (
+        free_inputs
+    )
     # The chain terminates in the three reporting figures.
     figures = {"fig_cka_heatmap", "fig_transfer_scatter", "fig_regression_ablation"}
     assert figures <= default.all_outputs()
