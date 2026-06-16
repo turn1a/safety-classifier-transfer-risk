@@ -117,6 +117,23 @@ def _load_wrapper(kind, source):
     return HuggingFaceModelWrapper(model, tokenizer)
 
 
+def _ensure_nltk_data():
+    import nltk
+
+    for resource in (
+        "averaged_perceptron_tagger_eng",
+        "wordnet",
+        "omw-1.4",
+        "stopwords",
+        "punkt",
+        "universal_tagset",
+    ):
+        try:
+            nltk.download(resource, quiet=True)
+        except Exception:  # noqa: BLE001, S110
+            pass
+
+
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--kind", required=True)
@@ -128,6 +145,7 @@ def main():
     parser.add_argument("--seed", type=int, default=0)
     args = parser.parse_args()
 
+    _ensure_nltk_data()
     wrapper = _load_wrapper(args.kind, args.source)
     examples = [
         json.loads(line)
