@@ -23,6 +23,10 @@ follow [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - GitHub Actions: lint/type/test on Ubuntu (with a gated macOS-14 job) and a docs
   publish workflow.
 
+### Changed
+
+- The `attacks` pipeline now runs TextAttack in-process in the main environment (transformers 5, Python 3.13) instead of shelling out to a pinned Python 3.11 subenv. It uses a minimal fork, [turn1a/TextAttack](https://github.com/turn1a/TextAttack) (branch `transformers-5-compat`), that makes the three top-level `flair` imports lazy and adds a torch-native sentence-transformers encoder in place of the TensorFlow Universal Sentence Encoder (`semantic_encoder: use` restores the original, behind the `textattack[tensorflow]` extra). All five recipes run — DeepWordBug, PWWS, TextFooler, BAE, BERT-Attack — none dropped for a missing dependency.
+
 ### Notes
 
 - Scope is structure + tooling only: pipeline nodes and the `lib` core raise

@@ -24,6 +24,7 @@ dependencies = [
     "scipy>=1.17.1",
     "seaborn>=0.13.2",
     "sentencepiece>=0.2.1",
+    "textattack",
     "torch>=2.12.0",
     "transformers>=5.12.1",
 ]
@@ -65,9 +66,6 @@ source_dir = "src"
 target-version = "py313"
 line-length = 100
 src = ["src"]
-# scripts/ holds subenv-only entry points (e.g. the TextAttack runner) that import
-# packages absent from the main env; they are validated by running, not by lint.
-extend-exclude = ["scripts"]
 
 [tool.ruff.lint]
 select = [
@@ -158,6 +156,7 @@ module = [
     "accelerate.*",
     "matplotlib.*",
     "seaborn.*",
+    "textattack.*",
 ]
 ignore_missing_imports = true
 
@@ -179,6 +178,8 @@ addopts = [
 filterwarnings = [
     "error",
     "ignore::DeprecationWarning",
+    # textattack/jieba import pkg_resources, which warns under setuptools>=81.
+    "ignore:pkg_resources is deprecated as an API:UserWarning",
 ]
 markers = [
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
@@ -207,3 +208,6 @@ exclude_lines = [
 ]
 show_missing = true
 skip_covered = true
+
+[tool.uv.sources]
+textattack = { git = "https://github.com/turn1a/TextAttack", rev = "transformers-5-compat" }

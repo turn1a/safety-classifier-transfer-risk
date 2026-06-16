@@ -1,27 +1,16 @@
-# Attacks stage: TextAttack recipes (SPEC.md §8). TextAttack 0.3.10 cannot run on the
-# main env (its `flair` dependency imports TransfoXLTokenizer, removed in transformers
-# 5.x), so each recipe runs in an isolated subenv (Python 3.11 + transformers<5),
-# resolved on the fly by `uv run --no-project` and invoked as a subprocess
-# (scripts/run_textattack.py).
-#
-# Only deepwordbug (char-level) and pwws (saliency-weighted WordNet synonyms) run in the
-# lean subenv. bae, bert-attack, and textfooler all use the Universal Sentence Encoder
-# semantic constraint (TensorFlow / tensorflow_hub), which the subenv does not carry, so
-# they are deferred until the subenv gains TF or the USE constraint is swapped for a
-# sentence-transformers one. v1 therefore covers char-level + lexical-synonym failure
-# modes; MLM-contextual (bae/bert-attack) is the documented gap (SPEC.md §8).
+# Attacks stage: TextAttack recipes run in-process in the main env (SPEC.md §8) via the
+# turn1a/TextAttack fork (transformers>=5). DeepWordBug (char-level) and PWWS (WordNet
+# synonyms ordered by saliency) need no semantic encoder; TextFooler, BAE and BERT-Attack
+# use a sentence-encoder semantic-similarity constraint, defaulting to a torch-native
+# sentence-transformers model. Set `semantic_encoder: use` to fall back to the original
+# TensorFlow Universal Sentence Encoder (needs the textattack[tensorflow] extra).
 attacks:
   recipes:
     - deepwordbug
     - pwws
-  eval_set_size: 500 # injection prompts attacked per surrogate
+    - textfooler
+    - bae
+    - bert-attack
+  semantic_encoder: sentence-transformers # or "use" (TensorFlow USE; see fork extras)
+  eval_set_size: 500 # injection prompts attacked per surrogate (caps at available)
   query_budget: 2000 # raise if transfer rates are uniformly low (SPEC.md §11)
-  max_seq_len: 256
-  subenv:
-    python: "3.11"
-    packages:
-      - "textattack==0.3.10"
-      - "transformers<5"
-      - "numpy<2"
-      - "torch"
-      - "sentencepiece"
