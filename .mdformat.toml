@@ -1,3 +1,5 @@
-# Keep mdformat (run via `just fmt`) off the canonical engineering spec and the
-# reference material so they stay byte-for-byte as written.
-exclude = ["SPEC.md", "refs/**"]
+# Keep each Markdown paragraph on a single line (no hard wrapping); diffs then change
+# words, not line-rewraps. Read by `just fmt` and the mdformat pre-commit hook. refs/
+# holds the reference papers' material, which we do not reformat.
+wrap = "no"
+exclude = ["refs/**"]

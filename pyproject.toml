@@ -229,10 +229,5 @@ ignore-nested-classes = false
 ignore-module = false
 exclude = ["tests", "docs"]
 
-# --- mdformat --------------------------------------------------------------
-[tool.mdformat]
-# Keep each paragraph on a single line (no hard wrapping); diffs change words, not rewraps.
-wrap = "no"
-
 [tool.uv.sources]
 textattack = { git = "https://github.com/turn1a/TextAttack", rev = "transformers-5-compat" }
