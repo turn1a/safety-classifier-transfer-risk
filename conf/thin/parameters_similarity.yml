@@ -1,0 +1,13 @@
+# Thin similarity overrides (self-contained; Kedro replaces the whole `similarity`
+# block). Small probe set for a fast slice.
+similarity:
+  n_probe: 64
+  pooling: cls
+  cka:
+    mode: linear
+    batch_size: 32
+  dbs:
+    box: 1
+  thresholds:
+    r1_quantile: 0.75
+    r2_quantile: 0.25

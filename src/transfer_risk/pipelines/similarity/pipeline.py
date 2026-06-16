@@ -17,13 +17,19 @@ def create_pipeline() -> Pipeline:
         [
             node(
                 build_probe_set,
-                inputs=["canonical_dataset", "params:similarity"],
+                inputs=["canonical_dataset", "params:similarity", "params:seed"],
                 outputs="probe_set",
                 name="build_probe_set",
             ),
             node(
                 compute_cka_matrices,
-                inputs=["probe_set", "surrogate_checkpoints", "params:similarity"],
+                inputs=[
+                    "probe_set",
+                    "surrogate_checkpoints",
+                    "surrogate_registry",
+                    "params:similarity",
+                    "params:device",
+                ],
                 outputs="cka_matrices",
                 name="compute_cka_matrices",
             ),

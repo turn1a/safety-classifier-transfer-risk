@@ -9,6 +9,7 @@ models:
     - name: deberta-small-pi-v2
       id: protectai/deberta-v3-small-prompt-injection-v2
       kind: pretrained
+      gated: true
     - name: electra-small-ft
       id: google/electra-small-discriminator
       kind: finetune

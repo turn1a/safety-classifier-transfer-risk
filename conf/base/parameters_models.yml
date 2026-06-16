@@ -12,9 +12,11 @@ models:
     - name: deberta-base-pi-v1
       id: protectai/deberta-v3-base-prompt-injection
       kind: pretrained
+    # Gated: request access on its HF page before running (needs HF token).
     - name: deberta-small-pi-v2
       id: protectai/deberta-v3-small-prompt-injection-v2
       kind: pretrained
+      gated: true
     - name: deepset-deberta-injection
       id: deepset/deberta-v3-base-injection
       kind: pretrained
