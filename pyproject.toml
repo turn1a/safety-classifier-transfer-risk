@@ -7,6 +7,9 @@ authors = [
 ]
 requires-python = ">=3.13,<3.14"
 dependencies = [
+    "accelerate>=1.14.0",
+    "datasets>=4.0.0",
+    "huggingface-hub>=1.19.0",
     "kedro>=1.4.0",
     "kedro-datasets>=9.4.0",
     "kedro-mlflow>=2.0.3",
@@ -17,7 +20,12 @@ dependencies = [
     "pyarrow<19",
     "pydantic>=2.13.4",
     "pydantic-settings>=2.14.1",
+    "scikit-learn>=1.9.0",
+    "scipy>=1.17.1",
     "seaborn>=0.13.2",
+    "sentencepiece>=0.2.1",
+    "torch>=2.12.0",
+    "transformers>=5.12.1",
 ]
 
 [project.scripts]
@@ -105,11 +113,10 @@ fixable = ["ALL"]
     "PLR2004",  # comparing against literal expected values is normal in tests
     "D",        # test functions are self-documenting; no docstring required
 ]
-# Stub functions declare the real inputs the next phase will use, but their bodies
-# only `raise NotImplementedError`, so the arguments read as unused. Scoped to the
-# stub files; drop an entry once that file's functions are implemented.
+# Stub pipeline nodes declare the real inputs the next phase will use, but their
+# bodies only `raise NotImplementedError`, so the arguments read as unused. Scoped to
+# the stub node files; drop an entry once that pipeline's nodes are implemented.
 "src/transfer_risk/pipelines/**/nodes.py" = ["ARG001"]
-"src/transfer_risk/lib/*.py" = ["ARG001"]
 
 [tool.ruff.lint.pydocstyle]
 convention = "google"
@@ -133,10 +140,20 @@ extra_checks = true
 show_error_codes = true
 pretty = true
 plugins = ["pydantic.mypy"]
-# mypy checks src/ only (see the justfile / pre-commit). Every third-party library
-# imported there — kedro, matplotlib — ships py.typed, and pandas is typed via the
-# pandas-stubs dev dependency, so no ignore_missing_imports overrides are needed.
-# Add one (with a reason) only when a new dependency genuinely ships no types.
+
+[[tool.mypy.overrides]]
+# These ML libraries ship no (or incomplete) type information, so strict mode cannot
+# resolve them. The relaxation is scoped to exactly these modules — the rest of src/
+# stays strictly typed. torch, huggingface-hub, pandas (via pandas-stubs), kedro and
+# matplotlib DO ship types and are deliberately not listed here.
+module = [
+    "transformers.*",
+    "datasets.*",
+    "sklearn.*",
+    "scipy.*",
+    "accelerate.*",
+]
+ignore_missing_imports = true
 
 # --- pytest ----------------------------------------------------------------
 [tool.pytest.ini_options]
@@ -149,7 +166,7 @@ addopts = [
     "--tb=short",
     "--strict-markers",
     "--strict-config",
-    "--cov=src/transfer_risk",
+    "--cov=src/transfer_risk/lib",
     "--cov-report=term-missing",
     "--cov-branch",
 ]
@@ -164,14 +181,14 @@ markers = [
 
 # --- coverage --------------------------------------------------------------
 [tool.coverage.run]
-source = ["src"]
+source = ["src/transfer_risk/lib"]
 branch = true
 
 [tool.coverage.report]
-# SCAFFOLD: the gate is 0 while the pipelines are skeletons. It ramps to 90% on
-# src/transfer_risk/lib (the pure, deterministic core) once that core lands — see
-# AGENTS.md. The heavy torch / TextAttack I/O nodes stay outside the gate.
-fail_under = 0
+# The gate covers the pure, deterministic core (src/transfer_risk/lib) at 90%. The
+# heavy torch / TextAttack / HF I/O nodes are verified by the thin end-to-end run and
+# the integration-marked smoke tests, not by line coverage (see AGENTS.md §9).
+fail_under = 90
 exclude_lines = [
     "pragma: no cover",
     "def __repr__",

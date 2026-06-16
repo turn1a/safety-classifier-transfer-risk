@@ -1,0 +1,31 @@
+# Thin overrides for the fast end-to-end slice (kedro run --env thin). Kedro replaces
+# the whole top-level `models` block from this file (it does not deep-merge sub-keys),
+# so the block must be self-contained. A 3-model subset spanning the similarity range —
+# one pre-fine-tuned DeBERTa (high), one fine-tuned ELECTRA-small (mid), the BiLSTM
+# floor (low) — at 1-2 epochs.
+models:
+  target: protectai/deberta-v3-base-prompt-injection-v2
+  surrogates:
+    - name: deberta-small-pi-v2
+      id: protectai/deberta-v3-small-prompt-injection-v2
+      kind: pretrained
+    - name: electra-small-ft
+      id: google/electra-small-discriminator
+      kind: finetune
+    - name: bilstm-attention
+      kind: bilstm
+  finetune:
+    lr: 2.0e-5
+    batch_size: 32
+    epochs: 1
+    max_seq_len: 256
+  bilstm:
+    embed_dim: 128
+    hidden_dim: 256
+    num_layers: 2
+    dropout: 0.3
+    lr: 1.0e-3
+    batch_size: 64
+    epochs: 2
+    max_vocab: 20000
+    max_seq_len: 256

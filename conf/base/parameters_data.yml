@@ -1,12 +1,29 @@
 # Data stage: build one canonical, deduplicated prompt-injection dataset behind a
-# loader so every surrogate trains on identical data (SPEC.md §6).
+# loader so every surrogate trains on identical data (SPEC.md §6). Schemas were
+# verified on HF; each source is normalised to (text, label in {0,1}) by an adapter.
 data:
-  sources:
-    - deepset/prompt-injections
-    - jackhhao/jailbreak-classification
-    - Lakera/gandalf_ignore_instructions
-    - xTRam1/safe-guard-prompt-injection
-  dedup_across_sources: true
+  train_sources:
+    # text + label(0/1); benign-heavy, manually curated.
+    - id: deepset/prompt-injections
+      text_col: text
+      label_col: label
+    # prompt + type(benign|jailbreak); roughly balanced.
+    - id: jackhhao/jailbreak-classification
+      text_col: prompt
+      label_col: type
+      label_map:
+        benign: 0
+        jailbreak: 1
+    # text + similarity(float, NOT a label); every row is an injection attempt.
+    - id: Lakera/gandalf_ignore_instructions
+      text_col: text
+      label_const: 1
+  # Held out for external robustness reporting only — never used to train surrogates.
+  eval_sources:
+    - hackaprompt/hackaprompt-dataset
+    - lakeraai/pint-benchmark
+  min_chars: 3 # drop near-empty prompts
+  dedup: normalized # exact match on case/whitespace-normalised text
   max_seq_len: 256
   splits:
     train: 0.8

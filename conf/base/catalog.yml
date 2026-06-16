@@ -23,6 +23,13 @@ task_splits:
     kedro-viz:
       layer: model_input
 
+dataset_audit:
+  type: json.JSONDataset
+  filepath: data/08_reporting/dataset_audit.json
+  metadata:
+    kedro-viz:
+      layer: reporting
+
 # --- models stage ----------------------------------------------------------
 surrogate_registry:
   type: json.JSONDataset
@@ -31,9 +38,12 @@ surrogate_registry:
     kedro-viz:
       layer: primary
 
+# A manifest of trained/recorded surrogates ({name -> kind, source, val_accuracy,
+# num_params, ...}); the model weights themselves are saved by the node under
+# data/06_models/<name>/ (HF format) or as a BiLSTM checkpoint, not pickled here.
 surrogate_checkpoints:
-  type: pickle.PickleDataset
-  filepath: data/06_models/surrogate_checkpoints.pkl
+  type: json.JSONDataset
+  filepath: data/06_models/surrogate_manifest.json
   metadata:
     kedro-viz:
       layer: models

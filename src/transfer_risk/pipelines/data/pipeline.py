@@ -12,12 +12,12 @@ def create_pipeline() -> Pipeline:
             node(
                 build_canonical_dataset,
                 inputs="params:data",
-                outputs="canonical_dataset",
+                outputs=["canonical_dataset", "dataset_audit"],
                 name="build_canonical_dataset",
             ),
             node(
                 split_dataset,
-                inputs=["canonical_dataset", "params:data"],
+                inputs=["canonical_dataset", "params:data", "params:seed"],
                 outputs="task_splits",
                 name="split_dataset",
             ),
