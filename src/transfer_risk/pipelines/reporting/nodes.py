@@ -7,18 +7,16 @@ headless (CI, ``kedro run`` without a display).
 
 from __future__ import annotations
 
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import matplotlib as mpl
 
 mpl.use("Agg")
 
 import matplotlib.pyplot as plt
+import pandas as pd
 import seaborn as sns
-
-if TYPE_CHECKING:
-    import pandas as pd
-    from matplotlib.figure import Figure
+from matplotlib.figure import Figure
 
 
 def plot_cka_heatmap(similarity_table: pd.DataFrame) -> Figure:

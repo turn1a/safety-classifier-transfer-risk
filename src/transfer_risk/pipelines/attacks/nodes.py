@@ -13,10 +13,9 @@ from __future__ import annotations
 import logging
 import os
 from concurrent.futures import ProcessPoolExecutor, as_completed
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
-if TYPE_CHECKING:
-    import pandas as pd
+import pandas as pd
 
 logger = logging.getLogger(__name__)
 

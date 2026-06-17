@@ -4,9 +4,10 @@ from __future__ import annotations
 
 import logging
 import math
-from typing import TYPE_CHECKING, Any
+from typing import Any
 
 import numpy as np
+import pandas as pd
 from scipy.stats import spearmanr
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import cross_val_score
@@ -14,9 +15,6 @@ from sklearn.tree import DecisionTreeRegressor
 
 from transfer_risk.lib.ablation import ablation_statistics
 from transfer_risk.lib.seeds import derive_seeds
-
-if TYPE_CHECKING:
-    import pandas as pd
 
 logger = logging.getLogger(__name__)
 _FEATURES = ["mean_cka", "dbs"]

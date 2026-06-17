@@ -4,12 +4,9 @@ from __future__ import annotations
 
 import platform
 import sys
-from typing import TYPE_CHECKING
+from typing import Any
 
 import kedro
-
-if TYPE_CHECKING:
-    from typing import Any
 
 
 def record_environment(project: dict[str, Any], seed: int) -> dict[str, Any]:

@@ -4,7 +4,9 @@ from __future__ import annotations
 
 import logging
 from pathlib import Path
-from typing import TYPE_CHECKING, Any
+from typing import Any
+
+import pandas as pd
 
 from transfer_risk.devices import resolve_device
 from transfer_risk.lib.seeds import derive_seeds
@@ -14,9 +16,6 @@ from transfer_risk.pipelines.models.registry import (
     validate_surrogate_specs,
 )
 from transfer_risk.pipelines.models.training import finetune_transformer, train_bilstm
-
-if TYPE_CHECKING:
-    import pandas as pd
 
 logger = logging.getLogger(__name__)
 _MODELS_DIR = Path("data/06_models")
