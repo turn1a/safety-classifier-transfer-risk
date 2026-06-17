@@ -14,3 +14,4 @@ attacks:
   semantic_encoder: sentence-transformers # or "use" (TensorFlow USE; see fork extras)
   eval_set_size: 500 # injection prompts attacked per surrogate (caps at available)
   query_budget: 2000 # raise if transfer rates are uniformly low (SPEC.md §11)
+  num_workers: 8 # CPU worker processes for the parallel sweep (~= perf cores; bandwidth-bound past this)

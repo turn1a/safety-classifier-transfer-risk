@@ -19,6 +19,8 @@ All notable changes to this project are documented here. The format follows [Kee
 ### Changed
 
 - The `attacks` pipeline now runs TextAttack in-process in the main environment (transformers 5, Python 3.13) instead of shelling out to a pinned Python 3.11 subenv. It uses a minimal fork, [turn1a/TextAttack](https://github.com/turn1a/TextAttack) (branch `transformers-5-compat`), that makes the three top-level `flair` imports lazy and adds a torch-native sentence-transformers encoder in place of the TensorFlow Universal Sentence Encoder (`semantic_encoder: use` restores the original, behind the `textattack[tensorflow]` extra). All five recipes run — DeepWordBug, PWWS, TextFooler, BAE, BERT-Attack — none dropped for a missing dependency.
+- The attack sweep parallelises across CPU cores: each `(surrogate, recipe)` pair is an independent worker process (`num_workers` param, single-threaded each), cutting the full sweep from ~6h to ~2h. The fork also gained MPS device detection (a separate upstream improvement), though MPS gives no gain for these small per-example attacks (memory-bandwidth-bound), so workers run on CPU.
+- `HF_HUB_DOWNLOAD_TIMEOUT` is set in `.env` so a stalled HuggingFace model download errors and retries instead of hanging the run indefinitely.
 
 ### Notes
 

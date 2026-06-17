@@ -3198,7 +3198,7 @@ wheels = [
 [[package]]
 name = "textattack"
 version = "0.3.10"
-source = { git = "https://github.com/turn1a/TextAttack?rev=transformers-5-compat#6ed1533bcaa4897b57693483e5eef90d593badd4" }
+source = { git = "https://github.com/turn1a/TextAttack?rev=transformers-5-compat#62a7db83df0caecfe11f14a03e24a6abeeaa0277" }
 dependencies = [
     { name = "bert-score" },
     { name = "datasets" },

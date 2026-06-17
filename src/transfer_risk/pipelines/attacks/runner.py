@@ -125,3 +125,35 @@ def run_recipe(
         }
         for result in results
     ]
+
+
+def attack_one(
+    entry: Mapping[str, Any],
+    recipe: str,
+    examples: list[dict[str, Any]],
+    *,
+    query_budget: int,
+    seed: int,
+) -> list[dict[str, Any]]:
+    """Run one ``(surrogate, recipe)`` attack task — the unit parallelised across workers.
+
+    The attacks node submits one of these per ``(surrogate, recipe)`` to a process pool, so
+    the embarrassingly-parallel sweep saturates the CPU cores. Each worker is pinned to a
+    single torch thread so N workers use N cores without oversubscription; the victim and
+    the masked-LM run on CPU (TextAttack's device is fixed to CPU via the inherited
+    ``TA_DEVICE`` env before this module imports textattack). Loading the model inside the
+    worker keeps the pickled payload to plain data, never a live model.
+
+    Args:
+        entry: the surrogate's manifest entry (``kind`` + ``source``).
+        recipe: a key of :data:`RECIPES`.
+        examples: the shared eval set (``[{"text", "label"}]``).
+        query_budget: per-example victim-query cap.
+        seed: TextAttack sampling seed.
+
+    Returns:
+        One record per attacked example (see :func:`run_recipe`).
+    """
+    torch.set_num_threads(1)
+    wrapper = build_wrapper(entry, torch.device("cpu"))
+    return run_recipe(wrapper, recipe, examples, query_budget=query_budget, seed=seed)

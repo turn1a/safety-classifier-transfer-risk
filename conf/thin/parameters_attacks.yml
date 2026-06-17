@@ -9,3 +9,4 @@ attacks:
   semantic_encoder: sentence-transformers
   eval_set_size: 12
   query_budget: 200
+  num_workers: 3 # small pool for the thin slice
