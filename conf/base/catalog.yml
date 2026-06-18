@@ -1,13 +1,16 @@
-# Data Catalog — every artifact the pipelines read or write.
+# Data Catalog — every artifact the pipelines read or write, including the models.
 #
-# Datasets not listed here default to in-memory. Paths follow the Kedro data-
-# engineering convention (data/NN_<layer>/). The `metadata.kedro-viz.layer`
-# keys group nodes by layer in `kedro viz`.
+# Paths follow the Kedro data-engineering convention (data/NN_<layer>/). Boundary artifacts
+# that cross to the cloud spot box (surrogate checkpoints, ONNX graphs, the eval splits, the
+# adversarial partitions) resolve their location from ${globals:...}; conf/cloud/globals.yml
+# re-points those roots at S3 so the catalog (not aws s3 sync) owns where they live. Every
+# other artifact keeps a literal local path and is unaffected by the environment.
 #
-# Raw training sources are pulled straight from the HuggingFace Hub via HFDataset;
-# every downstream artifact is written under data/NN_<layer>/.
+# HuggingFace sources are catalog entries, never a from_pretrained() call inside a node: raw
+# training *datasets* via HFDataset, and the pretrained / backbone / target *models* via
+# HuggingFaceHubModelDataset. The `metadata.kedro-viz.layer` keys group nodes in `kedro viz`.
 
-# --- raw stage (HuggingFace sources) ---------------------------------------
+# --- raw stage (HuggingFace dataset sources) -------------------------------
 raw_deepset:
   type: kedro_datasets.huggingface.HFDataset
   dataset_name: deepset/prompt-injections
@@ -29,6 +32,94 @@ raw_lakera:
     kedro-viz:
       layer: raw
 
+# --- HuggingFace Hub model sources -----------------------------------------
+# One entry per pretrained surrogate and per fine-tune backbone (the only place a Hub id
+# appears). The models pipeline loads these and persists each as a surrogate.{name} checkpoint,
+# so the spot box reads everything from the catalog and never touches the Hub. Gated repos use
+# the HF_TOKEN environment variable (read by transformers); no token is stored in the repo.
+# Fine-tune backbones load with a fresh 2-class head (num_labels: 2); pretrained classifiers
+# keep their own head. The frozen target loads with hidden states so similarity and transfer
+# can share it.
+target_model:
+  type: transfer_risk.datasets.hub_model_dataset.HuggingFaceHubModelDataset
+  repo_id: protectai/deberta-v3-base-prompt-injection-v2
+  load_args:
+    output_hidden_states: true
+  metadata:
+    kedro-viz:
+      layer: raw
+
+"hub__deberta-base-pi-v1":
+  type: transfer_risk.datasets.hub_model_dataset.HuggingFaceHubModelDataset
+  repo_id: protectai/deberta-v3-base-prompt-injection
+  metadata:
+    kedro-viz:
+      layer: raw
+
+"hub__deberta-small-pi-v2":
+  type: transfer_risk.datasets.hub_model_dataset.HuggingFaceHubModelDataset
+  repo_id: protectai/deberta-v3-small-prompt-injection-v2
+  metadata:
+    kedro-viz:
+      layer: raw
+
+"hub__deepset-deberta-injection":
+  type: transfer_risk.datasets.hub_model_dataset.HuggingFaceHubModelDataset
+  repo_id: deepset/deberta-v3-base-injection
+  metadata:
+    kedro-viz:
+      layer: raw
+
+"hub__llama-prompt-guard-86m":
+  type: transfer_risk.datasets.hub_model_dataset.HuggingFaceHubModelDataset
+  repo_id: meta-llama/Llama-Prompt-Guard-2-86M
+  metadata:
+    kedro-viz:
+      layer: raw
+
+"hub__llama-prompt-guard-22m":
+  type: transfer_risk.datasets.hub_model_dataset.HuggingFaceHubModelDataset
+  repo_id: meta-llama/Llama-Prompt-Guard-2-22M
+  metadata:
+    kedro-viz:
+      layer: raw
+
+"hub__bert-base-ft":
+  type: transfer_risk.datasets.hub_model_dataset.HuggingFaceHubModelDataset
+  repo_id: bert-base-uncased
+  load_args:
+    num_labels: 2
+  metadata:
+    kedro-viz:
+      layer: raw
+
+"hub__roberta-base-ft":
+  type: transfer_risk.datasets.hub_model_dataset.HuggingFaceHubModelDataset
+  repo_id: roberta-base
+  load_args:
+    num_labels: 2
+  metadata:
+    kedro-viz:
+      layer: raw
+
+"hub__electra-small-ft":
+  type: transfer_risk.datasets.hub_model_dataset.HuggingFaceHubModelDataset
+  repo_id: google/electra-small-discriminator
+  load_args:
+    num_labels: 2
+  metadata:
+    kedro-viz:
+      layer: raw
+
+"hub__deberta-base-ft-seed":
+  type: transfer_risk.datasets.hub_model_dataset.HuggingFaceHubModelDataset
+  repo_id: microsoft/deberta-v3-base
+  load_args:
+    num_labels: 2
+  metadata:
+    kedro-viz:
+      layer: raw
+
 # --- data stage ------------------------------------------------------------
 canonical_dataset:
   type: pandas.ParquetDataset
@@ -37,9 +128,10 @@ canonical_dataset:
     kedro-viz:
       layer: primary
 
+# Eval splits: a boundary input the spot box reads (the attack eval set comes from `test`).
 task_splits:
   type: pickle.PickleDataset
-  filepath: data/05_model_input/task_splits.pkl
+  filepath: ${globals:splits_path}
   metadata:
     kedro-viz:
       layer: model_input
@@ -59,22 +151,30 @@ surrogate_registry:
     kedro-viz:
       layer: primary
 
-# A manifest of trained/recorded surrogates ({name -> kind, source, val_accuracy,
-# num_params, ...}). Each trained checkpoint is persisted by the SurrogateModelDataset
-# below under data/06_models/<name>/; this JSON is the lightweight provenance index.
-surrogate_checkpoints:
+# Per-surrogate provenance fragment ({kind, val_accuracy, num_params, ...}), one per model.
+# Local leaf: nothing downstream reads it (the attack/similarity nodes know each surrogate's
+# kind at build time); it is kept as a readable record of how each surrogate was prepared.
+"surrogate_meta__{name}":
   type: json.JSONDataset
-  filepath: data/06_models/surrogate_manifest.json
+  filepath: data/06_models/meta_{name}.json
   metadata:
     kedro-viz:
       layer: models
 
-# Per-surrogate checkpoint (a HuggingFace classifier dir or a BiLSTM). The training nodes
-# save through this dataset; load `surrogate.<name>` for a ready (model + tokenizer/config)
-# bundle. No built-in kedro-datasets class covers a custom-head classifier + the BiLSTM.
-"surrogate.{name}":
+# Per-surrogate checkpoint (a HuggingFace classifier dir or a BiLSTM), for every kind. The
+# models nodes save through this factory; load surrogate.<name> for the local directory path.
+# Boundary: ${globals:model_root} is local in base, S3 in the cloud env.
+"surrogate__{name}":
   type: transfer_risk.datasets.surrogate_model_dataset.SurrogateModelDataset
-  filepath: data/06_models/{name}
+  filepath: ${globals:model_root}/{name}
+  metadata:
+    kedro-viz:
+      layer: models
+
+# Per-surrogate exported ONNX graph (+ tokenizer) for the faster CPU victim path. Boundary.
+"onnx__{name}":
+  type: transfer_risk.datasets.onnx_model_dataset.OnnxModelDataset
+  filepath: ${globals:onnx_root}/{name}
   metadata:
     kedro-viz:
       layer: models
@@ -86,6 +186,15 @@ probe_set:
   metadata:
     kedro-viz:
       layer: model_input
+
+# Per-surrogate target-vs-surrogate CKA matrix; the reduce step assembles them into
+# cka_matrices. Local (similarity runs on the laptop).
+"cka__{surrogate}":
+  type: pickle.PickleDataset
+  filepath: data/04_feature/cka_{surrogate}.pkl
+  metadata:
+    kedro-viz:
+      layer: feature
 
 cka_matrices:
   type: pickle.PickleDataset
@@ -116,16 +225,31 @@ surrogate_selection:
       layer: model_output
 
 # --- attacks stage ---------------------------------------------------------
-# Per-cell partitions: one pickle per "<surrogate>__<recipe>" cell, so the attacks node can
-# skip cells already on disk (resume) and the cloud box can sync completed cells to S3 as they
-# land. The node lists this directory itself for resume (PartitionedDataset raises on an empty
-# dir, which is the first-run state); the path is kept in sync with attacks.partition_root.
+# Each (surrogate, recipe, shard) attack node writes one shard partition; a reduce node per
+# cell concatenates the shards into adversarial.<surrogate>__<recipe>. Both are boundary
+# (S3 in the cloud env). Shards live in a sibling directory so the adversarial_examples
+# PartitionedDataset (which lists the cell directory) never picks them up. `kedro run
+# --only-missing-outputs` skips any shard or cell whose partition already exists (resume).
+"adversarial_shard__{shardkey}":
+  type: pickle.PickleDataset
+  filepath: ${globals:adversarial_root}_shards/{shardkey}.pkl
+  metadata:
+    kedro-viz:
+      layer: model_output
+
+"adversarial__{cellkey}":
+  type: pickle.PickleDataset
+  filepath: ${globals:adversarial_root}/{cellkey}.pkl
+  metadata:
+    kedro-viz:
+      layer: model_output
+
+# The cells assembled into one {cell -> records} mapping for the transfer stage. Local: the
+# assemble node reads the (possibly S3) per-cell partitions and writes the combined table here,
+# on the dev machine, so the local downstream consumes it without touching S3 per cell.
 adversarial_examples:
-  type: partitions.PartitionedDataset
-  path: data/07_model_output/adversarial_examples
-  dataset:
-    type: pickle.PickleDataset
-  filename_suffix: .pkl
+  type: pickle.PickleDataset
+  filepath: data/07_model_output/adversarial_examples.pkl
   metadata:
     kedro-viz:
       layer: model_output
@@ -217,10 +341,7 @@ smoke_report:
       layer: reporting
 
 # --- dataset factory -------------------------------------------------------
-# Per-surrogate hidden-state captures. With this factory, adding a surrogate
-# needs no new catalog entry — the similarity pipeline will address datasets as
-# `hidden_states.<surrogate>` once it is implemented (SPEC.md §5 model-agnostic
-# requirement).
+# Per-surrogate hidden-state captures (similarity), addressed as hidden_states.<surrogate>.
 "hidden_states.{surrogate}":
   type: pickle.PickleDataset
   filepath: data/04_feature/hidden_states_{surrogate}.pkl

@@ -7,11 +7,9 @@ models:
   target: protectai/deberta-v3-base-prompt-injection-v2
   surrogates:
     - name: deberta-small-pi-v2
-      id: protectai/deberta-v3-small-prompt-injection-v2
       kind: pretrained
       gated: true
     - name: electra-small-ft
-      id: google/electra-small-discriminator
       kind: finetune
     - name: bilstm-attention
       kind: bilstm

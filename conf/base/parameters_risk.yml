@@ -1,5 +1,5 @@
 # Risk stage: regression (transfer rate ~ similarity features) and the headline
-# CKA-guided-vs-random ablation (SPEC.md §3.1 steps 6-7).
+# M1-vs-M2 selection ablation (SPEC.md §3.1 steps 6-7).
 #
 # Tree depth is 3, not the paper's 6: with n ≈ surrogates×recipes (tens of rows) a
 # depth-6 tree (64 leaves) overfits. The trees are read for feature importance, not
@@ -12,5 +12,8 @@ risk:
     n_estimators: 200
     max_depth: 4
   ablation:
-    n_bootstrap: 1000 # random-selection reseeds for the empirical comparison
+    # One-sided permutation test, high-CKA (M1) vs low-CKA (M2), on mean and max transfer.
+    # Small groups are enumerated exactly (M1 ∪ M2 within C(n,|M1|) <= 2000), so n_permutations
+    # only applies if the pool grows past that; the exact path ignores it.
+    n_permutations: 10000
     alpha: 0.05

@@ -1,9 +1,16 @@
-"""Nodes for the models pipeline (SPEC.md §5, §7)."""
+"""Nodes for the models pipeline (SPEC.md §5, §7).
+
+Each surrogate is prepared by its own node so the work is catalog-driven and resumable: a
+``pretrained`` model is materialised from its ``hub.{name}`` source into a ``surrogate.{name}``
+checkpoint unchanged, a ``finetune`` backbone is fine-tuned, and the BiLSTM is trained from
+scratch. Every transformer surrogate is then exported to ONNX in-process. No model is loaded
+from the Hub or saved to disk inside a node — the ``hub.{name}`` / ``surrogate.{name}`` /
+``onnx.{name}`` catalog datasets own all model I/O.
+"""
 
 from __future__ import annotations
 
 import logging
-from pathlib import Path
 from typing import Any
 
 import pandas as pd
@@ -18,14 +25,13 @@ from transfer_risk.pipelines.models.registry import (
 from transfer_risk.pipelines.models.training import finetune_transformer, train_bilstm
 
 logger = logging.getLogger(__name__)
-_MODELS_DIR = Path("data/06_models")
 
 
 def build_surrogate_registry(params: dict[str, Any]) -> dict[str, Any]:
     """Resolve and validate the surrogate pool; verify HF auth if gated models are used.
 
     Args:
-        params: The ``models`` parameter block (``target``, ``surrogates``).
+        params: the ``models`` parameter block (``target``, ``surrogates``).
 
     Returns:
         A registry dict with the ``target`` id and the validated ``surrogates`` specs.
@@ -37,54 +43,82 @@ def build_surrogate_registry(params: dict[str, Any]) -> dict[str, Any]:
     return {"target": params["target"], "surrogates": specs}
 
 
-def prepare_surrogates(
+def _device_and_seed(device_params: dict[str, Any], seed: int) -> tuple[Any, int]:
+    """Resolve the training device and the derived torch seed."""
+    return resolve_device(device_params["policy"]), derive_seeds(seed).torch
+
+
+def materialize_surrogate(hub_bundle: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Pass a pretrained Hub model through to its checkpoint unchanged; return bundle + metadata.
+
+    Args:
+        hub_bundle: the ``{"kind", "model", "tokenizer"}`` bundle loaded from ``hub__{name}``.
+
+    Returns:
+        ``(bundle, meta)``: the same bundle (Kedro saves it via ``surrogate.{name}``) and a
+        provenance fragment.
+    """
+    num_params = int(sum(p.numel() for p in hub_bundle["model"].parameters()))
+    return hub_bundle, {"kind": "pretrained", "num_params": num_params}
+
+
+def train_surrogate(
+    backbone: dict[str, Any],
     splits: dict[str, pd.DataFrame],
-    registry: dict[str, Any],
     models_params: dict[str, Any],
     device_params: dict[str, Any],
     seed: int,
-) -> dict[str, Any]:
-    """Record pre-fine-tuned models, fine-tune the rest, and train the BiLSTM outlier.
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Fine-tune a backbone on the canonical task; return its checkpoint bundle and metadata.
 
     Args:
+        backbone: the ``{"model", "tokenizer"}`` loaded from the surrogate's ``hub.{name}``.
         splits: ``train`` / ``val`` / ``test`` DataFrames.
-        registry: Output of :func:`build_surrogate_registry`.
-        models_params: The ``models`` block (``finetune`` and ``bilstm`` sub-configs).
-        device_params: The ``device`` block (``policy``).
-        seed: The project root seed.
+        models_params: the ``models`` block (``finetune`` sub-config).
+        device_params: the ``device`` block (``policy``).
+        seed: the project root seed.
 
     Returns:
-        A manifest mapping each surrogate name to ``{kind, source, ...metadata}``.
+        ``(bundle, meta)`` for the ``surrogate.{name}`` output and its provenance fragment.
     """
-    device = resolve_device(device_params["policy"])
-    torch_seed = derive_seeds(seed).torch
-    train_df, val_df = splits["train"], splits["val"]
-    finetune_cfg, bilstm_cfg = models_params["finetune"], models_params["bilstm"]
-    manifest: dict[str, Any] = {}
-    for spec in registry["surrogates"]:
-        name, kind = spec["name"], spec["kind"]
-        if kind == "pretrained":
-            manifest[name] = {
-                "kind": "pretrained",
-                "source": spec["id"],
-                "gated": bool(spec.get("gated", False)),
-            }
-        elif kind == "finetune":
-            out_dir = _MODELS_DIR / name
-            meta = finetune_transformer(
-                spec["id"], train_df, val_df, out_dir, finetune_cfg, device, torch_seed
-            )
-            manifest[name] = {
-                "kind": "finetune",
-                "source": str(out_dir),
-                "backbone": spec["id"],
-                **meta,
-            }
-        else:  # bilstm
-            out_dir = _MODELS_DIR / name
-            meta = train_bilstm(
-                train_df, val_df, out_dir, params=bilstm_cfg, device=device, seed=torch_seed
-            )
-            manifest[name] = {"kind": "bilstm", "source": str(out_dir), **meta}
-        logger.info("Prepared surrogate %s (%s)", name, kind)
-    return manifest
+    device, torch_seed = _device_and_seed(device_params, seed)
+    return finetune_transformer(
+        backbone, splits["train"], splits["val"], models_params["finetune"], device, torch_seed
+    )
+
+
+def train_bilstm_surrogate(
+    splits: dict[str, pd.DataFrame],
+    models_params: dict[str, Any],
+    device_params: dict[str, Any],
+    seed: int,
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Train the from-scratch BiLSTM surrogate; return its checkpoint bundle and metadata."""
+    device, torch_seed = _device_and_seed(device_params, seed)
+    return train_bilstm(
+        splits["train"],
+        splits["val"],
+        params=models_params["bilstm"],
+        device=device,
+        seed=torch_seed,
+    )
+
+
+def export_onnx(surrogate_path: str, models_params: dict[str, Any]) -> dict[str, Any]:
+    """Export a transformer surrogate to an ONNX graph (+ tokenizer) for the fast victim path.
+
+    Args:
+        surrogate_path: the local checkpoint directory from ``surrogate.{name}``.
+        models_params: the ``models`` block (the ``finetune.max_seq_len`` trace length).
+
+    Returns:
+        ``{"onnx_bytes", "tokenizer"}`` for the ``onnx.{name}`` output.
+    """
+    import torch  # noqa: PLC0415
+
+    from transfer_risk.modeling import export_to_onnx, load_transformer  # noqa: PLC0415
+
+    model, tokenizer = load_transformer(surrogate_path, torch.device("cpu"))
+    max_seq_len = int(models_params["finetune"]["max_seq_len"])
+    onnx_bytes = export_to_onnx(model, tokenizer, max_seq_len=max_seq_len)
+    return {"onnx_bytes": onnx_bytes, "tokenizer": tokenizer}

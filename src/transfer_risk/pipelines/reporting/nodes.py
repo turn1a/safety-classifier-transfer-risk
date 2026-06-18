@@ -43,14 +43,20 @@ def plot_transfer_scatter(master_results_table: pd.DataFrame) -> Figure:
 def plot_regression_ablation(
     regressors: dict[str, Any], ablation_results: dict[str, Any]
 ) -> Figure:
-    """Feature importances and the CKA-guided-vs-random max-transfer comparison."""
+    """Feature importances (left) and the M1-vs-M2 mean-transfer contrast (right)."""
     fig, (ax_left, ax_right) = plt.subplots(1, 2, figsize=(10, 4))
     ax_left.bar(regressors["feature_names"], regressors["random_forest_importances"])
     ax_left.set(title="Random-forest feature importance", ylabel="importance")
-    guided = ablation_results.get("guided_max_transfer", 0.0)
-    random_mean = ablation_results.get("random_max_mean", 0.0)
-    ax_right.bar(["CKA-guided", "random"], [guided, random_mean], color=["#2a9d8f", "#999999"])
-    effect = ablation_results.get("effect_size_pp", 0.0)
-    ax_right.set(title=f"Selection ablation ({effect:+.1f}pp)", ylabel="max transfer rate")
+    m1_mean = ablation_results.get("m1_mean", 0.0)
+    m2_mean = ablation_results.get("m2_mean", 0.0)
+    ax_right.bar(
+        ["M1 (high CKA)", "M2 (low CKA)"], [m1_mean, m2_mean], color=["#2a9d8f", "#999999"]
+    )
+    effect = ablation_results.get("mean_diff_pp", ablation_results.get("effect_size_pp", 0.0))
+    p_value = ablation_results.get("mean_p_value", ablation_results.get("empirical_p_value", 1.0))
+    ax_right.set(
+        title=f"Selection ablation ({effect:+.1f}pp, p={p_value:.3f})",
+        ylabel="mean transfer rate",
+    )
     fig.tight_layout()
     return fig

@@ -1,0 +1,9 @@
+# Cloud overrides of the movable roots: every boundary artifact lives under the S3 exchange
+# bucket so Kedro reads and writes it through the catalog (fsspec/s3fs), with no aws s3 sync.
+# ${tr.bucket:} is the scoped resolver registered in settings.py (reads TR_BUCKET); it is
+# evaluated only under `--env cloud`, so local/base runs never need TR_BUCKET set. These keys
+# override the base globals per-key; non-boundary datasets stay on the local paths from base.
+model_root: s3://${tr.bucket:}/data/06_models
+onnx_root: s3://${tr.bucket:}/data/06_models/onnx
+splits_path: s3://${tr.bucket:}/data/05_model_input/task_splits.pkl
+adversarial_root: s3://${tr.bucket:}/data/07_model_output/adversarial_examples

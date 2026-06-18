@@ -1,9 +1,13 @@
-# Attacks stage: TextAttack recipes run in-process in the main env (SPEC.md §8) via the
-# turn1a/TextAttack fork (transformers>=5). DeepWordBug (char-level) and PWWS (WordNet
-# synonyms ordered by saliency) need no semantic encoder; TextFooler, BAE and BERT-Attack
-# use a sentence-encoder semantic-similarity constraint, defaulting to a torch-native
-# sentence-transformers model. Set `semantic_encoder: use` to fall back to the original
-# TensorFlow Universal Sentence Encoder (needs the textattack[tensorflow] extra).
+# Attacks stage: TextAttack recipes run in-process via the turn1a/TextAttack fork
+# (transformers>=5). DeepWordBug (char-level) and PWWS (WordNet synonyms ordered by saliency)
+# need no semantic encoder; TextFooler, BAE and BERT-Attack use a sentence-encoder
+# similarity constraint, defaulting to a torch-native sentence-transformers model.
+#
+# The sweep is generated as one node per (surrogate, recipe, example-shard): the pipeline reads
+# `recipes`, `eval_set_size`, and `shard_size` at build time to fan out, ParallelRunner runs the
+# nodes across cores, and `kedro run --only-missing-outputs` resumes by skipping shards/cells
+# already persisted. Victim inference is wired by surrogate kind (transformers from their ONNX
+# graph, the BiLSTM from torch), so there is no runtime ONNX toggle and no worker-pool knob.
 attacks:
   recipes:
     - deepwordbug
@@ -13,27 +17,16 @@ attacks:
     - bert-attack
   semantic_encoder: sentence-transformers # or "use" (TensorFlow USE; see fork extras)
   eval_set_size: 60 # injection prompts attacked per surrogate (caps at available 191)
-  # Truncate each prompt before attacking. The recipes do a greedy word-by-word search, so
-  # cost scales with the prompt's word count; the dataset is long-tailed (p90 2655 chars) and
+  # Truncate each prompt before attacking. The recipes do a greedy word-by-word search, so cost
+  # scales with the prompt's word count; the dataset is long-tailed (p90 2655 chars) and
   # untruncated prompts run 130-280 s/example. Injections are front-loaded and the surrogates
   # only have a 256-token context, so bounding the length is a ~10-15x speedup with the
   # comparison left intact (applied uniformly to every surrogate).
   max_prompt_chars: 512
   query_budget: 800 # per-example victim-query cap (was 2000; raise if transfer is uniformly low)
-  num_workers: 8 # CPU worker processes for the parallel sweep (~= perf cores; bandwidth-bound past this)
-  # Examples per worker task. Sharding a cell's eval set across workers means a slow
+  # Examples per shard node. Sharding a cell's eval set across nodes means a slow
   # (surrogate, recipe) cell spreads over cores instead of pinning one. A fixed shard_size and
   # seed reproduce exactly; PWWS is shard-size-invariant, but recipes with seeded random edits
   # (deepwordbug, bae, bert-attack) can shift if shard_size changes, so keep it fixed within
-  # any set of runs you compare. Omit or set null/0 to attack each cell in a single shard.
+  # any set of runs you compare.
   shard_size: 4
-  # Directory the per-cell adversarial partitions are written to and read back for resume.
-  # Must match the adversarial_examples PartitionedDataset path in catalog.yml; the cloud
-  # environment overrides both this and that catalog entry to an s3:// URI.
-  partition_root: data/07_model_output/adversarial_examples
-  # Serve victim queries from exported ONNX graphs (onnxruntime, ~2-3x faster on CPU) instead
-  # of the torch checkpoint. Off by default; the export (`just export-onnx`) is an offline,
-  # isolated-env step (optimum conflicts with transformers 5), and the cloud env turns it on.
-  # The BiLSTM always stays on torch. onnx_root holds one subdir per surrogate: {name}/model.onnx.
-  use_onnx: false
-  onnx_root: data/06_models/onnx

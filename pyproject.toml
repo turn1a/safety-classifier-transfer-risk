@@ -43,6 +43,9 @@ requires = ["uv_build>=0.11.21,<0.12.0"]
 build-backend = "uv_build"
 
 [dependency-groups]
+cloud = [
+    "s3fs>=2025.3.0",
+]
 dev = [
     "interrogate>=1.7.0",
     "mdformat>=1.0.0",
@@ -168,6 +171,7 @@ module = [
     "sentence_transformers.*",
     "kedro_datasets.*",
     "onnxruntime.*",
+    "fsspec.*",
 ]
 ignore_missing_imports = true
 

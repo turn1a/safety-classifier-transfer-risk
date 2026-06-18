@@ -1,45 +1,38 @@
-# Models stage. The surrogate layer is model-agnostic: adding a model is a single
-# entry here, never a code change (SPEC.md §5). Final M1/M2 membership is decided
-# empirically from computed CKA, not from these declarations.
+# Models stage. The surrogate layer is model-agnostic. Adding a transformer surrogate is two
+# entries: one here ({name, kind}) so the pipeline generates its train/materialise + ONNX
+# nodes, and a matching `hub.{name}` (or `target_model`) source in catalog.yml that holds the
+# HuggingFace repo id — the catalog owns where every model comes from (SPEC.md §5). The BiLSTM
+# has no Hub source. Final M1/M2 membership is decided empirically from computed CKA.
 #
 # kind:
-#   pretrained — already a prompt-injection classifier; loaded as-is.
-#   finetune   — a base backbone fine-tuned on the canonical task (label 1 = injection).
+#   pretrained — already a prompt-injection classifier; materialised from its Hub source as-is.
+#   finetune   — a base backbone (Hub source loads with num_labels: 2) fine-tuned on the task.
 #   bilstm     — the from-scratch non-transformer floor.
 models:
-  target: protectai/deberta-v3-base-prompt-injection-v2
+  target: protectai/deberta-v3-base-prompt-injection-v2 # provenance label; loaded via target_model
   surrogates:
     - name: deberta-base-pi-v1
-      id: protectai/deberta-v3-base-prompt-injection
       kind: pretrained
-    # Gated: request access on its HF page before running (needs HF token).
+    # Gated: request access on its HF page before running (needs HF_TOKEN).
     - name: deberta-small-pi-v2
-      id: protectai/deberta-v3-small-prompt-injection-v2
       kind: pretrained
       gated: true
     - name: deepset-deberta-injection
-      id: deepset/deberta-v3-base-injection
       kind: pretrained
     - name: llama-prompt-guard-86m
-      id: meta-llama/Llama-Prompt-Guard-2-86M
       kind: pretrained
       gated: true
     - name: llama-prompt-guard-22m
-      id: meta-llama/Llama-Prompt-Guard-2-22M
       kind: pretrained
       gated: true
     - name: bert-base-ft
-      id: bert-base-uncased
       kind: finetune
     - name: roberta-base-ft
-      id: roberta-base
       kind: finetune
     - name: electra-small-ft
-      id: google/electra-small-discriminator
       kind: finetune
     # Same backbone as the target's base, a different seed — the CKA sanity anchor (~0.9).
     - name: deberta-base-ft-seed
-      id: microsoft/deberta-v3-base
       kind: finetune
     # The deliberate non-transformer floor of the similarity range.
     - name: bilstm-attention

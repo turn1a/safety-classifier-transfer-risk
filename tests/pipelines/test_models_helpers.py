@@ -50,9 +50,12 @@ def test_validate_specs_rejects_unknown_kind() -> None:
         validate_surrogate_specs([{"name": "x", "kind": "magic"}])
 
 
-def test_validate_specs_requires_id_for_transformer_kinds() -> None:
-    with pytest.raises(ValueError, match="requires an 'id'"):
-        validate_surrogate_specs([{"name": "x", "kind": "finetune"}])
+def test_validate_specs_accepts_transformer_specs_without_id() -> None:
+    # The repo id now lives in the catalog (hub.{name}), not the spec, so an id-less
+    # transformer spec is valid.
+    validate_surrogate_specs(
+        [{"name": "x", "kind": "finetune"}, {"name": "y", "kind": "pretrained"}]
+    )
 
 
 def test_requires_gated_auth() -> None:

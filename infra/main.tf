@@ -3,8 +3,6 @@ provider "aws" {
   profile = var.aws_profile
 }
 
-data "aws_caller_identity" "current" {}
-
 data "aws_vpc" "default" {
   default = true
 }
@@ -95,22 +93,8 @@ data "aws_iam_policy_document" "runner" {
     actions   = ["s3:ListBucket", "s3:GetBucketLocation"]
     resources = [aws_s3_bucket.exchange.arn]
   }
-  statement {
-    sid       = "ReadHfToken"
-    actions   = ["ssm:GetParameter"]
-    resources = ["arn:aws:ssm:${var.region}:${data.aws_caller_identity.current.account_id}:parameter${var.ssm_token_param}"]
-  }
-  # Decrypt the SecureString token, only when the call goes through SSM in this region.
-  statement {
-    sid       = "DecryptViaSsm"
-    actions   = ["kms:Decrypt"]
-    resources = ["*"]
-    condition {
-      test     = "StringEquals"
-      variable = "kms:ViaService"
-      values   = ["ssm.${var.region}.amazonaws.com"]
-    }
-  }
+  # No HuggingFace-token statement: the box reads every model from the catalog (S3), so it
+  # never calls the Hub and needs no SSM/KMS access beyond AmazonSSMManagedInstanceCore.
 }
 
 resource "aws_iam_role_policy" "runner" {
@@ -176,12 +160,11 @@ resource "aws_instance" "runner" {
   }
 
   user_data = templatefile("${path.module}/user_data.sh", {
-    bucket          = aws_s3_bucket.exchange.id
-    region          = var.region
-    repo_url        = var.repo_url
-    repo_ref        = var.repo_ref
-    ssm_token_param = var.ssm_token_param
-    max_lifetime    = var.max_lifetime_minutes
+    bucket       = aws_s3_bucket.exchange.id
+    region       = var.region
+    repo_url     = var.repo_url
+    repo_ref     = var.repo_ref
+    max_lifetime = var.max_lifetime_minutes
   })
   # Editing the bootstrap recreates the instance (user-data runs only at first boot).
   user_data_replace_on_change = true

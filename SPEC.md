@@ -34,7 +34,7 @@ ______________________________________________________________________
 - Classification attacks via TextAttack (TextFooler, BERT-Attack, BAE, PWWS, DeepWordBug).
 - CKA + DBS similarity computation on encoder hidden states, with empirically recalibrated thresholds `r1`, `r2`.
 - Regression that predicts transfer success rate from similarity features.
-- Headline result: CKA-guided surrogate selection beats random surrogate selection on max transfer rate, with statistical significance.
+- Headline result: high-CKA surrogates (M1) transfer at a higher rate than low-CKA surrogates (M2), tested by a one-sided permutation test on mean and max transfer rate.
 - Fully automated, seeded, tested, and reproducible on an Apple M4 Pro (48 GB unified memory).
 
 ### v1 non-goals (explicitly deferred)
@@ -66,7 +66,7 @@ For a target classifier `T` and a pool of surrogate classifiers `S_1..S_k`, all 
 1. **Surrogate selection.** `M1` = surrogates with similarity ≥ `r1` (high); `M2` = surrogates with similarity ≤ `r2` (low). Require `|M1| ≥ 1` and `|M2| ≥ 1`; target ≥ 3 each where the pool allows.
 1. **Attack + transfer.** For each surrogate × attack recipe, generate adversarial examples on a fixed eval set the surrogate originally classified correctly. Feed every adversarial example to frozen `T`; transfer success rate = fraction that flip `T`'s prediction.
 1. **Regression.** Fit transfer rate ~ (mean CKA, DBS, attack recipe, surrogate param count, shared-tokenizer flag). Use `DecisionTreeRegressor` (depth 6, matching Klause & Bunzel) and `RandomForestRegressor` as comparison.
-1. **Ablation.** Compare CKA-guided selection (`M1 ∪ M2`) vs random surrogate selection (≥ 20 bootstrap reseeds). Paired t-test on max transfer rate.
+1. **Ablation.** Compare high-CKA (`M1`) vs low-CKA (`M2`) surrogate selection with a one-sided permutation test on the difference in group-mean transfer rate, run on both the per-surrogate mean-across-recipes and max-across-recipes summaries. Enumerate the label assignments exactly when the group sizes are small (an exact permutation p-value); otherwise sample.
 
 ### 3.2 Linear CKA — reference implementation
 
@@ -289,13 +289,13 @@ ______________________________________________________________________
 - **`similarity/matrix.py`** — builds L×L CKA matrix from captured per-layer hidden states for two models on the probe set; returns matrix + (mean CKA, DBS). DoD: deterministic given fixed probe set + seeds.
 - **`similarity/thresholds.py`** — `calibrate(similarities) -> (r1, r2)` via quartiles; persists chosen values + provenance. DoD: returns `0 < r2 < r1 < 1`; provenance recorded.
 - **`models/hooks.py`** — forward hooks capturing last hidden state per transformer block + CLS/mean pooling switch. DoD: two forward passes on frozen model with same seed produce identical captures.
-- **`models/registry.py`** — load any HF `text-classification` id or local checkpoint by name; cache. DoD: adding a model is one registry/config entry.
+- **`models/registry.py`** — validate the configured surrogate pool (unique names, known kinds) and pre-check HuggingFace auth for gated models; models themselves load through their `hub__{name}` / `target_model` catalog datasets, not here. DoD: adding a surrogate is one `parameters_models.yml` entry (`{name, kind}`) plus its `hub__{name}` catalog source — no pipeline code change (the dynamic pipelines generate its nodes).
 - **`models/finetune.py`** — recipe in §7; writes checkpoint + metadata JSON. DoD: produces a working binary classifier; same-backbone different-seed pair lands ≳0.9 CKA.
 - **`attacks/base.py`** — abstract `Attack` with `generate(model, examples) -> adversarial_examples`. DoD: TextAttack runner implements it; signature accommodates a future GCG implementation.
 - **`attacks/textattack_runner.py`** — runs a named recipe over a fixed eval set the surrogate classifies correctly; saves JSONL (original, adversarial, perturbation stats, success). DoD: smoke test over 5 examples × 1 recipe yields valid schema.
 - **`transfer/evaluate.py`** — feeds adversarial examples to frozen target; computes transfer success rate per (surrogate, recipe). DoD: rate ∈ [0,1]; deterministic.
 - **`risk/regressors.py`** — fit/evaluate DecisionTree (depth 6) + RandomForest on the assembled table. DoD: reports R² / accuracy on held-out surrogates with fixed seed.
-- **`risk/ablation.py`** — CKA-guided vs random selection, ≥20 reseeds, paired t-test on max transfer rate. DoD: emits effect size + p-value + bootstrap CIs.
+- **`risk/ablation.py`** — high-CKA (M1) vs low-CKA (M2) selection, one-sided permutation test on mean and max transfer rate (exact enumeration for small groups, else Monte Carlo). DoD: emits per-group transfer means, effect sizes (pp), and exact/empirical p-values.
 - **`reporting/plots.py`** — three figures: (a) CKA similarity matrix heatmap, (b) transfer rate vs CKA scatter per (surrogate, recipe), (c) regression fit + ablation comparison. DoD: figures render headless in CI.
 
 ______________________________________________________________________
@@ -312,9 +312,9 @@ ______________________________________________________________________
 1. **Attack** (`make attack`) — each surrogate × recipe on a fixed eval set (start 500 prompts); save adversarial examples. Longest stage; design for overnight runs.
 1. **Transfer** (`make transfer`) — evaluate every adversarial example against `T`; assemble the master results table (surrogate, recipe, mean CKA, DBS, params, shared-tokenizer, transfer rate).
 1. **Regress** (`make regress`) — fit + evaluate both regressors.
-1. **Ablate** (`make ablate`) — CKA-guided vs random; bootstrap + paired t-test; final plots.
+1. **Ablate** (`make ablate`) — high-CKA M1 vs low-CKA M2; one-sided permutation test on mean and max transfer rate (exact for small groups); final plots.
 
-**Headline success criterion:** CKA-guided selection yields ≥ 5 percentage-point absolute improvement in max transfer rate over random selection, paired-t p < 0.05. If not met, the most likely bug is a too-homogeneous pool (the "low-similarity" surrogates aren't actually low) — add the non-transformer outlier and a fastText model and recheck before concluding the method doesn't port.
+**Headline success criterion:** high-CKA surrogates (M1) yield ≥ 5 percentage-point higher mean transfer rate than low-CKA surrogates (M2), one-sided permutation p < 0.05 (note the small-group p-value floor: three vs three gives a minimum of 1/20 = 0.05). If not met, the most likely bug is a too-homogeneous pool (the "low-similarity" surrogates aren't actually low) — add the non-transformer outlier and a fastText model and recheck before concluding the method doesn't port.
 
 **Tripwires:**
 
@@ -335,7 +335,7 @@ ______________________________________________________________________
 
 **Integration test:** full pipeline on a 5-prompt probe set with 2 surrogates and 1 recipe; assert output schema and that transfer rate ∈ [0,1].
 
-**Verification beyond tests:** the CKA-guided-vs-random ablation with bootstrap reseeds and a paired t-test is the primary scientific check; report both headline plots with confidence bands.
+**Verification beyond tests:** the M1-vs-M2 selection ablation (a one-sided permutation test on mean and max transfer rate) is the primary scientific check; report the per-group transfer means and the exact p-value, noting the small-group p-value floor (three vs three gives a minimum of 1/20 = 0.05).
 
 **Reproducibility:** single root seed → `SeedSequence` → per-component seeds (Python `random`, NumPy, PyTorch, and `TEXTATTACK_RANDOM_SEED`). Commit `uv.lock`. Track every run in MLflow (params, metrics, artifacts, git SHA). `git-lfs` for the handful of checkpoints. Log per-example CKA, perturbation magnitude, attack runtime, and query counts — the regressor can only use features you logged.
 
@@ -355,8 +355,9 @@ ______________________________________________________________________
 - Never use mixed precision on MPS unless a config flag explicitly enables it.
 - Seed everything from one root seed via numpy SeedSequence (see src/transfer_risk/seeds.py).
   No unseeded randomness anywhere.
-- The surrogate layer is model-agnostic: adding a model = one registry/config entry,
-  never a code change in the pipeline.
+- The surrogate layer is model-agnostic: adding a surrogate = one `parameters_models.yml`
+  entry plus its `hub__{name}` catalog source, never a code change in the pipeline (the
+  models/similarity/attacks pipelines generate its nodes dynamically from config).
 - Do NOT implement GCG/nanoGCG, jailbreak/CBRNE/toxicity targets, multi-turn attacks,
   or any agentic wrapper in v1. Leave extension points only.
 - This tool measures and compares risk. It never certifies robustness

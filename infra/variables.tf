@@ -48,12 +48,6 @@ variable "use_spot" {
   default     = true
 }
 
-variable "ssm_token_param" {
-  description = "SSM Parameter Store name holding the HuggingFace token (SecureString)."
-  type        = string
-  default     = "/transfer-risk/hf-token"
-}
-
 variable "root_volume_gb" {
   description = "Root EBS size (holds the venv, the HF cache, and a working copy of data/)."
   type        = number

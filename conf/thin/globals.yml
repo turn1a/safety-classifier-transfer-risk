@@ -1,0 +1,4 @@
+# Thin overrides only the adversarial root, to an isolated directory, so a smoke run never
+# contaminates a real sweep through --only-missing-outputs resume (a real cell already on disk
+# would otherwise be skipped). The other roots inherit the base (local) globals per-key.
+adversarial_root: data/07_model_output/adversarial_examples_thin

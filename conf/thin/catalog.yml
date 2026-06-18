@@ -1,9 +1,0 @@
-# Thin override for the resumable attack partitions: write the smoke run's per-cell pickles
-# to a separate directory so a thin run never contaminates the real sweep via resume (cells
-# already on disk are skipped). Kept in sync with the thin attacks.partition_root.
-adversarial_examples:
-  type: partitions.PartitionedDataset
-  path: data/07_model_output/adversarial_examples_thin
-  dataset:
-    type: pickle.PickleDataset
-  filename_suffix: .pkl

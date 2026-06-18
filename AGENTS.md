@@ -44,7 +44,7 @@ This mirrors the pure/glue split: the deterministic core is small, tested, and i
 
 - **Python 3.13** (newest stable minus one), managed by **`uv`** exclusively. Never `pip`, never `poetry`.
 - Bootstrap: `just install` (= `uv sync` + `uv run pre-commit install --install-hooks`).
-- Recipes (all in `justfile`): `just fmt | lint | type | test | check | hooks | run | viz | viz-build | docs | mlflow-ui`, plus `setup-data`, `export-onnx`, and the `cloud-*` sweep recipes ([infra/README.md](infra/README.md)). `just` with no argument runs `check` (lint + type + test).
+- Recipes (all in `justfile`): `just fmt | lint | type | test | check | hooks | run | run-thin | viz | viz-build | docs | mlflow-ui`, plus `setup-data` and the `cloud-*` sweep recipes (`cloud-stage`/`cloud-up`/`cloud-finish`/`cloud-logs`/`cloud-attach`/`cloud-down`; [infra/README.md](infra/README.md)). `just` with no argument runs `check` (lint + type + test).
 - Telemetry is opted out (`.telemetry` + `DO_NOT_TRACK=1` in the justfile).
 
 > Environment note: the venv runs a native **arm64** Python 3.13, so the MPS / PyTorch path works (verified: `torch.backends.mps.is_available()` is `True`). If you recreate the venv, force the native build — `uv venv --python cpython-3.13-macos-aarch64-none && uv sync` — otherwise uv may pick up a stray x86_64 interpreter and lose MPS.
@@ -94,7 +94,7 @@ Standing rules distilled from a review; treat them at §7 weight.
 
 - **Keep docs current as you go.** Update `README.md`, `CHANGELOG.md`, `SPEC.md`, and this file in the same change that alters behaviour — not in a batch afterwards.
 - **One paragraph per line in Markdown.** `.mdformat.toml` sets `wrap = "no"`; never hand-wrap prose. `just fmt` and the pre-commit hook enforce it. `refs/` is the only exclusion.
-- **Datasets and models go through the catalog.** Raw HuggingFace sources are `HFDataset` entries; trained surrogates are persisted by `SurrogateModelDataset` (the `surrogate.{name}` factory). No ad-hoc `load_dataset` / `save_pretrained` inside nodes.
+- **Everything goes through the catalog — data, models, and S3.** Raw HuggingFace *datasets* are `HFDataset` entries; Hub *models* (pretrained surrogates, fine-tune backbones, the target) are `HuggingFaceHubModelDataset` entries; every surrogate is persisted through the `surrogate__{name}` factory (`SurrogateModelDataset`) and its ONNX graph through `onnx__{name}` (`OnnxModelDataset`). No `from_pretrained(hub_id)` / `load_dataset` / `save_pretrained` / `aws s3 sync` inside nodes or scripts. Cloud data locations are catalog-owned via `${globals:...}` (local in base, `s3://` in the `cloud` env, from a scoped `tr.bucket` resolver). The models/similarity/attacks pipelines are generated dynamically (one node per surrogate, and per `(surrogate, recipe, shard)`); they run with `ParallelRunner` and resume with `--only-missing-outputs`. Dotted dataset names are reserved for namespacing, so factory names use `__` (e.g. `surrogate__{name}`).
 - **Docstrings on public AND private functions.** ruff `D` covers public APIs; `interrogate` (`fail-under = 100`, checks private/nested/magic/init) covers the rest. Both run in `just lint` and pre-commit.
 - **Logging, not print.** `conf/logging.yml` configures the rich console plus a rotating `logs/run.log`; nodes log meaningful progress via `logging.getLogger(__name__)`.
 - **Env vars live in `.env`** (loaded by `settings.py` and by `just` via `dotenv-load`), never typed ad-hoc on the command line. `.env.example` documents them; `.env` is gitignored.

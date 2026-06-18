@@ -17,11 +17,14 @@ VALID_KINDS = frozenset({"pretrained", "finetune", "bilstm"})
 
 
 def validate_surrogate_specs(specs: Sequence[Mapping[str, Any]]) -> None:
-    """Validate surrogate specs: unique names, known kinds, and ids where required.
+    """Validate surrogate specs: unique names and known kinds.
+
+    The HuggingFace repo id is no longer part of the spec; a ``pretrained`` / ``finetune``
+    surrogate is sourced from its matching ``hub.{name}`` (or ``target_model``) catalog entry,
+    so the only spec invariants are a unique ``name`` and a recognised ``kind``.
 
     Raises:
-        ValueError: On a duplicate name, an unknown kind, or a transformer kind
-            (``pretrained`` / ``finetune``) missing its ``id``.
+        ValueError: On a duplicate name or an unknown kind.
     """
     names = [spec.get("name") for spec in specs]
     if len(names) != len(set(names)):
@@ -31,9 +34,6 @@ def validate_surrogate_specs(specs: Sequence[Mapping[str, Any]]) -> None:
         kind = spec.get("kind")
         if kind not in VALID_KINDS:
             msg = f"{spec.get('name')!r}: unknown kind {kind!r} (expected {sorted(VALID_KINDS)})"
-            raise ValueError(msg)
-        if kind in {"pretrained", "finetune"} and not spec.get("id"):
-            msg = f"{spec.get('name')!r}: kind {kind!r} requires an 'id'"
             raise ValueError(msg)
 
 

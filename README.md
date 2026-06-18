@@ -61,24 +61,22 @@ just install                      # uv sync + install pre-commit hooks
 just setup-data                   # download NLTK data, embeddings, the sentence encoder
 just check                        # ruff + interrogate + mypy + pytest
 just run                          # run the full data → reporting chain
-just run --env thin               # a fast end-to-end slice (small pool, few examples)
+just run-thin                     # a fast end-to-end slice (small pool, few examples; sets KEDRO_ENV=thin)
 just viz                          # open the interactive DAG
 just mlflow-ui                    # browse tracked runs (params, metrics, artifacts)
 ```
 
 `just run` executes the whole chain and writes the reporting figures under `data/08_reporting/`, the master results table, and `run_metrics.json`; every run is tracked in MLflow. Provide HuggingFace auth (`huggingface-cli login` or `HF_TOKEN` in `.env`) for the gated surrogates.
 
-The attack sweep is the only expensive stage. It shards each cell's examples across CPU cores and persists each `(surrogate, recipe)` cell as it completes, so a run resumes after an interruption rather than restarting. To run it on a single high-core spot box instead of the laptop and bring the results back:
+The attack sweep is the only expensive stage. It is generated as one Kedro node per `(surrogate, recipe, example-shard)`, so `ParallelRunner` spreads it across cores and `kedro run --only-missing-outputs` resumes by skipping partitions already written. The catalog owns where data lives: under `--env cloud` the boundary artifacts (splits, surrogate checkpoints, ONNX graphs, adversarial partitions) resolve to the S3 bucket via `${globals:...}`, so the spot box reads and writes S3 through the catalog with no `aws s3 sync`. To run the sweep on a single high-core spot box instead of the laptop:
 
 ```bash
-just export-onnx                          # export surrogates to ONNX (optional; ~2-3x faster victims)
-just cloud-push                           # upload surrogates + data to the S3 exchange bucket
-just cloud-up                             # provision the spot box; it runs the sweep and self-terminates
-just cloud-pull                           # bring the adversarial partitions back into data/
-just run --from-nodes evaluate_transfer   # downstream + MLflow, locally
+just cloud-stage                          # create the bucket; train the pool once under --env cloud, staging inputs to S3
+just cloud-up                             # provision the spot box; it runs the sweep (ParallelRunner) and self-terminates
+just cloud-finish                         # downstream (transfer/risk/reporting) + MLflow, locally, reading partitions from S3
 ```
 
-The downstream and MLflow stay local, so results land on your machine. One-time AWS setup and the cost/security notes are in [infra/README.md](infra/README.md).
+The downstream and MLflow stay local, so results land on your machine. The box never touches the HuggingFace Hub (every model comes from the catalog), so it needs no HF token. One-time AWS setup and the cost/security notes are in [infra/README.md](infra/README.md).
 
 ## Reproducibility
 

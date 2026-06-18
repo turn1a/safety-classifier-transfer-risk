@@ -1,7 +1,9 @@
 """Nodes for the similarity pipeline (SPEC.md §3.1-§3.3).
 
-The pure maths is delegated to :mod:`transfer_risk.lib` (CKA, DBS, thresholds);
-per-layer representation extraction lives in :mod:`transfer_risk.modeling`.
+The pure maths is delegated to :mod:`transfer_risk.lib` (CKA, DBS, thresholds); per-layer
+representation extraction lives in :mod:`transfer_risk.modeling`. The target's representations
+are computed once (it arrives as a loaded ``target_model`` bundle); each surrogate's CKA is its
+own node (input its ``surrogate.{name}`` checkpoint path), and a reduce step assembles them.
 """
 
 from __future__ import annotations
@@ -16,7 +18,7 @@ from transfer_risk.lib.cka import cka_matrix
 from transfer_risk.lib.dbs import diagonal_box_similarity
 from transfer_risk.lib.seeds import derive_seeds
 from transfer_risk.lib.thresholds import calibrate
-from transfer_risk.modeling import layer_representations
+from transfer_risk.modeling import layer_representations, representations_from_loaded
 
 logger = logging.getLogger(__name__)
 
@@ -37,41 +39,65 @@ def build_probe_set(canonical: pd.DataFrame, params: dict[str, Any], seed: int) 
     return probe.sample(frac=1.0, random_state=rng_seed).reset_index(drop=True)
 
 
-def compute_cka_matrices(
+def compute_target_reps(
+    target: dict[str, Any],
     probe_set: pd.DataFrame,
-    manifest: dict[str, Any],
-    registry: dict[str, Any],
     sim_params: dict[str, Any],
     device_params: dict[str, Any],
-) -> dict[str, Any]:
-    """Build the target-vs-surrogate layer CKA matrix for each surrogate."""
+) -> list[Any]:
+    """Compute the frozen target's per-layer probe representations once (reused by every CKA)."""
     device = resolve_device(device_params["policy"])
-    texts = probe_set["text"].tolist()
-    pooling = sim_params["pooling"]
-    batch_size = sim_params["cka"]["batch_size"]
-    max_seq_len = int(sim_params.get("max_seq_len", 256))
-    target_spec = {"kind": "pretrained", "source": registry["target"]}
-    target_reps = layer_representations(
-        target_spec,
-        texts,
-        pooling=pooling,
-        max_seq_len=max_seq_len,
-        batch_size=batch_size,
+    return representations_from_loaded(
+        target["model"],
+        target["tokenizer"],
+        probe_set["text"].tolist(),
+        pooling=sim_params["pooling"],
+        max_seq_len=int(sim_params.get("max_seq_len", 256)),
+        batch_size=sim_params["cka"]["batch_size"],
         device=device,
     )
-    matrices: dict[str, Any] = {}
-    for name, entry in manifest.items():
-        surrogate_reps = layer_representations(
-            entry,
-            texts,
-            pooling=pooling,
-            max_seq_len=max_seq_len,
-            batch_size=batch_size,
-            device=device,
-        )
-        matrices[name] = cka_matrix(target_reps, surrogate_reps)
-        logger.info("CKA matrix %s: shape %s", name, matrices[name].shape)
-    return matrices
+
+
+def compute_cka(
+    surrogate_path: str,
+    target_reps: list[Any],
+    probe_set: pd.DataFrame,
+    sim_params: dict[str, Any],
+    device_params: dict[str, Any],
+    *,
+    kind: str,
+) -> Any:
+    """Build the target-vs-surrogate layer CKA matrix for one surrogate.
+
+    Args:
+        surrogate_path: the surrogate's local checkpoint directory (from ``surrogate.{name}``).
+        target_reps: the precomputed target representations.
+        probe_set: the shared probe texts.
+        sim_params: the ``similarity`` block.
+        device_params: the ``device`` block.
+        kind: the surrogate kind (``pretrained`` / ``finetune`` / ``bilstm``), bound at build time.
+
+    Returns:
+        The layer-pair CKA matrix.
+    """
+    device = resolve_device(device_params["policy"])
+    spec = {"kind": kind, "source": surrogate_path}
+    surrogate_reps = layer_representations(
+        spec,
+        probe_set["text"].tolist(),
+        pooling=sim_params["pooling"],
+        max_seq_len=int(sim_params.get("max_seq_len", 256)),
+        batch_size=sim_params["cka"]["batch_size"],
+        device=device,
+    )
+    matrix = cka_matrix(target_reps, surrogate_reps)
+    logger.info("CKA matrix shape %s", matrix.shape)
+    return matrix
+
+
+def reduce_cka(*matrices: Any, names: list[str]) -> dict[str, Any]:
+    """Assemble the per-surrogate CKA matrices into a ``{surrogate -> matrix}`` mapping."""
+    return dict(zip(names, matrices, strict=True))
 
 
 def reduce_similarity(cka_matrices: dict[str, Any], params: dict[str, Any]) -> pd.DataFrame:

@@ -1,6 +1,8 @@
-# Thin attacks overrides (self-contained; Kedro replaces the whole `attacks` block).
-# Three fast recipes — char-level, WordNet synonym, and embedding + sentence-encoder — over
-# a handful of examples. BAE/BERT-Attack (masked-LM) are exercised only in the full run.
+# Thin attacks overrides (self-contained; Kedro replaces the whole `attacks` block). Three fast
+# recipes — char-level, WordNet synonym, and embedding + sentence-encoder — over a handful of
+# examples. BAE/BERT-Attack (masked-LM) are exercised only in the full run. Run the thin slice
+# with KEDRO_ENV=thin so the dynamic pipeline reads this reduced structure at build time
+# (`just run-thin`); the isolated partition directory comes from conf/thin/globals.yml.
 attacks:
   recipes:
     - deepwordbug
@@ -9,8 +11,5 @@ attacks:
   semantic_encoder: sentence-transformers
   eval_set_size: 12
   query_budget: 200
-  num_workers: 3 # small pool for the thin slice
   max_prompt_chars: 512
   shard_size: 4 # 3 shards over the 12 examples — exercises the sharding path in the smoke run
-  # Isolated partition dir so a smoke run never contaminates a real sweep via resume.
-  partition_root: data/07_model_output/adversarial_examples_thin

@@ -1,12 +1,19 @@
 #!/usr/bin/env bash
-# Cloud sweep runner — invoked on the EC2 box by user_data (as ec2-user). Installs the project,
-# pulls cached inputs (and any partitions a previous run finished) from S3, runs the attack
-# sweep in the cloud env (all cores, ONNX victims, small shards), and pushes completed
-# partitions back to S3 — incrementally, so a spot reclaim loses at most the in-flight cells.
-# Config is written to /opt/config.env by user_data: TR_BUCKET, TR_REGION, TR_REPO_REF,
-# TR_SSM_TOKEN_PARAM. This is a plain bash file (not a Terraform template), so $VARS are normal.
+# Cloud sweep runner — invoked on the EC2 box by user_data (as ec2-user). Installs the project
+# and runs the attack sweep under `--env cloud`, reading inputs (splits, surrogate checkpoints,
+# ONNX graphs) from S3 and writing each partition back to S3 *through the Kedro catalog* — no
+# aws s3 sync, and no HuggingFace access (every model is materialised from the catalog).
+# ParallelRunner uses the whole box; --only-missing-outputs makes a re-run (or a spot reclaim)
+# resume by skipping partitions already on S3. Config is written to /opt/config.env by user_data:
+# TR_BUCKET, TR_REGION, TR_REPO_REF.
 set -euo pipefail
+# Export the box config into the environment so the catalog's ${tr.bucket:} / ${tr.region:}
+# resolvers and the AWS SDK (region) see it.
+set -a
 source /opt/config.env
+set +a
+export AWS_REGION="$TR_REGION"
+export AWS_DEFAULT_REGION="$TR_REGION"
 
 export PATH="$HOME/.local/bin:$PATH"
 export TOKENIZERS_PARALLELISM=false
@@ -16,41 +23,15 @@ export DO_NOT_TRACK=1
 cd "$HOME/repo"
 git checkout "$TR_REPO_REF"
 
-# uv + the project (resolves torch/transformers/textattack/onnxruntime arm64 wheels from the lock).
+# uv + the project, including the cloud group (s3fs) so the catalog can read/write s3://.
 curl -LsSf https://astral.sh/uv/install.sh | sh
-uv sync
+uv sync --group cloud
 
 # Offline NLP assets the recipes need (NLTK data, counter-fitted embeddings, sentence encoder).
 uv run python -m transfer_risk.scripts.fetch_assets
 
-# HuggingFace token into the process env only — never written to disk or logged.
-HF_TOKEN="$(aws ssm get-parameter --name "$TR_SSM_TOKEN_PARAM" --with-decryption \
-  --region "$TR_REGION" --query Parameter.Value --output text)"
-export HF_TOKEN
-
-# Pull cached inputs (surrogates incl. ONNX + BiLSTM + manifest, canonical data, splits) and
-# any partitions a previous run already completed (resume skips them).
-aws s3 sync "s3://$TR_BUCKET/data/03_primary/" data/03_primary/ --region "$TR_REGION"
-aws s3 sync "s3://$TR_BUCKET/data/05_model_input/" data/05_model_input/ --region "$TR_REGION"
-aws s3 sync "s3://$TR_BUCKET/data/06_models/" data/06_models/ --region "$TR_REGION"
-aws s3 sync "s3://$TR_BUCKET/data/07_model_output/adversarial_examples/" \
-  data/07_model_output/adversarial_examples/ --region "$TR_REGION"
-
-# Push completed partitions every 90s so a spot reclaim costs only the in-flight cells.
-( while true; do
-    aws s3 sync data/07_model_output/adversarial_examples/ \
-      "s3://$TR_BUCKET/data/07_model_output/adversarial_examples/" --region "$TR_REGION" \
-      >/dev/null 2>&1
-    sleep 90
-  done ) &
-sync_pid=$!
-
-# The sweep, in tmux so `just cloud-attach` can watch it live. The trailing marker fires whether
-# the run succeeds or fails, so partial results are still pushed below.
+# The sweep, in tmux so `just cloud-attach` can watch it live. The catalog reads inputs from S3
+# and writes each shard/cell partition straight to S3; --only-missing-outputs resumes.
 tmux new-session -d -s run \
-  "uv run kedro run --env cloud --pipeline attacks; echo done > /tmp/sweep_done"
+  "uv run kedro run --env cloud --pipeline attacks --runner ParallelRunner --only-missing-outputs; echo done > /tmp/sweep_done"
 while [ ! -f /tmp/sweep_done ]; do sleep 15; done
-
-kill "$sync_pid" 2>/dev/null || true
-aws s3 sync data/07_model_output/adversarial_examples/ \
-  "s3://$TR_BUCKET/data/07_model_output/adversarial_examples/" --region "$TR_REGION"

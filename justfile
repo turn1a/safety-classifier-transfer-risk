@@ -21,12 +21,6 @@ install:
 setup-data:
     uv run python -m transfer_risk.scripts.fetch_assets
 
-# Export each transformer surrogate to ONNX for `use_onnx` attack runs (onnxruntime is ~2-3x
-# faster per query on CPU). Runs optimum in a throwaway `uvx` env — optimum conflicts with
-# transformers 5 — so it never touches the main environment. Run once before an ONNX sweep.
-export-onnx:
-    uv run python -m transfer_risk.scripts.export_onnx
-
 # Auto-fix formatting (ruff + mdformat).
 fmt:
     uv run ruff format .
@@ -57,6 +51,11 @@ hooks:
 run *args:
     uv run kedro run {{args}}
 
+# Fast end-to-end slice. KEDRO_ENV=thin is required so the dynamic pipelines read the reduced
+# structure (3 surrogates, 3 recipes) at build time, not just at run time. e.g. `just run-thin`.
+run-thin *args:
+    KEDRO_ENV=thin uv run kedro run {{args}}
+
 # Open the interactive pipeline DAG in the browser.
 viz *args:
     uv run kedro viz run {{args}}
@@ -78,33 +77,39 @@ mlflow-ui:
     uv run mlflow ui --backend-store-uri sqlite:///mlflow.db
 
 # --- cloud sweep (one fat spot box; see infra/ and the plan) ---------------
-# Typical flow: export-onnx -> cloud-push -> cloud-up -> cloud-pull -> run --from-nodes evaluate_transfer.
-# The downstream (transfer/risk/reporting + MLflow) runs locally, so MLflow stays a single
-# local sqlite writer and results land here.
+# Typical flow: cloud-stage -> cloud-up -> cloud-finish. The catalog owns all S3 I/O via
+# ${globals:...}; there is no aws s3 sync of project data. cloud-stage trains the pool once with
+# --env cloud (writing splits/surrogates/ONNX to S3 and the rest locally); the box runs only the
+# attacks; cloud-finish runs the downstream (transfer/risk/reporting + MLflow) locally.
 
-# Provision the spot box and start the sweep (creates the bucket/IAM/SG on first run). The box
-# clones the repo at terraform.tfvars repo_ref, runs the attacks under --env cloud, self-terminates.
+# Create the S3 bucket, then build + stage everything the box reads: run data, models, similarity
+# under --env cloud so the boundary artifacts (splits, surrogate checkpoints, ONNX) land on S3 and
+# the rest stay local. One training pass; re-run is a no-op with --only-missing-outputs.
+cloud-stage:
+    #!/usr/bin/env bash
+    set -euo pipefail
+    terraform -chdir=infra init -input=false
+    terraform -chdir=infra apply -auto-approve -target=aws_s3_bucket.exchange
+    bucket="$(terraform -chdir=infra output -raw bucket_name)"
+    AWS_PROFILE={{aws_profile}} AWS_REGION={{aws_region}} TR_BUCKET="$bucket" TR_REGION={{aws_region}} \
+      uv run --group cloud kedro run --env cloud --pipeline "data,models,similarity" --only-missing-outputs
+
+# Provision the rest of the infra (IAM/SG/spot box) and start the sweep. The box clones the repo
+# at terraform.tfvars repo_ref, runs the attacks under --env cloud (ParallelRunner,
+# --only-missing-outputs), reading and writing S3 through the catalog, then self-terminates.
 cloud-up:
     terraform -chdir=infra init -input=false
     terraform -chdir=infra apply -auto-approve
-    @echo "watch: just cloud-logs  |  shell: just cloud-attach  |  results: just cloud-pull"
+    @echo "watch: just cloud-logs  |  shell: just cloud-attach  |  results: just cloud-finish"
 
-# Upload the cached inputs the box needs: canonical data, splits, and surrogates (incl. the
-# exported ONNX). Run after `just export-onnx`, and again whenever surrogates change.
-cloud-push:
+# Run the downstream locally against the S3 partitions: transfer/risk/reporting under --env cloud
+# read the per-cell adversarial partitions from S3 and write results, figures, and MLflow locally.
+cloud-finish:
     #!/usr/bin/env bash
     set -euo pipefail
     bucket="$(terraform -chdir=infra output -raw bucket_name)"
-    for layer in 03_primary 05_model_input 06_models; do
-      aws s3 sync "data/$layer/" "s3://$bucket/data/$layer/" --profile {{aws_profile}} --region {{aws_region}}
-    done
-
-# Pull the adversarial partitions the box produced back into the local data/ dir.
-cloud-pull:
-    #!/usr/bin/env bash
-    set -euo pipefail
-    bucket="$(terraform -chdir=infra output -raw bucket_name)"
-    aws s3 sync "s3://$bucket/data/07_model_output/adversarial_examples/" data/07_model_output/adversarial_examples/ --profile {{aws_profile}} --region {{aws_region}}
+    AWS_PROFILE={{aws_profile}} AWS_REGION={{aws_region}} TR_BUCKET="$bucket" TR_REGION={{aws_region}} \
+      uv run --group cloud kedro run --env cloud --pipeline "transfer,risk,reporting"
 
 # Stream the box's bootstrap/run log from S3.
 cloud-logs:
@@ -120,8 +125,8 @@ cloud-attach:
     iid="$(terraform -chdir=infra output -raw instance_id)"
     aws ssm start-session --target "$iid" --profile {{aws_profile}} --region {{aws_region}}
 
-# Tear down everything (box, IAM, SG, bucket). Pull first: the bucket holds the intermediate
-# partitions, while the final results are produced locally by the downstream run, so they are
-# safe once you have run `just cloud-pull` and the local downstream.
+# Tear down everything (box, IAM, SG, bucket). Run cloud-finish first: the bucket holds the
+# adversarial partitions, and the final results are produced locally by the downstream run, so
+# they are safe once cloud-finish has completed.
 cloud-down:
     terraform -chdir=infra destroy -auto-approve

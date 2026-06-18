@@ -2,11 +2,17 @@
 
 kedro-mlflow registers its tracking hooks automatically via plugin entry points (config
 in ``conf/base/mlflow.yml``), so no explicit ``HOOKS`` entry is required. Console + file
-logging is configured in ``conf/logging.yml`` (auto-discovered by Kedro). See the Kedro
-docs to customise the config loader, session store, or hooks as the project grows:
-https://docs.kedro.org/en/stable/configure/configuration_basics/
+logging is configured in ``conf/logging.yml`` (auto-discovered by Kedro).
+
+``CONFIG_LOADER_ARGS`` registers two *scoped* OmegaConf resolvers, ``tr.bucket`` and
+``tr.region``, so ``conf/cloud/globals.yml`` can build ``s3://`` roots from the box's
+environment (``TR_BUCKET`` / ``TR_REGION``). Kedro 1.4 enables the built-in ``oc.env``
+resolver only for credentials, and the docs discourage re-enabling it globally; two
+single-purpose resolvers expose exactly the cloud bucket and region and nothing else. See
+https://docs.kedro.org/en/stable/configure/advanced_configuration/
 """
 
+import os
 from pathlib import Path
 
 from dotenv import load_dotenv
@@ -16,3 +22,40 @@ from dotenv import load_dotenv
 # Kedro imports settings during project bootstrap, ahead of pipeline execution. Existing
 # shell variables win (override=False), so an exported value is never clobbered.
 load_dotenv(Path(__file__).resolve().parents[2] / ".env")
+
+
+def _require_env(name: str) -> str:
+    """Return the environment variable ``name``, raising if it is unset or empty.
+
+    Args:
+        name: the environment variable to read.
+
+    Returns:
+        The variable's value.
+
+    Raises:
+        KeyError: if the variable is unset or empty (the cloud config cannot resolve).
+    """
+    value = os.environ.get(name)
+    if not value:
+        msg = f"environment variable {name!r} is required to resolve the cloud config but is unset"
+        raise KeyError(msg)
+    return value
+
+
+def _resolve_bucket(*_args: object) -> str:
+    """Resolve ``${tr.bucket:}`` to the cloud S3 bucket from ``TR_BUCKET`` (used in globals)."""
+    return _require_env("TR_BUCKET")
+
+
+def _resolve_region(*_args: object) -> str:
+    """Resolve ``${tr.region:}`` to the AWS region from ``TR_REGION`` (used in globals)."""
+    return _require_env("TR_REGION")
+
+
+CONFIG_LOADER_ARGS = {
+    "custom_resolvers": {
+        "tr.bucket": _resolve_bucket,
+        "tr.region": _resolve_region,
+    },
+}

@@ -1,0 +1,9 @@
+# Movable data roots, resolved into the catalog and parameters via ${globals:...}. Base is
+# the local project tree (the Kedro data-engineering layers). conf/cloud/globals.yml is the
+# ONLY per-environment override: it re-points these roots at the S3 exchange bucket so the
+# catalog (not aws s3 sync) owns where the boundary artifacts live. Non-boundary datasets
+# keep literal local paths in catalog.yml and are unaffected.
+model_root: data/06_models
+onnx_root: data/06_models/onnx
+splits_path: data/05_model_input/task_splits.pkl
+adversarial_root: data/07_model_output/adversarial_examples

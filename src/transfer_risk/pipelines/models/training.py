@@ -2,30 +2,25 @@
 
 Both use a small explicit torch loop rather than the HF ``Trainer`` — ``model(**enc,
 labels=...).loss`` is stable across transformers versions, and the loop keeps seeding
-and the MPS device explicit (SPEC.md §7). Each function trains, saves a checkpoint, and
-returns manifest metadata (validation accuracy, parameter count).
+and the MPS device explicit (SPEC.md §7). Each function trains and returns a checkpoint
+bundle plus metadata (validation accuracy, parameter count); the node persists the bundle
+through the ``surrogate.{name}`` catalog dataset.
 """
 
 from __future__ import annotations
 
+import copy
 import logging
 import math
 from typing import TYPE_CHECKING, Any
 
 import torch
 from torch.nn.functional import cross_entropy
-from transformers import (
-    AutoModelForSequenceClassification,
-    AutoTokenizer,
-    get_linear_schedule_with_warmup,
-)
+from transformers import get_linear_schedule_with_warmup
 
-from transfer_risk.datasets.surrogate_model_dataset import SurrogateModelDataset
 from transfer_risk.pipelines.models.bilstm import BiLSTMClassifier, build_vocab, encode, pad_batch
 
 if TYPE_CHECKING:
-    from pathlib import Path
-
     import pandas as pd
 
 logger = logging.getLogger(__name__)
@@ -36,27 +31,28 @@ class _NaNLossError(RuntimeError):
 
 
 def _train_transformer(
-    model_id: str,
+    model: Any,
     tokenizer: Any,
     train_df: pd.DataFrame,
     cfg: dict[str, Any],
     device: torch.device,
     seed: int,
 ) -> Any:
-    """Fine-tune one transformer on ``device`` and return the trained model.
+    """Fine-tune the given transformer on ``device`` and return the trained model.
 
-    Uses gradient clipping and a linear warmup (both HF ``Trainer`` defaults) for stability.
-    The loss is checked every step; a non-finite value raises :class:`_NaNLossError` at the
-    step it appears, so the caller can retry the model on another device without finishing a
-    doomed epoch.
+    The backbone is supplied already loaded (from its ``hub.{name}`` catalog dataset, in fp32
+    with a 2-class head), so this function never touches the Hub. Uses gradient clipping and a
+    linear warmup (both HF ``Trainer`` defaults) for stability. The loss is checked every step;
+    a non-finite value raises :class:`_NaNLossError` at the step it appears, so the caller can
+    retry on another device without finishing a doomed epoch.
 
     Args:
-        model_id: HuggingFace model identifier to load the backbone from.
-        tokenizer: tokenizer paired with ``model_id``.
+        model: the backbone classifier to fine-tune (modified in place, on ``device``).
+        tokenizer: tokenizer paired with the backbone.
         train_df: training split with ``text`` and ``label`` columns.
         cfg: the ``finetune`` block (``lr``, ``batch_size``, ``epochs``, ``max_seq_len``).
         device: device to train on.
-        seed: seed for the weight init and the batch-shuffle generator.
+        seed: seed for the batch-shuffle generator.
 
     Returns:
         The fine-tuned model, left on ``device``.
@@ -66,13 +62,7 @@ def _train_transformer(
     """
     torch.manual_seed(seed)
     batch_size, max_seq_len = cfg["batch_size"], cfg["max_seq_len"]
-    # Force fp32: deberta-v3-base ships a float16 checkpoint, and transformers>=5 loads in
-    # the checkpoint dtype by default. Training in raw fp16 without loss scaling overflows to
-    # NaN within an epoch (other backbones ship fp32 and were unaffected). fp32 is the stable,
-    # device-agnostic choice for a from-scratch fine-tune.
-    model = AutoModelForSequenceClassification.from_pretrained(
-        model_id, num_labels=2, dtype=torch.float32
-    ).to(device)
+    model = model.to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=cfg["lr"])
     texts = train_df["text"].tolist()
     labels = train_df["label"].tolist()
@@ -99,7 +89,7 @@ def _train_transformer(
             optimizer.zero_grad()
             loss = model(**encoded, labels=targets).loss
             if not bool(torch.isfinite(loss)):
-                msg = f"non-finite training loss for {model_id} on {device}"
+                msg = f"non-finite training loss on {device}"
                 raise _NaNLossError(msg)
             loss.backward()
             torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
@@ -109,46 +99,48 @@ def _train_transformer(
 
 
 def finetune_transformer(
-    model_id: str,
+    backbone: dict[str, Any],
     train_df: pd.DataFrame,
     val_df: pd.DataFrame,
-    output_dir: Path,
     cfg: dict[str, Any],
     device: torch.device,
     seed: int,
-) -> dict[str, Any]:
-    """Fine-tune a transformer backbone on the canonical task; save model + tokenizer.
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Fine-tune a backbone on the canonical task; return its checkpoint bundle and metadata.
 
-    ``cfg`` is the ``finetune`` block (``lr``, ``batch_size``, ``epochs``, ``max_seq_len``).
-    Training runs in fp32 (see :func:`_train_transformer`), which is what keeps the
-    fp16-checkpoint backbones (deberta-v3) stable rather than diverging to NaN. As a safety
-    net against any other divergence, a non-finite loss is caught and the model is retrained
-    once on CPU; the device actually used is recorded in the returned metadata.
+    ``backbone`` is the ``{"model", "tokenizer"}`` loaded from the surrogate's ``hub.{name}``
+    catalog dataset (fp32, 2-class head), so no Hub access or persistence happens here — the
+    caller writes the returned bundle through ``surrogate.{name}``. ``cfg`` is the ``finetune``
+    block. As a safety net against divergence, a non-finite loss is caught and training is
+    retried once on CPU from a pristine copy of the backbone; the device used is recorded.
+
+    Returns:
+        ``(bundle, meta)`` where ``bundle`` is a transformer ``SurrogateModelDataset`` value and
+        ``meta`` carries ``val_accuracy``, ``num_params``, ``num_labels``, and ``device``.
     """
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
+    tokenizer = backbone["tokenizer"]
+    pristine = copy.deepcopy(backbone["model"])
     try:
-        model = _train_transformer(model_id, tokenizer, train_df, cfg, device, seed)
+        model = _train_transformer(backbone["model"], tokenizer, train_df, cfg, device, seed)
         used_device = device
     except _NaNLossError:
         if device.type == "cpu":
             raise
-        logger.warning(
-            "%s diverged to a non-finite loss on %s; retraining on CPU", model_id, device
-        )
+        logger.warning("diverged to a non-finite loss on %s; retraining on CPU", device)
         used_device = torch.device("cpu")
-        model = _train_transformer(model_id, tokenizer, train_df, cfg, used_device, seed)
-    SurrogateModelDataset(str(output_dir)).save(
-        {"kind": "transformer", "model": model, "tokenizer": tokenizer}
-    )
+        model = _train_transformer(pristine, tokenizer, train_df, cfg, used_device, seed)
     accuracy = _transformer_accuracy(
         model, tokenizer, val_df, cfg["max_seq_len"], cfg["batch_size"], used_device
     )
-    return {
+    bundle = {"kind": "transformer", "model": model, "tokenizer": tokenizer}
+    meta = {
+        "kind": "finetune",
         "val_accuracy": accuracy,
         "num_params": int(sum(p.numel() for p in model.parameters())),
         "num_labels": 2,
         "device": str(used_device),
     }
+    return bundle, meta
 
 
 def _transformer_accuracy(
@@ -183,13 +175,18 @@ def _transformer_accuracy(
 def train_bilstm(
     train_df: pd.DataFrame,
     val_df: pd.DataFrame,
-    output_dir: Path,
     *,
     params: dict[str, Any],
     device: torch.device,
     seed: int,
-) -> dict[str, Any]:
-    """Train the from-scratch BiLSTM classifier; save weights, vocab, and config."""
+) -> tuple[dict[str, Any], dict[str, Any]]:
+    """Train the from-scratch BiLSTM classifier; return its checkpoint bundle and metadata.
+
+    Returns:
+        ``(bundle, meta)`` where ``bundle`` is a BiLSTM ``SurrogateModelDataset`` value (model +
+        vocab/shape config) and ``meta`` carries ``val_accuracy``, ``num_params``, ``num_labels``.
+        The caller persists the bundle through ``surrogate.{name}``.
+    """
     torch.manual_seed(seed)
     texts = train_df["text"].tolist()
     labels = train_df["label"].tolist()
@@ -228,12 +225,13 @@ def train_bilstm(
         "max_seq_len": max_len,
     }
     bundle = {"kind": "bilstm", "model": model, "config": config}
-    SurrogateModelDataset(str(output_dir)).save(bundle)
-    return {
+    meta = {
+        "kind": "bilstm",
         "val_accuracy": accuracy,
-        "num_params": sum(p.numel() for p in model.parameters()),
+        "num_params": int(sum(p.numel() for p in model.parameters())),
         "num_labels": 2,
     }
+    return bundle, meta
 
 
 def _bilstm_accuracy(
