@@ -92,8 +92,8 @@ class ONNXModelWrapper(ModelWrapper):  # type: ignore[misc]  # ModelWrapper is u
     search is unchanged; only the victim forward is swapped for an ONNX Runtime session,
     which is ~2-3x faster per query on CPU. It imports *only* ``onnxruntime`` plus the
     project's tokenizer — never ``optimum`` — so the hot path avoids the
-    optimum<->transformers-5 version conflict (the ``.onnx`` graph is produced offline by
-    ``just export-onnx``). One intra-op thread, so N pool workers use N cores.
+    optimum<->transformers-5 version conflict (the ``.onnx`` graph is produced in-process by the
+    models pipeline's ONNX-export node). One intra-op thread, so N pool workers use N cores.
     """
 
     def __init__(self, onnx_path: str, tokenizer_source: str, *, max_seq_len: int = 256) -> None:
@@ -123,18 +123,23 @@ class ONNXModelWrapper(ModelWrapper):  # type: ignore[misc]  # ModelWrapper is u
 
 
 def build_wrapper(
-    entry: Mapping[str, Any], device: torch.device, *, onnx_dir: str | None = None
+    entry: Mapping[str, Any],
+    device: torch.device,
+    *,
+    onnx_dir: str | None = None,
+    max_seq_len: int = 256,
 ) -> ModelWrapper:
     """Build a TextAttack ``ModelWrapper`` for one surrogate manifest entry.
 
     With ``onnx_dir`` set (and the surrogate not the BiLSTM), the victim is served from the
-    exported graph at ``{onnx_dir}/model.onnx`` via :class:`ONNXModelWrapper`; otherwise the
-    torch checkpoint is loaded. The BiLSTM is tiny and always stays on torch.
+    exported graph at ``{onnx_dir}/model.onnx`` via :class:`ONNXModelWrapper`, tokenising to
+    ``max_seq_len``; otherwise the torch checkpoint is loaded. The BiLSTM is tiny and always
+    stays on torch, using its own trained window from its checkpoint config.
     """
     if entry["kind"] == "bilstm":
         return BiLSTMModelWrapper(entry["source"], device)
     if onnx_dir is not None:
-        return ONNXModelWrapper(f"{onnx_dir}/model.onnx", onnx_dir)
+        return ONNXModelWrapper(f"{onnx_dir}/model.onnx", onnx_dir, max_seq_len=max_seq_len)
     model, tokenizer = load_transformer(entry["source"], device)
     return HuggingFaceModelWrapper(model, tokenizer)
 

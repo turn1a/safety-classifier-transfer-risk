@@ -16,14 +16,19 @@ attacks:
     - bae
     - bert-attack
   semantic_encoder: sentence-transformers # or "use" (TensorFlow USE; see fork extras)
-  eval_set_size: 60 # injection prompts attacked per surrogate (caps at available 191)
-  # Truncate each prompt before attacking. The recipes do a greedy word-by-word search, so cost
-  # scales with the prompt's word count; the dataset is long-tailed (p90 2655 chars) and
-  # untruncated prompts run 130-280 s/example. Injections are front-loaded and the surrogates
-  # only have a 256-token context, so bounding the length is a ~10-15x speedup with the
-  # comparison left intact (applied uniformly to every surrogate).
-  max_prompt_chars: 512
-  query_budget: 800 # per-example victim-query cap (was 2000; raise if transfer is uniformly low)
+  # Production sweep: the full test-injection eval set, the model's full 512-token context, and a
+  # generous query budget (the dev-tractability clips of 60 / 512 chars / 800 queries are gone).
+  eval_set_size: 191 # caps at the available test injections (~191); attack all of them
+  # Victim token window. The exported ONNX graph has a dynamic sequence axis, so the attack victim
+  # tokenises to this length; keep it in sync with transfer.max_seq_len so the surrogate and the
+  # target judge the same text over the same context. 512 is the pool's ceiling (BERT/RoBERTa/
+  # ELECTRA max positions; DeBERTa-v3 relative).
+  max_seq_len: 512
+  # Char truncation before the greedy search. Set above the char-equivalent of max_seq_len so the
+  # tokenizer's 512-token truncation binds, not this cut — the search then covers exactly what the
+  # victim reads and no prompt is clipped below its context (the long tail is p90 2655 chars).
+  max_prompt_chars: 3200
+  query_budget: 6000 # per-example victim-query cap; high enough to rarely bind except on robust victims
   # Examples per shard node. Sharding a cell's eval set across nodes means a slow
   # (surrogate, recipe) cell spreads over cores instead of pinning one. A fixed shard_size and
   # seed reproduce exactly; PWWS is shard-size-invariant, but recipes with seeded random edits

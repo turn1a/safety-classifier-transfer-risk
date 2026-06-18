@@ -3,7 +3,7 @@
 transfer:
   target: protectai/deberta-v3-base-prompt-injection-v2
   batch_size: 64
-  max_seq_len: 256
+  max_seq_len: 512 # the target judges transfer over the same window the attack used (attacks.max_seq_len)
   # How many worked transfer cases (surrogate AND target flipped) to persist for the write-up's
   # before/after example; the fewest-word-edit, most-varied cases are kept (transferred_examples).
   max_transferred_examples: 8

@@ -41,7 +41,7 @@ models:
     lr: 2.0e-5
     batch_size: 32
     epochs: 3
-    max_seq_len: 256
+    max_seq_len: 512 # train + ONNX-trace at the full window the sweep attacks over
   bilstm:
     embed_dim: 128
     hidden_dim: 256
@@ -51,4 +51,4 @@ models:
     batch_size: 64
     epochs: 5
     max_vocab: 20000
-    max_seq_len: 256
+    max_seq_len: 512 # BiLSTM trained + attacked at the same window (its wrapper reads this from config)

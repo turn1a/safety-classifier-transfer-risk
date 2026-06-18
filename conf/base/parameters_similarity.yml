@@ -2,7 +2,8 @@
 # Do NOT hardcode the paper's CNN-derived thresholds — recalibrate on text
 # (SPEC.md §3.1 step 3).
 similarity:
-  n_probe: 1000           # fixed probe-set size (start 1000-2000)
+  n_probe: 2000           # fixed probe-set size (production: upper end of the 1000-2000 range)
+  max_seq_len: 512        # token window for the CKA reps; matches the attack/transfer window
   pooling: cls            # cls | mean (hidden-state pooling)
   cka:
     mode: minibatch       # linear | minibatch

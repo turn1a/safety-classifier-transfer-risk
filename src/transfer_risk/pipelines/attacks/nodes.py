@@ -42,8 +42,8 @@ def attack_shard(  # noqa: PLR0913 (a generated per-shard node: catalog inputs +
         splits: train/val/test DataFrames; the eval set is drawn from ``test``.
         victim_path: local directory of the victim — the ONNX graph (transformers) or the BiLSTM
             checkpoint, materialised from the catalog.
-        attacks_params: the ``attacks`` block (eval_set_size, max_prompt_chars, query_budget,
-            semantic_encoder).
+        attacks_params: the ``attacks`` block (eval_set_size, max_prompt_chars, max_seq_len,
+            query_budget, semantic_encoder).
         seed: root seed; this shard attacks with ``seed + start``.
         name: the surrogate name (for logging/provenance), bound at build time.
         kind: the surrogate kind, bound at build time (selects the victim wrapper).
@@ -69,13 +69,16 @@ def attack_shard(  # noqa: PLR0913 (a generated per-shard node: catalog inputs +
     eval_size = int(attacks_params["eval_set_size"])
     max_chars = int(attacks_params.get("max_prompt_chars") or 10**9)
     query_budget = int(attacks_params["query_budget"])
+    max_seq_len = int(attacks_params.get("max_seq_len", 256))
     test_df = splits["test"]
     injections = test_df.loc[test_df["label"] == 1, "text"].head(eval_size).tolist()
     examples = [{"text": text[:max_chars], "label": 1} for text in injections]
     if kind == "bilstm":
         wrapper = build_wrapper({"kind": "bilstm", "source": victim_path}, torch.device("cpu"))
     else:
-        wrapper = build_wrapper({"kind": kind}, torch.device("cpu"), onnx_dir=victim_path)
+        wrapper = build_wrapper(
+            {"kind": kind}, torch.device("cpu"), onnx_dir=victim_path, max_seq_len=max_seq_len
+        )
     return run_recipe(
         wrapper, recipe, examples[start:stop], query_budget=query_budget, seed=seed + start
     )
