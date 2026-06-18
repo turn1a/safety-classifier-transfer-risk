@@ -112,6 +112,8 @@ def run_attacks(
     max_chars = int(params.get("max_prompt_chars") or 10**9)
     recipes = params["recipes"]
     partition_root = str(params["partition_root"])
+    use_onnx = bool(params.get("use_onnx", False))
+    onnx_root = str(params["onnx_root"]) if use_onnx else None
     test_df = splits["test"]
     injections = test_df.loc[test_df["label"] == 1, "text"].head(eval_size).tolist()
     # Truncate before attacking: the greedy word-level search cost scales with the prompt's
@@ -156,13 +158,14 @@ def run_attacks(
         for name, entry, recipe, start, stop in tasks:
             future = pool.submit(
                 attack_shard,
+                name,
                 entry,
                 recipe,
                 examples,
-                start=start,
-                stop=stop,
+                span=(start, stop),
                 query_budget=query_budget,
                 seed=seed,
+                onnx_root=onnx_root,
             )
             futures[future] = (name, recipe, start)
         for future in as_completed(futures):

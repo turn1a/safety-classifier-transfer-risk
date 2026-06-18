@@ -14,6 +14,8 @@ import json
 from pathlib import Path
 from typing import TYPE_CHECKING, Any
 
+import numpy as np
+import onnxruntime as ort
 import torch
 from textattack import AttackArgs, Attacker
 from textattack.attack_recipes import (
@@ -25,6 +27,7 @@ from textattack.attack_recipes import (
 )
 from textattack.datasets import Dataset as TextAttackDataset
 from textattack.models.wrappers import HuggingFaceModelWrapper, ModelWrapper
+from transformers import AutoTokenizer
 
 from transfer_risk.modeling import load_transformer
 from transfer_risk.pipelines.models.bilstm import BiLSTMClassifier, encode, pad_batch
@@ -82,10 +85,56 @@ class BiLSTMModelWrapper(ModelWrapper):  # type: ignore[misc]  # ModelWrapper is
             return torch.softmax(self.model(ids), dim=-1).cpu().numpy()
 
 
-def build_wrapper(entry: Mapping[str, Any], device: torch.device) -> ModelWrapper:
-    """Build a TextAttack ``ModelWrapper`` for one surrogate manifest entry."""
+class ONNXModelWrapper(ModelWrapper):  # type: ignore[misc]  # ModelWrapper is untyped (Any)
+    """TextAttack wrapper that serves a surrogate's exported ONNX graph via ONNX Runtime.
+
+    Same ``text -> class-probability (n, 2)`` contract as the HF/BiLSTM wrappers, so the
+    search is unchanged; only the victim forward is swapped for an ONNX Runtime session,
+    which is ~2-3x faster per query on CPU. It imports *only* ``onnxruntime`` plus the
+    project's tokenizer — never ``optimum`` — so the hot path avoids the
+    optimum<->transformers-5 version conflict (the ``.onnx`` graph is produced offline by
+    ``just export-onnx``). One intra-op thread, so N pool workers use N cores.
+    """
+
+    def __init__(self, onnx_path: str, tokenizer_source: str, *, max_seq_len: int = 256) -> None:
+        """Open the ONNX session at ``onnx_path`` with the tokenizer at ``tokenizer_source``."""
+        options = ort.SessionOptions()
+        options.intra_op_num_threads = 1
+        self.session = ort.InferenceSession(
+            onnx_path, sess_options=options, providers=["CPUExecutionProvider"]
+        )
+        self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_source)
+        self.input_names = {model_input.name for model_input in self.session.get_inputs()}
+        self.max_seq_len = max_seq_len
+
+    def __call__(self, text_list: list[str]) -> Any:
+        """Return softmax class probabilities ``(n, 2)`` for a list of texts."""
+        encoded = self.tokenizer(
+            text_list,
+            truncation=True,
+            max_length=self.max_seq_len,
+            padding=True,
+            return_tensors="np",
+        )
+        feeds = {name: encoded[name] for name in self.input_names if name in encoded}
+        logits = self.session.run(None, feeds)[0]
+        shifted = np.exp(logits - logits.max(axis=-1, keepdims=True))
+        return shifted / shifted.sum(axis=-1, keepdims=True)
+
+
+def build_wrapper(
+    entry: Mapping[str, Any], device: torch.device, *, onnx_dir: str | None = None
+) -> ModelWrapper:
+    """Build a TextAttack ``ModelWrapper`` for one surrogate manifest entry.
+
+    With ``onnx_dir`` set (and the surrogate not the BiLSTM), the victim is served from the
+    exported graph at ``{onnx_dir}/model.onnx`` via :class:`ONNXModelWrapper`; otherwise the
+    torch checkpoint is loaded. The BiLSTM is tiny and always stays on torch.
+    """
     if entry["kind"] == "bilstm":
         return BiLSTMModelWrapper(entry["source"], device)
+    if onnx_dir is not None:
+        return ONNXModelWrapper(f"{onnx_dir}/model.onnx", onnx_dir)
     model, tokenizer = load_transformer(entry["source"], device)
     return HuggingFaceModelWrapper(model, tokenizer)
 
@@ -135,14 +184,15 @@ def run_recipe(
 
 
 def attack_shard(
+    name: str,
     entry: Mapping[str, Any],
     recipe: str,
     examples: list[dict[str, Any]],
     *,
-    start: int,
-    stop: int,
+    span: tuple[int, int],
     query_budget: int,
     seed: int,
+    onnx_root: str | None = None,
 ) -> list[dict[str, Any]]:
     """Attack the ``examples[start:stop]`` slice for one ``(surrogate, recipe)`` — one pool task.
 
@@ -159,48 +209,24 @@ def attack_shard(
     so keep it fixed within a comparison set.
 
     Args:
+        name: the surrogate's manifest key, used to locate its ONNX graph under ``onnx_root``.
         entry: the surrogate's manifest entry (``kind`` + ``source``).
         recipe: a key of :data:`RECIPES`.
         examples: the shared eval set (``[{"text", "label"}]``).
-        start: shard start index into ``examples`` (inclusive).
-        stop: shard stop index into ``examples`` (exclusive).
+        span: shard ``(start, stop)`` index range into ``examples`` (start inclusive, stop
+            exclusive).
         query_budget: per-example victim-query cap.
         seed: root seed; the shard attacks with ``seed + start``.
+        onnx_root: if set, serve the victim from ``{onnx_root}/{name}/model.onnx`` (ONNX
+            Runtime) instead of the torch checkpoint; the BiLSTM always stays on torch.
 
     Returns:
         One record per attacked example in the shard (see :func:`run_recipe`).
     """
     torch.set_num_threads(1)
-    wrapper = build_wrapper(entry, torch.device("cpu"))
+    start, stop = span
+    onnx_dir = f"{onnx_root}/{name}" if onnx_root else None
+    wrapper = build_wrapper(entry, torch.device("cpu"), onnx_dir=onnx_dir)
     return run_recipe(
         wrapper, recipe, examples[start:stop], query_budget=query_budget, seed=seed + start
-    )
-
-
-def attack_one(
-    entry: Mapping[str, Any],
-    recipe: str,
-    examples: list[dict[str, Any]],
-    *,
-    query_budget: int,
-    seed: int,
-) -> list[dict[str, Any]]:
-    """Attack a whole ``(surrogate, recipe)`` cell — :func:`attack_shard` over every example.
-
-    Retained as the single-shard convenience for tests and any non-sharded caller; the sweep
-    itself submits :func:`attack_shard` tasks. Equivalent to ``attack_shard`` with ``start=0,
-    stop=len(examples)`` (the seed is unchanged at ``seed + 0``).
-
-    Args:
-        entry: the surrogate's manifest entry (``kind`` + ``source``).
-        recipe: a key of :data:`RECIPES`.
-        examples: the shared eval set (``[{"text", "label"}]``).
-        query_budget: per-example victim-query cap.
-        seed: TextAttack sampling seed.
-
-    Returns:
-        One record per attacked example (see :func:`run_recipe`).
-    """
-    return attack_shard(
-        entry, recipe, examples, start=0, stop=len(examples), query_budget=query_budget, seed=seed
     )

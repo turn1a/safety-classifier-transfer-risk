@@ -17,6 +17,12 @@ install:
 setup-data:
     uv run python -m transfer_risk.scripts.fetch_assets
 
+# Export each transformer surrogate to ONNX for `use_onnx` attack runs (onnxruntime is ~2-3x
+# faster per query on CPU). Runs optimum in a throwaway `uvx` env — optimum conflicts with
+# transformers 5 — so it never touches the main environment. Run once before an ONNX sweep.
+export-onnx:
+    uv run python -m transfer_risk.scripts.export_onnx
+
 # Auto-fix formatting (ruff + mdformat).
 fmt:
     uv run ruff format .

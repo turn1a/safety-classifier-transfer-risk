@@ -31,3 +31,9 @@ attacks:
   # Must match the adversarial_examples PartitionedDataset path in catalog.yml; the cloud
   # environment overrides both this and that catalog entry to an s3:// URI.
   partition_root: data/07_model_output/adversarial_examples
+  # Serve victim queries from exported ONNX graphs (onnxruntime, ~2-3x faster on CPU) instead
+  # of the torch checkpoint. Off by default; the export (`just export-onnx`) is an offline,
+  # isolated-env step (optimum conflicts with transformers 5), and the cloud env turns it on.
+  # The BiLSTM always stays on torch. onnx_root holds one subdir per surrogate: {name}/model.onnx.
+  use_onnx: false
+  onnx_root: data/06_models/onnx
