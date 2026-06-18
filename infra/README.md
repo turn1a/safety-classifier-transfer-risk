@@ -15,7 +15,7 @@ This is the entire manual surface. After it, the `just cloud-*` recipes are one 
 1. **A scoped IAM user (do not use the root user).** In the IAM console create a user (e.g. `transfer-risk-cli`, no console access), attach `PowerUserAccess`, and add an inline policy for the IAM actions PowerUser excludes (Terraform creates the instance role and passes it to EC2):
    ```json
    { "Version": "2012-10-17", "Statement": [{ "Effect": "Allow", "Resource": "*",
-     "Action": ["iam:CreateRole","iam:DeleteRole","iam:GetRole","iam:PassRole",
+     "Action": ["iam:CreateRole","iam:DeleteRole","iam:GetRole","iam:GetRolePolicy","iam:PassRole",
        "iam:PutRolePolicy","iam:DeleteRolePolicy","iam:AttachRolePolicy","iam:DetachRolePolicy",
        "iam:CreateInstanceProfile","iam:DeleteInstanceProfile","iam:GetInstanceProfile",
        "iam:AddRoleToInstanceProfile","iam:RemoveRoleFromInstanceProfile",
