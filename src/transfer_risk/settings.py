@@ -17,6 +17,12 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+from transfer_risk.hooks import CloudpickleDatasetHook
+
+# Register a cloudpickle reducer for ForkingPickler-unfriendly datasets so the attack sweep can
+# run under ParallelRunner with the (unused-by-it) kedro-mlflow datasets present in the catalog.
+HOOKS = (CloudpickleDatasetHook(),)
+
 # Load .env before any node imports torch, so the Apple-Silicon / tokenizer flags
 # (PYTORCH_ENABLE_MPS_FALLBACK, TOKENIZERS_PARALLELISM, ...) and HF_TOKEN take effect.
 # Kedro imports settings during project bootstrap, ahead of pipeline execution. Existing
@@ -54,6 +60,11 @@ def _resolve_region(*_args: object) -> str:
 
 
 CONFIG_LOADER_ARGS = {
+    # Kedro's default CONFIG_LOADER_ARGS carries these; since we override the dict to add
+    # resolvers, we must restate them, or base_env/default_run_env fall back to "" and the loader
+    # globs conf/** across every environment (raising on duplicate keys between base and thin).
+    "base_env": "base",
+    "default_run_env": "local",
     "custom_resolvers": {
         "tr.bucket": _resolve_bucket,
         "tr.region": _resolve_region,

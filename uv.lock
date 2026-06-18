@@ -3430,6 +3430,7 @@ version = "0.1.0"
 source = { editable = "." }
 dependencies = [
     { name = "accelerate" },
+    { name = "cloudpickle" },
     { name = "datasets" },
     { name = "huggingface-hub" },
     { name = "kedro" },
@@ -3474,6 +3475,7 @@ dev = [
 [package.metadata]
 requires-dist = [
     { name = "accelerate", specifier = ">=1.14.0" },
+    { name = "cloudpickle", specifier = ">=3.1.2" },
     { name = "datasets", specifier = ">=4.0.0" },
     { name = "huggingface-hub", specifier = ">=1.19.0" },
     { name = "kedro", specifier = ">=1.4.0" },

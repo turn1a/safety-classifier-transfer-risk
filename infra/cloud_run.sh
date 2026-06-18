@@ -19,6 +19,12 @@ export PATH="$HOME/.local/bin:$PATH"
 export TOKENIZERS_PARALLELISM=false
 export HF_HUB_DISABLE_PROGRESS_BARS=1
 export DO_NOT_TRACK=1
+# ParallelRunner start method: spawn (not the Linux default fork). Each attack node sets
+# TA_DEVICE / OMP_NUM_THREADS and imports textattack/torch inside the worker, which only takes
+# effect in a fresh process; spawn also avoids fork-after-torch issues (Kedro loads every
+# pipeline module — and thus torch — in the parent). The node payloads are spawn-safe
+# (module-level functions + functools.partial; all datasets persisted).
+export KEDRO_MP_CONTEXT=spawn
 
 cd "$HOME/repo"
 git checkout "$TR_REPO_REF"

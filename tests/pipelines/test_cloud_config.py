@@ -22,13 +22,8 @@ _BUCKET = "tr-test-bucket"
 
 
 def _catalog(env: str | None) -> dict[str, Any]:
-    loader = OmegaConfigLoader(
-        conf_source=_CONF,
-        env=env,
-        base_env="base",
-        default_run_env="local",
-        **CONFIG_LOADER_ARGS,
-    )
+    # CONFIG_LOADER_ARGS already carries base_env / default_run_env, so don't pass them again.
+    loader = OmegaConfigLoader(conf_source=_CONF, env=env, **CONFIG_LOADER_ARGS)
     return loader["catalog"]
 
 
