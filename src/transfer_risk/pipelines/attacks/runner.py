@@ -134,6 +134,49 @@ def run_recipe(
     ]
 
 
+def attack_shard(
+    entry: Mapping[str, Any],
+    recipe: str,
+    examples: list[dict[str, Any]],
+    *,
+    start: int,
+    stop: int,
+    query_budget: int,
+    seed: int,
+) -> list[dict[str, Any]]:
+    """Attack the ``examples[start:stop]`` slice for one ``(surrogate, recipe)`` — one pool task.
+
+    This is the unit the sweep parallelises. Splitting a cell's examples into shards lets a
+    slow ``(surrogate, recipe)`` cell spread across cores instead of pinning one worker for its
+    whole eval set. Each worker is pinned to a single torch thread so N workers use N cores
+    without oversubscription; the victim and the masked-LM run on CPU (TextAttack's device is
+    fixed via the inherited ``TA_DEVICE`` env before this module imports textattack). Loading
+    the model inside the worker keeps the pickled payload to plain data, never a live model.
+    The per-shard seed is ``seed + start`` (the shard's absolute start index), so a given
+    ``shard_size`` and ``seed`` reproduce exactly. PWWS is shard-size-invariant; recipes whose
+    edits draw on the seeded RNG (DeepWordBug's random character edits, BAE/BERT-Attack's
+    masked-LM) reproduce for a fixed ``shard_size`` but can shift across ``shard_size`` values,
+    so keep it fixed within a comparison set.
+
+    Args:
+        entry: the surrogate's manifest entry (``kind`` + ``source``).
+        recipe: a key of :data:`RECIPES`.
+        examples: the shared eval set (``[{"text", "label"}]``).
+        start: shard start index into ``examples`` (inclusive).
+        stop: shard stop index into ``examples`` (exclusive).
+        query_budget: per-example victim-query cap.
+        seed: root seed; the shard attacks with ``seed + start``.
+
+    Returns:
+        One record per attacked example in the shard (see :func:`run_recipe`).
+    """
+    torch.set_num_threads(1)
+    wrapper = build_wrapper(entry, torch.device("cpu"))
+    return run_recipe(
+        wrapper, recipe, examples[start:stop], query_budget=query_budget, seed=seed + start
+    )
+
+
 def attack_one(
     entry: Mapping[str, Any],
     recipe: str,
@@ -142,14 +185,11 @@ def attack_one(
     query_budget: int,
     seed: int,
 ) -> list[dict[str, Any]]:
-    """Run one ``(surrogate, recipe)`` attack task — the unit parallelised across workers.
+    """Attack a whole ``(surrogate, recipe)`` cell — :func:`attack_shard` over every example.
 
-    The attacks node submits one of these per ``(surrogate, recipe)`` to a process pool, so
-    the embarrassingly-parallel sweep saturates the CPU cores. Each worker is pinned to a
-    single torch thread so N workers use N cores without oversubscription; the victim and
-    the masked-LM run on CPU (TextAttack's device is fixed to CPU via the inherited
-    ``TA_DEVICE`` env before this module imports textattack). Loading the model inside the
-    worker keeps the pickled payload to plain data, never a live model.
+    Retained as the single-shard convenience for tests and any non-sharded caller; the sweep
+    itself submits :func:`attack_shard` tasks. Equivalent to ``attack_shard`` with ``start=0,
+    stop=len(examples)`` (the seed is unchanged at ``seed + 0``).
 
     Args:
         entry: the surrogate's manifest entry (``kind`` + ``source``).
@@ -161,6 +201,6 @@ def attack_one(
     Returns:
         One record per attacked example (see :func:`run_recipe`).
     """
-    torch.set_num_threads(1)
-    wrapper = build_wrapper(entry, torch.device("cpu"))
-    return run_recipe(wrapper, recipe, examples, query_budget=query_budget, seed=seed)
+    return attack_shard(
+        entry, recipe, examples, start=0, stop=len(examples), query_budget=query_budget, seed=seed
+    )

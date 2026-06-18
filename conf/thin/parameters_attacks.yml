@@ -10,3 +10,5 @@ attacks:
   eval_set_size: 12
   query_budget: 200
   num_workers: 3 # small pool for the thin slice
+  max_prompt_chars: 512
+  shard_size: 4 # 3 shards over the 12 examples — exercises the sharding path in the smoke run

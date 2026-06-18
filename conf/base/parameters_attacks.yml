@@ -21,3 +21,9 @@ attacks:
   max_prompt_chars: 512
   query_budget: 800 # per-example victim-query cap (was 2000; raise if transfer is uniformly low)
   num_workers: 8 # CPU worker processes for the parallel sweep (~= perf cores; bandwidth-bound past this)
+  # Examples per worker task. Sharding a cell's eval set across workers means a slow
+  # (surrogate, recipe) cell spreads over cores instead of pinning one. A fixed shard_size and
+  # seed reproduce exactly; PWWS is shard-size-invariant, but recipes with seeded random edits
+  # (deepwordbug, bae, bert-attack) can shift if shard_size changes, so keep it fixed within
+  # any set of runs you compare. Omit or set null/0 to attack each cell in a single shard.
+  shard_size: 4
