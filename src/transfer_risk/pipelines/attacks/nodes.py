@@ -51,10 +51,15 @@ def run_attacks(
 
     eval_size = int(params["eval_set_size"])
     query_budget = int(params["query_budget"])
+    max_chars = int(params["max_prompt_chars"])
     recipes = params["recipes"]
     test_df = splits["test"]
     injections = test_df.loc[test_df["label"] == 1, "text"].head(eval_size).tolist()
-    examples = [{"text": text, "label": 1} for text in injections]
+    # Truncate before attacking: the greedy word-level search cost scales with the prompt's
+    # word count, and the prompts are long-tailed (params_attacks.yml). Injections are
+    # front-loaded and the surrogates only see 256 tokens, so this bounds search cost without
+    # changing the comparison (uniform across surrogates).
+    examples = [{"text": text[:max_chars], "label": 1} for text in injections]
     tasks = [(name, entry, recipe) for name, entry in manifest.items() for recipe in recipes]
     configured = params.get("num_workers")
     workers = int(configured) if configured else max(1, (os.cpu_count() or 2) - 2)

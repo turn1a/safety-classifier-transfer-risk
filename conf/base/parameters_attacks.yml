@@ -12,6 +12,12 @@ attacks:
     - bae
     - bert-attack
   semantic_encoder: sentence-transformers # or "use" (TensorFlow USE; see fork extras)
-  eval_set_size: 500 # injection prompts attacked per surrogate (caps at available)
-  query_budget: 2000 # raise if transfer rates are uniformly low (SPEC.md §11)
+  eval_set_size: 60 # injection prompts attacked per surrogate (caps at available 191)
+  # Truncate each prompt before attacking. The recipes do a greedy word-by-word search, so
+  # cost scales with the prompt's word count; the dataset is long-tailed (p90 2655 chars) and
+  # untruncated prompts run 130-280 s/example. Injections are front-loaded and the surrogates
+  # only have a 256-token context, so bounding the length is a ~10-15x speedup with the
+  # comparison left intact (applied uniformly to every surrogate).
+  max_prompt_chars: 512
+  query_budget: 800 # per-example victim-query cap (was 2000; raise if transfer is uniformly low)
   num_workers: 8 # CPU worker processes for the parallel sweep (~= perf cores; bandwidth-bound past this)
