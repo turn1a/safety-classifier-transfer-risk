@@ -91,7 +91,7 @@ cloud-stage:
     terraform -chdir=infra init -input=false
     terraform -chdir=infra apply -auto-approve -target=aws_s3_bucket.exchange
     bucket="$(terraform -chdir=infra output -raw bucket_name)"
-    AWS_PROFILE={{aws_profile}} AWS_REGION={{aws_region}} TR_BUCKET="$bucket" TR_REGION={{aws_region}} \
+    AWS_PROFILE={{aws_profile}} AWS_REGION={{aws_region}} TR_BUCKET="$bucket" TR_REGION={{aws_region}} KEDRO_ENV=cloud \
       uv run --group cloud kedro run --env cloud --pipeline stage --only-missing-outputs
 
 # Provision the rest of the infra (IAM/SG/spot box) and start the sweep. The box clones the repo
@@ -108,7 +108,7 @@ cloud-finish:
     #!/usr/bin/env bash
     set -euo pipefail
     bucket="$(terraform -chdir=infra output -raw bucket_name)"
-    AWS_PROFILE={{aws_profile}} AWS_REGION={{aws_region}} TR_BUCKET="$bucket" TR_REGION={{aws_region}} \
+    AWS_PROFILE={{aws_profile}} AWS_REGION={{aws_region}} TR_BUCKET="$bucket" TR_REGION={{aws_region}} KEDRO_ENV=cloud \
       uv run --group cloud kedro run --env cloud --pipeline downstream
 
 # Stream the box's bootstrap/run log from S3.

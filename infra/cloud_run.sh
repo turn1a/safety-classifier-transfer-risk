@@ -14,6 +14,10 @@ source /opt/config.env
 set +a
 export AWS_REGION="$TR_REGION"
 export AWS_DEFAULT_REGION="$TR_REGION"
+# Select the cloud config environment. The catalog's S3 routing keys off the run env, and in this
+# project the KEDRO_ENV variable is honoured where `kedro run --env cloud` alone is not (the
+# catalog otherwise resolves the boundary datasets to their local base paths), so set it here.
+export KEDRO_ENV=cloud
 
 export PATH="$HOME/.local/bin:$PATH"
 export TOKENIZERS_PARALLELISM=false
