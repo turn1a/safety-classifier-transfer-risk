@@ -44,3 +44,9 @@ docs/.quarto/
 
 # macOS
 .DS_Store
+
+# Terraform (infra/) — local state, provider cache, and the filled-in tfvars (the .example is tracked).
+infra/.terraform/
+infra/terraform.tfvars
+*.tfstate
+*.tfstate.*

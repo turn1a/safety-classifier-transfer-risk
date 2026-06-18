@@ -1,0 +1,10 @@
+# Copy to terraform.tfvars and fill in. terraform.tfvars and *.tfstate are gitignored.
+bucket_name = "transfer-risk-<your-account-id>-eucentral1" # must be globally unique
+repo_ref    = "<the git SHA to run>"                        # pin a commit for a reproducible run
+
+# Optional overrides (defaults shown):
+# region        = "eu-central-1"
+# aws_profile   = "transfer-risk-cli"
+# arch          = "arm64"          # or "x86_64" (the ONNX fallback)
+# instance_type = "c8g.16xlarge"   # arm64 default; use "c7i.16xlarge" when arch = "x86_64"
+# use_spot      = true
