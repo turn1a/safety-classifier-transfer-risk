@@ -1,5 +1,5 @@
 #!/bin/bash
-# Minimal first-boot bootstrap (rendered by Terraform templatefile — only the ${...} below are
+# Minimal first-boot bootstrap (rendered by Terraform templatefile — only the $${...} below are
 # substituted; it deliberately uses no bash variables, so nothing needs $$-escaping). It writes
 # the run config, clones the repo, and hands off to the committed infra/cloud_run.sh (a normal
 # bash script) which installs the project and runs the sweep — reading inputs and writing
