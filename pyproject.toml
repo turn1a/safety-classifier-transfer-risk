@@ -165,6 +165,7 @@ module = [
     "textattack.*",
     "nltk.*",
     "sentence_transformers.*",
+    "kedro_datasets.*",
 ]
 ignore_missing_imports = true
 

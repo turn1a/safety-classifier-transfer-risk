@@ -12,3 +12,5 @@ attacks:
   num_workers: 3 # small pool for the thin slice
   max_prompt_chars: 512
   shard_size: 4 # 3 shards over the 12 examples — exercises the sharding path in the smoke run
+  # Isolated partition dir so a smoke run never contaminates a real sweep via resume.
+  partition_root: data/07_model_output/adversarial_examples_thin

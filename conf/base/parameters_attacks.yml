@@ -27,3 +27,7 @@ attacks:
   # (deepwordbug, bae, bert-attack) can shift if shard_size changes, so keep it fixed within
   # any set of runs you compare. Omit or set null/0 to attack each cell in a single shard.
   shard_size: 4
+  # Directory the per-cell adversarial partitions are written to and read back for resume.
+  # Must match the adversarial_examples PartitionedDataset path in catalog.yml; the cloud
+  # environment overrides both this and that catalog entry to an s3:// URI.
+  partition_root: data/07_model_output/adversarial_examples

@@ -116,9 +116,16 @@ surrogate_selection:
       layer: model_output
 
 # --- attacks stage ---------------------------------------------------------
+# Per-cell partitions: one pickle per "<surrogate>__<recipe>" cell, so the attacks node can
+# skip cells already on disk (resume) and the cloud box can sync completed cells to S3 as they
+# land. The node lists this directory itself for resume (PartitionedDataset raises on an empty
+# dir, which is the first-run state); the path is kept in sync with attacks.partition_root.
 adversarial_examples:
-  type: pickle.PickleDataset
-  filepath: data/07_model_output/adversarial_examples.pkl
+  type: partitions.PartitionedDataset
+  path: data/07_model_output/adversarial_examples
+  dataset:
+    type: pickle.PickleDataset
+  filename_suffix: .pkl
   metadata:
     kedro-viz:
       layer: model_output

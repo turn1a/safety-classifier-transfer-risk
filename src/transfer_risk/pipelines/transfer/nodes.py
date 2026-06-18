@@ -31,7 +31,10 @@ def evaluate_transfer(
     max_seq_len = int(params.get("max_seq_len", 256))
     batch_size = int(params["batch_size"])
     rows: list[dict[str, Any]] = []
-    for key, records in adversarial_examples.items():
+    for key, load_records in adversarial_examples.items():
+        # adversarial_examples is a PartitionedDataset: each value is a zero-arg loader for
+        # that cell's pickle, so one cell is held in memory at a time.
+        records = load_records()
         surrogate, recipe = key.split("__", 1)
         successful = [record for record in records if record.get("success")]
         if not successful:
