@@ -272,6 +272,16 @@ master_results_table:
     kedro-viz:
       layer: model_output
 
+# A few worked transfer cases (surrogate AND frozen target both flip to benign), selected by the
+# transfer node so the write-up can show a real before/after example without loading any model.
+# Non-boundary: always local, never routed to S3.
+transferred_examples:
+  type: json.JSONDataset
+  filepath: data/08_reporting/transferred_examples.json
+  metadata:
+    kedro-viz:
+      layer: model_output
+
 # --- risk stage ------------------------------------------------------------
 regressors:
   type: pickle.PickleDataset
