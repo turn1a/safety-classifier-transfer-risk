@@ -68,6 +68,18 @@ just mlflow-ui                    # browse tracked runs (params, metrics, artifa
 
 `just run` executes the whole chain and writes the reporting figures under `data/08_reporting/`, the master results table, and `run_metrics.json`; every run is tracked in MLflow. Provide HuggingFace auth (`huggingface-cli login` or `HF_TOKEN` in `.env`) for the gated surrogates.
 
+The attack sweep is the only expensive stage. It shards each cell's examples across CPU cores and persists each `(surrogate, recipe)` cell as it completes, so a run resumes after an interruption rather than restarting. To run it on a single high-core spot box instead of the laptop and bring the results back:
+
+```bash
+just export-onnx                          # export surrogates to ONNX (optional; ~2-3x faster victims)
+just cloud-push                           # upload surrogates + data to the S3 exchange bucket
+just cloud-up                             # provision the spot box; it runs the sweep and self-terminates
+just cloud-pull                           # bring the adversarial partitions back into data/
+just run --from-nodes evaluate_transfer   # downstream + MLflow, locally
+```
+
+The downstream and MLflow stay local, so results land on your machine. One-time AWS setup and the cost/security notes are in [infra/README.md](infra/README.md).
+
 ## Reproducibility
 
 A single root seed derives independent per-component seeds (Python, NumPy, PyTorch, TextAttack). `uv.lock` pins the environment; runs are tracked in MLflow (`sqlite:///mlflow.db`) with flattened parameters, run metrics, artifacts, and the git SHA. CI runs lint, type-check, and tests on every push.

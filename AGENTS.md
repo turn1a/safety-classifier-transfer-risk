@@ -29,6 +29,7 @@ conf/base/                # catalog.yml, parameters_<stage>.yml, mlflow.yml
 data/01_raw … 08_reporting/   # Kedro data layers (gitignored except .gitkeep)
 tests/{lib,pipelines}/     # unit tests mirror lib/; registry test builds every pipeline
 refs/                      # the three reference papers (git-lfs)
+infra/                     # Terraform for the cloud sweep (S3 + spot box); see infra/README.md
 ```
 
 ## 4. Architecture — pure lib vs Kedro nodes
@@ -43,7 +44,7 @@ This mirrors the pure/glue split: the deterministic core is small, tested, and i
 
 - **Python 3.13** (newest stable minus one), managed by **`uv`** exclusively. Never `pip`, never `poetry`.
 - Bootstrap: `just install` (= `uv sync` + `uv run pre-commit install --install-hooks`).
-- Recipes (all in `justfile`): `just fmt | lint | type | test | check | hooks | run | viz | viz-build | docs | mlflow-ui`. `just` with no argument runs `check` (lint + type + test).
+- Recipes (all in `justfile`): `just fmt | lint | type | test | check | hooks | run | viz | viz-build | docs | mlflow-ui`, plus `setup-data`, `export-onnx`, and the `cloud-*` sweep recipes ([infra/README.md](infra/README.md)). `just` with no argument runs `check` (lint + type + test).
 - Telemetry is opted out (`.telemetry` + `DO_NOT_TRACK=1` in the justfile).
 
 > Environment note: the venv runs a native **arm64** Python 3.13, so the MPS / PyTorch path works (verified: `torch.backends.mps.is_available()` is `True`). If you recreate the venv, force the native build — `uv venv --python cpython-3.13-macos-aarch64-none && uv sync` — otherwise uv may pick up a stray x86_64 interpreter and lose MPS.
