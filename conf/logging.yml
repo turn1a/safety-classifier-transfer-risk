@@ -29,6 +29,10 @@ loggers:
     level: INFO
   transfer_risk:
     level: INFO
+  # Per-node load/compute/save timings from NodeTimingHook. INFO logs one line per phase per node
+  # (verbose for the 800-node sweep); set to WARNING to silence without touching the code.
+  transfer_risk.timing:
+    level: INFO
 
 root:
   handlers: [console, run_file]

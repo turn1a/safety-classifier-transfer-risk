@@ -17,11 +17,13 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
-from transfer_risk.hooks import CloudpickleDatasetHook
+from transfer_risk.hooks import CloudpickleDatasetHook, NodeTimingHook
 
-# Register a cloudpickle reducer for ForkingPickler-unfriendly datasets so the attack sweep can
-# run under ParallelRunner with the (unused-by-it) kedro-mlflow datasets present in the catalog.
-HOOKS = (CloudpickleDatasetHook(),)
+# CloudpickleDatasetHook registers a cloudpickle reducer for ForkingPickler-unfriendly datasets so
+# the attack sweep can run under ParallelRunner with the (unused-by-it) kedro-mlflow datasets in the
+# catalog. NodeTimingHook logs per-node load/compute/save time (the `transfer_risk.timing` logger);
+# each parallel worker registers its own instance, so timings are emitted from the workers too.
+HOOKS = (CloudpickleDatasetHook(), NodeTimingHook())
 
 # Load .env before any node imports torch, so the Apple-Silicon / tokenizer flags
 # (PYTORCH_ENABLE_MPS_FALLBACK, TOKENIZERS_PARALLELISM, ...) and HF_TOKEN take effect.
