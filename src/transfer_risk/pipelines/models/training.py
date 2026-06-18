@@ -8,11 +8,17 @@ returns manifest metadata (validation accuracy, parameter count).
 
 from __future__ import annotations
 
+import logging
+import math
 from typing import TYPE_CHECKING, Any
 
 import torch
 from torch.nn.functional import cross_entropy
-from transformers import AutoModelForSequenceClassification, AutoTokenizer
+from transformers import (
+    AutoModelForSequenceClassification,
+    AutoTokenizer,
+    get_linear_schedule_with_warmup,
+)
 
 from transfer_risk.datasets.surrogate_model_dataset import SurrogateModelDataset
 from transfer_risk.pipelines.models.bilstm import BiLSTMClassifier, build_vocab, encode, pad_batch
@@ -22,29 +28,61 @@ if TYPE_CHECKING:
 
     import pandas as pd
 
+logger = logging.getLogger(__name__)
 
-def finetune_transformer(
+
+class _NaNLossError(RuntimeError):
+    """Raised when a training step produces a non-finite loss (numerical divergence)."""
+
+
+def _train_transformer(
     model_id: str,
+    tokenizer: Any,
     train_df: pd.DataFrame,
-    val_df: pd.DataFrame,
-    output_dir: Path,
     cfg: dict[str, Any],
     device: torch.device,
     seed: int,
-) -> dict[str, Any]:
-    """Fine-tune a transformer backbone on the canonical task; save model + tokenizer.
+) -> Any:
+    """Fine-tune one transformer on ``device`` and return the trained model.
 
-    ``cfg`` is the ``finetune`` parameter block (``lr``, ``batch_size``, ``epochs``,
-    ``max_seq_len``).
+    Uses gradient clipping and a linear warmup (both HF ``Trainer`` defaults) for stability.
+    The loss is checked every step; a non-finite value raises :class:`_NaNLossError` at the
+    step it appears, so the caller can retry the model on another device without finishing a
+    doomed epoch.
+
+    Args:
+        model_id: HuggingFace model identifier to load the backbone from.
+        tokenizer: tokenizer paired with ``model_id``.
+        train_df: training split with ``text`` and ``label`` columns.
+        cfg: the ``finetune`` block (``lr``, ``batch_size``, ``epochs``, ``max_seq_len``).
+        device: device to train on.
+        seed: seed for the weight init and the batch-shuffle generator.
+
+    Returns:
+        The fine-tuned model, left on ``device``.
+
+    Raises:
+        _NaNLossError: if any training step yields a non-finite loss.
     """
     torch.manual_seed(seed)
     batch_size, max_seq_len = cfg["batch_size"], cfg["max_seq_len"]
-    tokenizer = AutoTokenizer.from_pretrained(model_id)
-    model = AutoModelForSequenceClassification.from_pretrained(model_id, num_labels=2).to(device)
+    # Force fp32: deberta-v3-base ships a float16 checkpoint, and transformers>=5 loads in
+    # the checkpoint dtype by default. Training in raw fp16 without loss scaling overflows to
+    # NaN within an epoch (other backbones ship fp32 and were unaffected). fp32 is the stable,
+    # device-agnostic choice for a from-scratch fine-tune.
+    model = AutoModelForSequenceClassification.from_pretrained(
+        model_id, num_labels=2, dtype=torch.float32
+    ).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=cfg["lr"])
     texts = train_df["text"].tolist()
     labels = train_df["label"].tolist()
     generator = torch.Generator().manual_seed(seed)
+    total_steps = cfg["epochs"] * math.ceil(len(texts) / batch_size)
+    scheduler = get_linear_schedule_with_warmup(  # type: ignore[no-untyped-call]
+        optimizer,
+        num_warmup_steps=max(1, int(0.06 * total_steps)),
+        num_training_steps=total_steps,
+    )
     model.train()
     for _ in range(cfg["epochs"]):
         order = torch.randperm(len(texts), generator=generator).tolist()
@@ -59,17 +97,57 @@ def finetune_transformer(
             ).to(device)
             targets = torch.tensor([labels[i] for i in batch], device=device)
             optimizer.zero_grad()
-            outputs = model(**encoded, labels=targets)
-            outputs.loss.backward()
+            loss = model(**encoded, labels=targets).loss
+            if not bool(torch.isfinite(loss)):
+                msg = f"non-finite training loss for {model_id} on {device}"
+                raise _NaNLossError(msg)
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), max_norm=1.0)
             optimizer.step()
+            scheduler.step()
+    return model
+
+
+def finetune_transformer(
+    model_id: str,
+    train_df: pd.DataFrame,
+    val_df: pd.DataFrame,
+    output_dir: Path,
+    cfg: dict[str, Any],
+    device: torch.device,
+    seed: int,
+) -> dict[str, Any]:
+    """Fine-tune a transformer backbone on the canonical task; save model + tokenizer.
+
+    ``cfg`` is the ``finetune`` block (``lr``, ``batch_size``, ``epochs``, ``max_seq_len``).
+    Training runs in fp32 (see :func:`_train_transformer`), which is what keeps the
+    fp16-checkpoint backbones (deberta-v3) stable rather than diverging to NaN. As a safety
+    net against any other divergence, a non-finite loss is caught and the model is retrained
+    once on CPU; the device actually used is recorded in the returned metadata.
+    """
+    tokenizer = AutoTokenizer.from_pretrained(model_id)
+    try:
+        model = _train_transformer(model_id, tokenizer, train_df, cfg, device, seed)
+        used_device = device
+    except _NaNLossError:
+        if device.type == "cpu":
+            raise
+        logger.warning(
+            "%s diverged to a non-finite loss on %s; retraining on CPU", model_id, device
+        )
+        used_device = torch.device("cpu")
+        model = _train_transformer(model_id, tokenizer, train_df, cfg, used_device, seed)
     SurrogateModelDataset(str(output_dir)).save(
         {"kind": "transformer", "model": model, "tokenizer": tokenizer}
     )
-    accuracy = _transformer_accuracy(model, tokenizer, val_df, max_seq_len, batch_size, device)
+    accuracy = _transformer_accuracy(
+        model, tokenizer, val_df, cfg["max_seq_len"], cfg["batch_size"], used_device
+    )
     return {
         "val_accuracy": accuracy,
         "num_params": int(sum(p.numel() for p in model.parameters())),
         "num_labels": 2,
+        "device": str(used_device),
     }
 
 

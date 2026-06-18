@@ -71,7 +71,11 @@ class SurrogateModelDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
         source = str(self._path)
         return {
             "kind": "transformer",
-            "model": AutoModelForSequenceClassification.from_pretrained(source),
+            # fp32 to match the training/inference path (fp16 weights are slow/unsupported on
+            # the CPU the attack sweep uses); see transfer_risk.modeling.
+            "model": AutoModelForSequenceClassification.from_pretrained(
+                source, dtype=torch.float32
+            ),
             "tokenizer": AutoTokenizer.from_pretrained(source),
         }
 

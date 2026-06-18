@@ -29,7 +29,21 @@ def fit_regressors(master: pd.DataFrame, params: dict[str, Any], seed: int) -> d
     With the small sample (n ~ surrogates x recipes) the trees are read for feature
     importance, not prediction; Spearman(similarity, transfer) is the primary
     correlation evidence. Cross-validated R2 is reported only when n is large enough.
+
+    Rows whose similarity features are non-finite are dropped first: a surrogate that
+    failed to yield valid representations (so CKA/DBS could not be computed) cannot inform
+    the regression, and scikit-learn rejects NaN inputs outright.
     """
+    finite = np.isfinite(master[_FEATURES].to_numpy()).all(axis=1)
+    if not bool(finite.all()):
+        dropped = sorted(master.loc[~finite, "surrogate"].unique())
+        logger.warning(
+            "Dropping %d row(s) with non-finite %s before regression (surrogates: %s)",
+            int((~finite).sum()),
+            _FEATURES,
+            dropped,
+        )
+        master = master.loc[finite]
     features = master[_FEATURES].to_numpy()
     target = master["transfer_rate"].to_numpy()
     n = len(master)

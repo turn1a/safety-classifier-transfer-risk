@@ -68,8 +68,13 @@ def _transformer_representations(
 ) -> list[FloatArray]:
     """Return one pooled ``(n_texts, d)`` matrix per transformer layer (embeddings skipped)."""
     tokenizer = AutoTokenizer.from_pretrained(source)
+    # fp32 regardless of checkpoint dtype: some backbones (deberta-v3) ship fp16 weights, and
+    # fp16 ops are slow/unimplemented on CPU. fp32 also keeps activations comparable across the
+    # pool for CKA.
     model = (
-        AutoModelForSequenceClassification.from_pretrained(source, output_hidden_states=True)
+        AutoModelForSequenceClassification.from_pretrained(
+            source, output_hidden_states=True, dtype=torch.float32
+        )
         .to(device)
         .eval()
     )
@@ -129,7 +134,13 @@ def _bilstm_representations(
 def load_transformer(source: str, device: torch.device) -> tuple[Any, Any]:
     """Load a transformer classifier + tokenizer for inference (no hidden states)."""
     tokenizer = AutoTokenizer.from_pretrained(source)
-    model = AutoModelForSequenceClassification.from_pretrained(source).to(device).eval()
+    # fp32: fp16 checkpoints (deberta-v3) are slow/unsupported for CPU inference, and the
+    # attack sweep runs surrogates on CPU.
+    model = (
+        AutoModelForSequenceClassification.from_pretrained(source, dtype=torch.float32)
+        .to(device)
+        .eval()
+    )
     return model, tokenizer
 
 
