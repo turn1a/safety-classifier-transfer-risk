@@ -48,13 +48,28 @@ class CloudpickleDatasetHook:
 
     @hook_impl
     def before_pipeline_run(self, catalog: DataCatalog) -> None:
-        """Register a cloudpickle reducer for each materialised dataset ForkingPickler rejects.
+        """Register a cloudpickle reducer for each dataset ForkingPickler rejects.
 
         Runs before the runner builds and validates its (shared-memory) catalog, so the reducers
-        are in place for both validation and the worker hand-off. Only materialised datasets are
-        inspected; lazily-instantiated catalog entries are created per worker and never pickled.
+        are in place for both validation and the worker hand-off.
+
+        Two kinds of dataset need this. kedro-mlflow's ``MlflowArtifactDataset`` instances are
+        materialised named entries, so the loop below finds and covers them. The project's fsspec
+        model-dir datasets (the ``onnx__{name}`` / ``surrogate__{name}`` factory entries the attack
+        sweep reads from S3) are materialised *lazily*, so they are not yet in ``catalog._datasets``
+        here — but ParallelRunner's ``validate_catalog`` does materialise and pickle-check them, and
+        rejects them as unserialisable. Register their classes up front so both validation and the
+        worker hand-off can serialise them by value.
         """
-        for name, dataset in catalog._datasets.items():  # materialised datasets only
+        from transfer_risk.datasets.onnx_model_dataset import OnnxModelDataset  # noqa: PLC0415
+        from transfer_risk.datasets.surrogate_model_dataset import (  # noqa: PLC0415
+            SurrogateModelDataset,
+        )
+
+        for cls in (OnnxModelDataset, SurrogateModelDataset):
+            ForkingPickler.register(cls, _reduce_via_cloudpickle)
+
+        for name, dataset in catalog._datasets.items():  # materialised datasets (e.g. kedro-mlflow)
             try:
                 ForkingPickler.dumps(dataset)
             except (AttributeError, PicklingError):

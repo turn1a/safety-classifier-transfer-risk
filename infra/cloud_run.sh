@@ -40,10 +40,10 @@ uv sync --group cloud
 # Offline NLP assets the recipes need (NLTK data, counter-fitted embeddings, sentence encoder).
 uv run python -m transfer_risk.scripts.fetch_assets
 
-# The sweep, in tmux so `just cloud-attach` can watch it live. The catalog reads inputs from S3
-# and writes each shard/cell partition straight to S3; --only-missing-outputs resumes. --async
-# loads a node's inputs (splits + victim from S3) and saves its partition on threads, overlapping
-# the per-shard S3 I/O with compute. NodeTimingHook logs each node's load/compute/save time.
-tmux new-session -d -s run \
-  "uv run kedro run --env cloud --pipeline attacks --runner ParallelRunner --async --only-missing-outputs; echo done > /tmp/sweep_done"
-while [ ! -f /tmp/sweep_done ]; do sleep 15; done
+# The sweep, run in the foreground so its output flows through user_data's `tee` to the S3 log
+# (cloud-logs) — the NodeTimingHook's per-node load/compute/save lines and any traceback are then
+# visible without attaching (running it detached in tmux hid all of this from S3). The catalog
+# reads inputs from S3 and writes each shard/cell partition straight to S3; --only-missing-outputs
+# resumes; --async overlaps the per-shard S3 I/O with compute. `|| true` lets user_data do its
+# final log sync + shutdown even if the run errors.
+uv run kedro run --env cloud --pipeline attacks --runner ParallelRunner --async --only-missing-outputs || true
