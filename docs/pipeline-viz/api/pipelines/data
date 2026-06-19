@@ -5,9 +5,9 @@
       "name": "build_canonical_dataset",
       "tags": [],
       "pipelines": [
-        "stage",
+        "__default__",
         "data",
-        "__default__"
+        "stage"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -56,9 +56,9 @@
       "name": "raw_deepset",
       "tags": [],
       "pipelines": [
-        "stage",
+        "__default__",
         "data",
-        "__default__"
+        "stage"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -71,9 +71,9 @@
       "name": "raw_jackhhao",
       "tags": [],
       "pipelines": [
-        "stage",
+        "__default__",
         "data",
-        "__default__"
+        "stage"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -86,9 +86,9 @@
       "name": "raw_lakera",
       "tags": [],
       "pipelines": [
-        "stage",
+        "__default__",
         "data",
-        "__default__"
+        "stage"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -101,9 +101,9 @@
       "name": "params:data",
       "tags": [],
       "pipelines": [
-        "stage",
+        "__default__",
         "data",
-        "__default__"
+        "stage"
       ],
       "type": "parameters",
       "modular_pipelines": null,
@@ -118,9 +118,9 @@
         "similarity"
       ],
       "pipelines": [
+        "__default__",
         "similarity",
         "data",
-        "__default__",
         "stage"
       ],
       "type": "data",
@@ -141,9 +141,9 @@
       "name": "dataset_audit",
       "tags": [],
       "pipelines": [
-        "stage",
+        "__default__",
         "data",
-        "__default__"
+        "stage"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -155,26 +155,35 @@
       "id": "85e11043",
       "name": "params:seed",
       "tags": [
-        "textfooler",
-        "attacks",
-        "pwws",
-        "models",
-        "deepwordbug",
-        "electra-small-ft",
-        "deberta-small-pi-v2",
+        "roberta-base-ft",
         "similarity",
-        "bilstm-attention"
+        "bae",
+        "bert-attack",
+        "llama-prompt-guard-86m",
+        "bert-base-ft",
+        "deepset-deberta-injection",
+        "pwws",
+        "bilstm-attention",
+        "deberta-base-pi-v1",
+        "textfooler",
+        "models",
+        "deberta-base-ft-seed",
+        "electra-small-ft",
+        "llama-prompt-guard-22m",
+        "deberta-small-pi-v2",
+        "attacks",
+        "deepwordbug"
       ],
       "pipelines": [
-        "data",
         "__default__",
-        "attacks",
-        "models",
-        "stage",
         "similarity",
+        "models",
         "downstream",
+        "data",
+        "smoke",
         "risk",
-        "smoke"
+        "attacks",
+        "stage"
       ],
       "type": "parameters",
       "modular_pipelines": null,
@@ -187,9 +196,9 @@
       "name": "split_dataset",
       "tags": [],
       "pipelines": [
-        "stage",
+        "__default__",
         "data",
-        "__default__"
+        "stage"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -238,20 +247,29 @@
       "id": "8289686f",
       "name": "task_splits",
       "tags": [
-        "textfooler",
-        "attacks",
+        "roberta-base-ft",
+        "bae",
+        "bert-attack",
+        "llama-prompt-guard-86m",
+        "bert-base-ft",
+        "deepset-deberta-injection",
         "pwws",
+        "bilstm-attention",
+        "deberta-base-pi-v1",
+        "textfooler",
         "models",
-        "deepwordbug",
+        "deberta-base-ft-seed",
         "electra-small-ft",
+        "llama-prompt-guard-22m",
         "deberta-small-pi-v2",
-        "bilstm-attention"
+        "attacks",
+        "deepwordbug"
       ],
       "pipelines": [
-        "data",
-        "attacks",
         "__default__",
         "models",
+        "data",
+        "attacks",
         "stage"
       ],
       "type": "data",
@@ -262,18 +280,6 @@
     }
   ],
   "edges": [
-    {
-      "source": "349b977c",
-      "target": "014ac4b5"
-    },
-    {
-      "source": "69c62486",
-      "target": "8289686f"
-    },
-    {
-      "source": "84e86f23",
-      "target": "349b977c"
-    },
     {
       "source": "21d22ec4",
       "target": "69c62486"
@@ -291,16 +297,28 @@
       "target": "69c62486"
     },
     {
-      "source": "021a8ebe",
+      "source": "92cc0247",
       "target": "349b977c"
     },
     {
-      "source": "92cc0247",
+      "source": "021a8ebe",
       "target": "349b977c"
     },
     {
       "source": "349b977c",
       "target": "21d22ec4"
+    },
+    {
+      "source": "84e86f23",
+      "target": "349b977c"
+    },
+    {
+      "source": "349b977c",
+      "target": "014ac4b5"
+    },
+    {
+      "source": "69c62486",
+      "target": "8289686f"
     }
   ],
   "layers": [
@@ -318,12 +336,36 @@
       "name": "attacks"
     },
     {
+      "id": "bae",
+      "name": "bae"
+    },
+    {
+      "id": "bert-attack",
+      "name": "bert-attack"
+    },
+    {
+      "id": "bert-base-ft",
+      "name": "bert-base-ft"
+    },
+    {
       "id": "bilstm-attention",
       "name": "bilstm-attention"
     },
     {
+      "id": "deberta-base-ft-seed",
+      "name": "deberta-base-ft-seed"
+    },
+    {
+      "id": "deberta-base-pi-v1",
+      "name": "deberta-base-pi-v1"
+    },
+    {
       "id": "deberta-small-pi-v2",
       "name": "deberta-small-pi-v2"
+    },
+    {
+      "id": "deepset-deberta-injection",
+      "name": "deepset-deberta-injection"
     },
     {
       "id": "deepwordbug",
@@ -334,12 +376,24 @@
       "name": "electra-small-ft"
     },
     {
+      "id": "llama-prompt-guard-22m",
+      "name": "llama-prompt-guard-22m"
+    },
+    {
+      "id": "llama-prompt-guard-86m",
+      "name": "llama-prompt-guard-86m"
+    },
+    {
       "id": "models",
       "name": "models"
     },
     {
       "id": "pwws",
       "name": "pwws"
+    },
+    {
+      "id": "roberta-base-ft",
+      "name": "roberta-base-ft"
     },
     {
       "id": "similarity",
@@ -408,39 +462,11 @@
       "outputs": [],
       "children": [
         {
-          "id": "b33736fd",
-          "type": "data"
-        },
-        {
-          "id": "349b977c",
-          "type": "task"
-        },
-        {
-          "id": "85e11043",
-          "type": "data"
-        },
-        {
-          "id": "84e86f23",
-          "type": "parameters"
-        },
-        {
-          "id": "85e11043",
-          "type": "parameters"
-        },
-        {
-          "id": "69c62486",
-          "type": "task"
-        },
-        {
-          "id": "92cc0247",
-          "type": "data"
-        },
-        {
           "id": "021a8ebe",
           "type": "data"
         },
         {
-          "id": "21d22ec4",
+          "id": "85e11043",
           "type": "data"
         },
         {
@@ -448,12 +474,40 @@
           "type": "data"
         },
         {
+          "id": "8289686f",
+          "type": "data"
+        },
+        {
+          "id": "92cc0247",
+          "type": "data"
+        },
+        {
+          "id": "84e86f23",
+          "type": "parameters"
+        },
+        {
+          "id": "21d22ec4",
+          "type": "data"
+        },
+        {
           "id": "84e86f23",
           "type": "data"
         },
         {
-          "id": "8289686f",
+          "id": "349b977c",
+          "type": "task"
+        },
+        {
+          "id": "69c62486",
+          "type": "task"
+        },
+        {
+          "id": "b33736fd",
           "type": "data"
+        },
+        {
+          "id": "85e11043",
+          "type": "parameters"
         }
       ]
     }

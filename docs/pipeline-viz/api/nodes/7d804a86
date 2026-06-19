@@ -1,0 +1,8 @@
+{
+  "type": "pickle.pickle_dataset.PickleDataset",
+  "filepath": "/Users/aholszewska/dev/risk-transfer/data/07_model_output/adversarial_examples/llama-prompt-guard-86m__bae.pkl",
+  "run_command": "kedro run --to-outputs=adversarial__llama-prompt-guard-86m__bae",
+  "preview": null,
+  "preview_type": null,
+  "stats": null
+}

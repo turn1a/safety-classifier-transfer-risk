@@ -1,0 +1,8 @@
+{
+  "type": "datasets.hub_model_dataset.HuggingFaceHubModelDataset",
+  "filepath": null,
+  "run_command": null,
+  "preview": null,
+  "preview_type": null,
+  "stats": null
+}

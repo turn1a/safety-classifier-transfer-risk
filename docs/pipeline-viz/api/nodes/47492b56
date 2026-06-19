@@ -1,0 +1,8 @@
+{
+  "type": "pickle.pickle_dataset.PickleDataset",
+  "filepath": "/Users/aholszewska/dev/risk-transfer/data/04_feature/cka_deberta-base-pi-v1.pkl",
+  "run_command": "kedro run --to-outputs=cka__deberta-base-pi-v1",
+  "preview": null,
+  "preview_type": null,
+  "stats": null
+}

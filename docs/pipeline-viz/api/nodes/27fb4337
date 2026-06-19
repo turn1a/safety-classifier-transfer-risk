@@ -3,11 +3,12 @@
   "filepath": null,
   "parameters": {
     "similarity": {
-      "n_probe": 64,
+      "n_probe": 2000,
+      "max_seq_len": 512,
       "pooling": "cls",
       "cka": {
-        "mode": "linear",
-        "batch_size": 32
+        "mode": "minibatch",
+        "batch_size": 64
       },
       "dbs": {
         "box": 1

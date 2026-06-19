@@ -6,12 +6,42 @@
       "target": "protectai/deberta-v3-base-prompt-injection-v2",
       "surrogates": [
         {
+          "name": "deberta-base-pi-v1",
+          "kind": "pretrained"
+        },
+        {
           "name": "deberta-small-pi-v2",
           "kind": "pretrained",
           "gated": true
         },
         {
+          "name": "deepset-deberta-injection",
+          "kind": "pretrained"
+        },
+        {
+          "name": "llama-prompt-guard-86m",
+          "kind": "pretrained",
+          "gated": true
+        },
+        {
+          "name": "llama-prompt-guard-22m",
+          "kind": "pretrained",
+          "gated": true
+        },
+        {
+          "name": "bert-base-ft",
+          "kind": "finetune"
+        },
+        {
+          "name": "roberta-base-ft",
+          "kind": "finetune"
+        },
+        {
           "name": "electra-small-ft",
+          "kind": "finetune"
+        },
+        {
+          "name": "deberta-base-ft-seed",
           "kind": "finetune"
         },
         {
@@ -22,8 +52,8 @@
       "finetune": {
         "lr": 0.00002,
         "batch_size": 32,
-        "epochs": 1,
-        "max_seq_len": 256
+        "epochs": 3,
+        "max_seq_len": 512
       },
       "bilstm": {
         "embed_dim": 128,
@@ -32,9 +62,9 @@
         "dropout": 0.3,
         "lr": 0.001,
         "batch_size": 64,
-        "epochs": 2,
+        "epochs": 5,
         "max_vocab": 20000,
-        "max_seq_len": 256
+        "max_seq_len": 512
       }
     }
   },

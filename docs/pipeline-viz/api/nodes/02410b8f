@@ -1,0 +1,8 @@
+{
+  "type": "json.json_dataset.JSONDataset",
+  "filepath": "/Users/aholszewska/dev/risk-transfer/data/06_models/meta_deberta-base-pi-v1.json",
+  "run_command": "kedro run --to-outputs=surrogate_meta__deberta-base-pi-v1",
+  "preview": null,
+  "preview_type": null,
+  "stats": null
+}

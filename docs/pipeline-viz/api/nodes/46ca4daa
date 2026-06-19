@@ -1,0 +1,14 @@
+{
+  "code": "def materialize_surrogate(hub_bundle: dict[str, Any]) -> tuple[dict[str, Any], dict[str, Any]]:\n    \"\"\"Pass a pretrained Hub model through to its checkpoint unchanged; return bundle + metadata.\n\n    Args:\n        hub_bundle: the ``{\"kind\", \"model\", \"tokenizer\"}`` bundle loaded from ``hub__{name}``.\n\n    Returns:\n        ``(bundle, meta)``: the same bundle (Kedro saves it via ``surrogate.{name}``) and a\n        provenance fragment.\n    \"\"\"\n    num_params = int(sum(p.numel() for p in hub_bundle[\"model\"].parameters()))\n    return hub_bundle, {\"kind\": \"pretrained\", \"num_params\": num_params}\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/models/nodes.py",
+  "parameters": {},
+  "run_command": "kedro run --to-nodes='materialize_llama-prompt-guard-22m'",
+  "inputs": [
+    "hub__llama-prompt-guard-22m"
+  ],
+  "outputs": [
+    "surrogate__llama-prompt-guard-22m",
+    "surrogate_meta__llama-prompt-guard-22m"
+  ],
+  "preview": null
+}

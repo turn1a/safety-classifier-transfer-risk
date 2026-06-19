@@ -1,0 +1,38 @@
+{
+  "code": null,
+  "filepath": null,
+  "parameters": {
+    "similarity": {
+      "n_probe": 2000,
+      "max_seq_len": 512,
+      "pooling": "cls",
+      "cka": {
+        "mode": "minibatch",
+        "batch_size": 64
+      },
+      "dbs": {
+        "box": 1
+      },
+      "thresholds": {
+        "r1_quantile": 0.75,
+        "r2_quantile": 0.25
+      }
+    },
+    "device": {
+      "policy": "mps_or_cpu",
+      "allow_mps_fallback": true
+    }
+  },
+  "run_command": "kedro run --to-nodes='cka_deberta-base-pi-v1'",
+  "inputs": [
+    "surrogate__deberta-base-pi-v1",
+    "target_reps",
+    "probe_set",
+    "params:similarity",
+    "params:device"
+  ],
+  "outputs": [
+    "cka__deberta-base-pi-v1"
+  ],
+  "preview": null
+}

@@ -1,0 +1,80 @@
+{
+  "code": "def export_onnx(surrogate_path: str, models_params: dict[str, Any]) -> dict[str, Any]:\n    \"\"\"Export a transformer surrogate to an ONNX graph (+ tokenizer) for the fast victim path.\n\n    Args:\n        surrogate_path: the local checkpoint directory from ``surrogate.{name}``.\n        models_params: the ``models`` block (the ``finetune.max_seq_len`` trace length).\n\n    Returns:\n        ``{\"onnx_bytes\", \"tokenizer\"}`` for the ``onnx.{name}`` output.\n    \"\"\"\n    import torch  # noqa: PLC0415\n\n    from transfer_risk.modeling import export_to_onnx, load_transformer  # noqa: PLC0415\n\n    model, tokenizer = load_transformer(surrogate_path, torch.device(\"cpu\"))\n    max_seq_len = int(models_params[\"finetune\"][\"max_seq_len\"])\n    onnx_bytes = export_to_onnx(model, tokenizer, max_seq_len=max_seq_len)\n    return {\"onnx_bytes\": onnx_bytes, \"tokenizer\": tokenizer}\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/models/nodes.py",
+  "parameters": {
+    "models": {
+      "target": "protectai/deberta-v3-base-prompt-injection-v2",
+      "surrogates": [
+        {
+          "name": "deberta-base-pi-v1",
+          "kind": "pretrained"
+        },
+        {
+          "name": "deberta-small-pi-v2",
+          "kind": "pretrained",
+          "gated": true
+        },
+        {
+          "name": "deepset-deberta-injection",
+          "kind": "pretrained"
+        },
+        {
+          "name": "llama-prompt-guard-86m",
+          "kind": "pretrained",
+          "gated": true
+        },
+        {
+          "name": "llama-prompt-guard-22m",
+          "kind": "pretrained",
+          "gated": true
+        },
+        {
+          "name": "bert-base-ft",
+          "kind": "finetune"
+        },
+        {
+          "name": "roberta-base-ft",
+          "kind": "finetune"
+        },
+        {
+          "name": "electra-small-ft",
+          "kind": "finetune"
+        },
+        {
+          "name": "deberta-base-ft-seed",
+          "kind": "finetune"
+        },
+        {
+          "name": "bilstm-attention",
+          "kind": "bilstm"
+        }
+      ],
+      "finetune": {
+        "lr": 0.00002,
+        "batch_size": 32,
+        "epochs": 3,
+        "max_seq_len": 512
+      },
+      "bilstm": {
+        "embed_dim": 128,
+        "hidden_dim": 256,
+        "num_layers": 2,
+        "dropout": 0.3,
+        "lr": 0.001,
+        "batch_size": 64,
+        "epochs": 5,
+        "max_vocab": 20000,
+        "max_seq_len": 512
+      }
+    }
+  },
+  "run_command": "kedro run --to-nodes='export_onnx_llama-prompt-guard-86m'",
+  "inputs": [
+    "surrogate__llama-prompt-guard-86m",
+    "params:models"
+  ],
+  "outputs": [
+    "onnx__llama-prompt-guard-86m"
+  ],
+  "preview": null
+}

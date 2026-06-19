@@ -1,0 +1,8 @@
+{
+  "type": "pickle.pickle_dataset.PickleDataset",
+  "filepath": "/Users/aholszewska/dev/risk-transfer/data/07_model_output/adversarial_examples_shards/roberta-base-ft__pwws__56.pkl",
+  "run_command": "kedro run --to-outputs=adversarial_shard__roberta-base-ft__pwws__56",
+  "preview": null,
+  "preview_type": null,
+  "stats": null
+}
