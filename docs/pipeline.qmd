@@ -9,7 +9,5 @@ The measurement is a [Kedro](https://kedro.org) project: pure algorithms in `tra
 This is the full production graph: ten surrogates and five attack recipes (the 50 `(surrogate, recipe)` cells), with the attack stage splitting each cell into a few example-shards so a slow cell still spreads across cores. The shard count scales to the run box — about `2 × vCPUs` shards in total (~3 per cell here) — rather than a fixed tiny size that would fan out to thousands of nodes. `ParallelRunner` runs the shards across cores and `kedro run --only-missing-outputs` resumes. Click a node or dataset to see its inputs, outputs, and layer; use the focus and pipeline filters to isolate a stage.
 
 ```{=html}
-<iframe src="pipeline-viz/index.html" title="Kedro pipeline graph"
-        style="width:100%; height:82vh; border:1px solid var(--bs-border-color, #dee2e6); border-radius:4px;">
-</iframe>
+<iframe class="viz-frame" src="pipeline-viz/index.html" title="Kedro pipeline graph"></iframe>
 ```

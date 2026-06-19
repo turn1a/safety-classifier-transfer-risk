@@ -8,3 +8,12 @@
 pre code {
   font-size: 0.85em;
 }
+
+/* Pipeline graph: break out of the content column to span the full viewport width. */
+.viz-frame {
+  display: block;
+  width: 100vw;
+  margin-left: calc(50% - 50vw);
+  height: 90vh;
+  border: 0;
+}
