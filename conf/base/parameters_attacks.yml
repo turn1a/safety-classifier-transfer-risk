@@ -36,5 +36,5 @@ attacks:
   # auto value (the thin smoke run does). A fixed cores + seed reproduce exactly; the seeded-RNG
   # recipes (deepwordbug, bae, bert-attack) shift if the shard layout changes, so keep cores fixed
   # within a comparison set.
-  cores: 64
+  cores: 192
   shard_multiple: 2
