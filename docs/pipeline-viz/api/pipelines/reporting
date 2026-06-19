@@ -4,16 +4,16 @@
       "id": "3d21843d",
       "name": "similarity_table",
       "tags": [
-        "similarity",
-        "transfer"
+        "transfer",
+        "similarity"
       ],
       "pipelines": [
         "__default__",
-        "similarity",
-        "downstream",
-        "reporting",
         "transfer",
-        "stage"
+        "similarity",
+        "reporting",
+        "stage",
+        "downstream"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -26,9 +26,9 @@
       "name": "plot_cka_heatmap",
       "tags": [],
       "pipelines": [
-        "__default__",
         "reporting",
-        "downstream"
+        "downstream",
+        "__default__"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -41,9 +41,9 @@
       "name": "fig_cka_heatmap",
       "tags": [],
       "pipelines": [
-        "__default__",
         "reporting",
-        "downstream"
+        "downstream",
+        "__default__"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -59,10 +59,10 @@
       ],
       "pipelines": [
         "__default__",
-        "downstream",
+        "transfer",
         "risk",
         "reporting",
-        "transfer"
+        "downstream"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -75,10 +75,10 @@
       "name": "regressors",
       "tags": [],
       "pipelines": [
-        "__default__",
         "reporting",
         "downstream",
-        "risk"
+        "risk",
+        "__default__"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -91,9 +91,9 @@
       "name": "plot_transfer_scatter",
       "tags": [],
       "pipelines": [
-        "__default__",
         "reporting",
-        "downstream"
+        "downstream",
+        "__default__"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -106,9 +106,9 @@
       "name": "fig_transfer_scatter",
       "tags": [],
       "pipelines": [
-        "__default__",
         "reporting",
-        "downstream"
+        "downstream",
+        "__default__"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -121,10 +121,10 @@
       "name": "ablation_results",
       "tags": [],
       "pipelines": [
-        "__default__",
         "reporting",
         "downstream",
-        "risk"
+        "risk",
+        "__default__"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -137,9 +137,9 @@
       "name": "plot_regression_ablation",
       "tags": [],
       "pipelines": [
-        "__default__",
         "reporting",
-        "downstream"
+        "downstream",
+        "__default__"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -152,9 +152,9 @@
       "name": "fig_regression_ablation",
       "tags": [],
       "pipelines": [
-        "__default__",
         "reporting",
-        "downstream"
+        "downstream",
+        "__default__"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -165,16 +165,16 @@
   ],
   "edges": [
     {
-      "source": "abc2021e",
-      "target": "11c8dd13"
-    },
-    {
-      "source": "a20940e6",
-      "target": "6bc5358c"
+      "source": "a73769e9",
+      "target": "844e1a3b"
     },
     {
       "source": "02cdda9d",
       "target": "a73769e9"
+    },
+    {
+      "source": "3d21843d",
+      "target": "a20940e6"
     },
     {
       "source": "11c8dd13",
@@ -185,12 +185,12 @@
       "target": "a73769e9"
     },
     {
-      "source": "3d21843d",
-      "target": "a20940e6"
+      "source": "abc2021e",
+      "target": "11c8dd13"
     },
     {
-      "source": "a73769e9",
-      "target": "844e1a3b"
+      "source": "a20940e6",
+      "target": "6bc5358c"
     }
   ],
   "layers": [
@@ -334,11 +334,7 @@
       "outputs": [],
       "children": [
         {
-          "id": "11c8dd13",
-          "type": "task"
-        },
-        {
-          "id": "db2ca221",
+          "id": "02cdda9d",
           "type": "data"
         },
         {
@@ -346,15 +342,11 @@
           "type": "data"
         },
         {
-          "id": "3d21843d",
+          "id": "db2ca221",
           "type": "data"
         },
         {
-          "id": "a20940e6",
-          "type": "task"
-        },
-        {
-          "id": "02cdda9d",
+          "id": "ba4b2fe1",
           "type": "data"
         },
         {
@@ -362,7 +354,15 @@
           "type": "data"
         },
         {
-          "id": "a73769e9",
+          "id": "3d21843d",
+          "type": "data"
+        },
+        {
+          "id": "11c8dd13",
+          "type": "task"
+        },
+        {
+          "id": "a20940e6",
           "type": "task"
         },
         {
@@ -370,8 +370,8 @@
           "type": "data"
         },
         {
-          "id": "ba4b2fe1",
-          "type": "data"
+          "id": "a73769e9",
+          "type": "task"
         }
       ]
     }

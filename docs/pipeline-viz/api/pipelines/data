@@ -5,9 +5,9 @@
       "name": "build_canonical_dataset",
       "tags": [],
       "pipelines": [
-        "__default__",
         "data",
-        "stage"
+        "stage",
+        "__default__"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -56,9 +56,9 @@
       "name": "raw_deepset",
       "tags": [],
       "pipelines": [
-        "__default__",
         "data",
-        "stage"
+        "stage",
+        "__default__"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -71,9 +71,9 @@
       "name": "raw_jackhhao",
       "tags": [],
       "pipelines": [
-        "__default__",
         "data",
-        "stage"
+        "stage",
+        "__default__"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -86,9 +86,9 @@
       "name": "raw_lakera",
       "tags": [],
       "pipelines": [
-        "__default__",
         "data",
-        "stage"
+        "stage",
+        "__default__"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -101,9 +101,9 @@
       "name": "params:data",
       "tags": [],
       "pipelines": [
-        "__default__",
         "data",
-        "stage"
+        "stage",
+        "__default__"
       ],
       "type": "parameters",
       "modular_pipelines": null,
@@ -118,10 +118,10 @@
         "similarity"
       ],
       "pipelines": [
-        "__default__",
-        "similarity",
         "data",
-        "stage"
+        "stage",
+        "similarity",
+        "__default__"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -141,9 +141,9 @@
       "name": "dataset_audit",
       "tags": [],
       "pipelines": [
-        "__default__",
         "data",
-        "stage"
+        "stage",
+        "__default__"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -155,34 +155,34 @@
       "id": "85e11043",
       "name": "params:seed",
       "tags": [
-        "roberta-base-ft",
-        "similarity",
-        "bae",
-        "bert-attack",
-        "llama-prompt-guard-86m",
+        "deberta-base-pi-v1",
+        "llama-prompt-guard-22m",
         "bert-base-ft",
+        "llama-prompt-guard-86m",
+        "bert-attack",
+        "deberta-small-pi-v2",
         "deepset-deberta-injection",
+        "deberta-base-ft-seed",
         "pwws",
         "bilstm-attention",
-        "deberta-base-pi-v1",
-        "textfooler",
         "models",
-        "deberta-base-ft-seed",
-        "electra-small-ft",
-        "llama-prompt-guard-22m",
-        "deberta-small-pi-v2",
+        "textfooler",
+        "deepwordbug",
         "attacks",
-        "deepwordbug"
+        "electra-small-ft",
+        "similarity",
+        "bae",
+        "roberta-base-ft"
       ],
       "pipelines": [
-        "__default__",
-        "similarity",
-        "models",
-        "downstream",
         "data",
         "smoke",
-        "risk",
+        "models",
         "attacks",
+        "__default__",
+        "similarity",
+        "risk",
+        "downstream",
         "stage"
       ],
       "type": "parameters",
@@ -196,9 +196,9 @@
       "name": "split_dataset",
       "tags": [],
       "pipelines": [
-        "__default__",
         "data",
-        "stage"
+        "stage",
+        "__default__"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -247,29 +247,29 @@
       "id": "8289686f",
       "name": "task_splits",
       "tags": [
-        "roberta-base-ft",
-        "bae",
-        "bert-attack",
-        "llama-prompt-guard-86m",
+        "deberta-base-pi-v1",
+        "llama-prompt-guard-22m",
         "bert-base-ft",
+        "llama-prompt-guard-86m",
+        "bert-attack",
+        "deberta-small-pi-v2",
         "deepset-deberta-injection",
+        "deberta-base-ft-seed",
         "pwws",
         "bilstm-attention",
-        "deberta-base-pi-v1",
-        "textfooler",
         "models",
-        "deberta-base-ft-seed",
-        "electra-small-ft",
-        "llama-prompt-guard-22m",
-        "deberta-small-pi-v2",
+        "textfooler",
+        "deepwordbug",
         "attacks",
-        "deepwordbug"
+        "electra-small-ft",
+        "bae",
+        "roberta-base-ft"
       ],
       "pipelines": [
-        "__default__",
-        "models",
         "data",
+        "models",
         "attacks",
+        "__default__",
         "stage"
       ],
       "type": "data",
@@ -281,6 +281,22 @@
   ],
   "edges": [
     {
+      "source": "84e86f23",
+      "target": "69c62486"
+    },
+    {
+      "source": "69c62486",
+      "target": "8289686f"
+    },
+    {
+      "source": "021a8ebe",
+      "target": "349b977c"
+    },
+    {
+      "source": "349b977c",
+      "target": "014ac4b5"
+    },
+    {
       "source": "21d22ec4",
       "target": "69c62486"
     },
@@ -289,8 +305,8 @@
       "target": "349b977c"
     },
     {
-      "source": "84e86f23",
-      "target": "69c62486"
+      "source": "349b977c",
+      "target": "21d22ec4"
     },
     {
       "source": "85e11043",
@@ -301,24 +317,8 @@
       "target": "349b977c"
     },
     {
-      "source": "021a8ebe",
-      "target": "349b977c"
-    },
-    {
-      "source": "349b977c",
-      "target": "21d22ec4"
-    },
-    {
       "source": "84e86f23",
       "target": "349b977c"
-    },
-    {
-      "source": "349b977c",
-      "target": "014ac4b5"
-    },
-    {
-      "source": "69c62486",
-      "target": "8289686f"
     }
   ],
   "layers": [
@@ -462,31 +462,15 @@
       "outputs": [],
       "children": [
         {
-          "id": "021a8ebe",
+          "id": "b33736fd",
           "type": "data"
         },
         {
           "id": "85e11043",
-          "type": "data"
-        },
-        {
-          "id": "014ac4b5",
-          "type": "data"
-        },
-        {
-          "id": "8289686f",
-          "type": "data"
-        },
-        {
-          "id": "92cc0247",
-          "type": "data"
-        },
-        {
-          "id": "84e86f23",
           "type": "parameters"
         },
         {
-          "id": "21d22ec4",
+          "id": "92cc0247",
           "type": "data"
         },
         {
@@ -498,16 +482,32 @@
           "type": "task"
         },
         {
+          "id": "014ac4b5",
+          "type": "data"
+        },
+        {
+          "id": "021a8ebe",
+          "type": "data"
+        },
+        {
+          "id": "84e86f23",
+          "type": "parameters"
+        },
+        {
           "id": "69c62486",
           "type": "task"
         },
         {
-          "id": "b33736fd",
+          "id": "8289686f",
           "type": "data"
         },
         {
           "id": "85e11043",
-          "type": "parameters"
+          "type": "data"
+        },
+        {
+          "id": "21d22ec4",
+          "type": "data"
         }
       ]
     }

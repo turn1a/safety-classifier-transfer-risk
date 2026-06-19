@@ -1,8 +1,0 @@
-{
-  "type": "pickle.pickle_dataset.PickleDataset",
-  "filepath": "/Users/aholszewska/dev/risk-transfer/data/07_model_output/adversarial_examples_shards/bert-base-ft__pwws__112.pkl",
-  "run_command": "kedro run --to-outputs=adversarial_shard__bert-base-ft__pwws__112",
-  "preview": null,
-  "preview_type": null,
-  "stats": null
-}

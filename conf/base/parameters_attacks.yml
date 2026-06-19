@@ -29,9 +29,12 @@ attacks:
   # victim reads and no prompt is clipped below its context (the long tail is p90 2655 chars).
   max_prompt_chars: 3200
   query_budget: 6000 # per-example victim-query cap; high enough to rarely bind except on robust victims
-  # Examples per shard node. Sharding a cell's eval set across nodes means a slow
-  # (surrogate, recipe) cell spreads over cores instead of pinning one. A fixed shard_size and
-  # seed reproduce exactly; PWWS is shard-size-invariant, but recipes with seeded random edits
-  # (deepwordbug, bae, bert-attack) can shift if shard_size changes, so keep it fixed within
-  # any set of runs you compare.
-  shard_size: 4
+  # Fan-out scaled to the run box: each (surrogate, recipe) cell is split into shards so a slow
+  # cell spreads over cores instead of pinning one. The shard count targets ~shard_multiple * cores
+  # total shards across the surrogate×recipe cells (set `cores` to the box's vCPUs), rather than a
+  # fixed tiny shard_size that over-shards (4 -> ~2,450 nodes). Set `shard_size` to override the
+  # auto value (the thin smoke run does). A fixed cores + seed reproduce exactly; the seeded-RNG
+  # recipes (deepwordbug, bae, bert-attack) shift if the shard layout changes, so keep cores fixed
+  # within a comparison set.
+  cores: 64
+  shard_multiple: 2

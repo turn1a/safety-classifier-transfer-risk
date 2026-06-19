@@ -15,7 +15,8 @@
       "max_seq_len": 512,
       "max_prompt_chars": 3200,
       "query_budget": 6000,
-      "shard_size": 4
+      "cores": 64,
+      "shard_multiple": 2
     },
     "seed": 20260616
   },

@@ -1,6 +1,12 @@
 """Unit tests for the attack-sweep fan-out helpers (pure index logic, no textattack)."""
 
-from transfer_risk.lib.sweep import attack_units, cell_key, shard_key, shard_spans
+from transfer_risk.lib.sweep import (
+    attack_units,
+    auto_shard_size,
+    cell_key,
+    shard_key,
+    shard_spans,
+)
 
 
 def test_shard_spans_tile_range_without_gaps_or_overlap() -> None:
@@ -23,6 +29,29 @@ def test_shard_spans_coerces_nonpositive_size() -> None:
 def test_cell_and_shard_keys() -> None:
     assert cell_key("deberta-base", "bert-attack") == "deberta-base__bert-attack"
     assert shard_key("deberta-base", "bert-attack", 8) == "deberta-base__bert-attack__8"
+
+
+def test_auto_shard_size_scales_total_shards_to_cores() -> None:
+    # 50 cells, 64 cores, multiple 2 -> ~128 target shards -> round(128/50)=3 shards/cell.
+    size = auto_shard_size(191, n_cells=50, cores=64, multiple=2)
+    assert size == 64  # ceil(191 / 3)
+    shards_per_cell = len(shard_spans(191, size))
+    assert shards_per_cell == 3
+    total_shards = 50 * shards_per_cell
+    assert abs(total_shards - 2 * 64) <= 50  # within one shard/cell of the 2*cores target
+
+
+def test_auto_shard_size_collapses_to_one_shard_when_cores_are_scarce() -> None:
+    # Few cores relative to cells -> one shard per cell (shard_size == n_examples).
+    size = auto_shard_size(191, n_cells=50, cores=4, multiple=2)
+    assert size == 191
+    assert len(shard_spans(191, size)) == 1
+
+
+def test_auto_shard_size_is_always_at_least_one() -> None:
+    assert auto_shard_size(0, n_cells=50, cores=64) == 1
+    assert auto_shard_size(10, n_cells=0, cores=64) == 10  # degenerate inputs -> no fan-out
+    assert auto_shard_size(10, n_cells=50, cores=0) == 10
 
 
 def test_attack_units_cover_every_surrogate_recipe_shard() -> None:
