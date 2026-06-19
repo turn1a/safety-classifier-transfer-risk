@@ -6,7 +6,7 @@ toc: false
 
 The measurement is a [Kedro](https://kedro.org) project: pure algorithms in `transfer_risk.lib`, thin nodes that read and write through a typed Data Catalog, and pipelines wired one stage at a time (data, models, similarity, attacks, transfer, risk, reporting). The graph below is the live Kedro-Viz export — pan, zoom, and click a node or dataset to see its inputs, outputs, and layer.
 
-This is the full production graph: ten surrogates and five attack recipes (the 50 `(surrogate, recipe)` cells), with the attack stage splitting each cell into a few example-shards so a slow cell still spreads across cores. The shard count scales to the run box — about `2 × vCPUs` shards in total (~3 per cell here) — rather than a fixed tiny size that would fan out to thousands of nodes. `ParallelRunner` runs the shards across cores and `kedro run --only-missing-outputs` resumes. Click a node or dataset to see its inputs, outputs, and layer; use the focus and pipeline filters to isolate a stage.
+This is the full production pipeline — ten surrogates and five attack recipes (the 50 `(surrogate, recipe)` attack cells), wired `data → models → similarity → attacks → transfer → risk → reporting`. For readability the attack stage is drawn here as one node per cell; the actual run splits each cell into several example-shards scaled to the box's cores, so a slow cell spreads across cores, then a reduce step concatenates them — `ParallelRunner` runs the shards and `kedro run --only-missing-outputs` resumes. Click a node or dataset to see its inputs, outputs, and layer; use the focus and pipeline filters to isolate a stage.
 
 ```{=html}
 <iframe class="viz-frame" src="pipeline-viz/index.html" title="Kedro pipeline graph"></iframe>

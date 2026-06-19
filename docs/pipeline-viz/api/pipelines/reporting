@@ -4,16 +4,16 @@
       "id": "3d21843d",
       "name": "similarity_table",
       "tags": [
-        "transfer",
-        "similarity"
+        "similarity",
+        "transfer"
       ],
       "pipelines": [
-        "__default__",
-        "transfer",
-        "similarity",
         "reporting",
-        "stage",
-        "downstream"
+        "__default__",
+        "similarity",
+        "transfer",
+        "downstream",
+        "stage"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -58,10 +58,10 @@
         "transfer"
       ],
       "pipelines": [
+        "reporting",
         "__default__",
         "transfer",
         "risk",
-        "reporting",
         "downstream"
       ],
       "type": "data",
@@ -76,9 +76,9 @@
       "tags": [],
       "pipelines": [
         "reporting",
-        "downstream",
         "risk",
-        "__default__"
+        "__default__",
+        "downstream"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -122,9 +122,9 @@
       "tags": [],
       "pipelines": [
         "reporting",
-        "downstream",
         "risk",
-        "__default__"
+        "__default__",
+        "downstream"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -165,18 +165,6 @@
   ],
   "edges": [
     {
-      "source": "a73769e9",
-      "target": "844e1a3b"
-    },
-    {
-      "source": "02cdda9d",
-      "target": "a73769e9"
-    },
-    {
-      "source": "3d21843d",
-      "target": "a20940e6"
-    },
-    {
       "source": "11c8dd13",
       "target": "db2ca221"
     },
@@ -187,6 +175,18 @@
     {
       "source": "abc2021e",
       "target": "11c8dd13"
+    },
+    {
+      "source": "a73769e9",
+      "target": "844e1a3b"
+    },
+    {
+      "source": "3d21843d",
+      "target": "a20940e6"
+    },
+    {
+      "source": "02cdda9d",
+      "target": "a73769e9"
     },
     {
       "source": "a20940e6",
@@ -334,6 +334,30 @@
       "outputs": [],
       "children": [
         {
+          "id": "6bc5358c",
+          "type": "data"
+        },
+        {
+          "id": "abc2021e",
+          "type": "data"
+        },
+        {
+          "id": "11c8dd13",
+          "type": "task"
+        },
+        {
+          "id": "db2ca221",
+          "type": "data"
+        },
+        {
+          "id": "a73769e9",
+          "type": "task"
+        },
+        {
+          "id": "ba4b2fe1",
+          "type": "data"
+        },
+        {
           "id": "02cdda9d",
           "type": "data"
         },
@@ -342,35 +366,11 @@
           "type": "data"
         },
         {
-          "id": "db2ca221",
-          "type": "data"
-        },
-        {
-          "id": "ba4b2fe1",
-          "type": "data"
-        },
-        {
-          "id": "abc2021e",
-          "type": "data"
-        },
-        {
           "id": "3d21843d",
           "type": "data"
         },
         {
-          "id": "11c8dd13",
-          "type": "task"
-        },
-        {
           "id": "a20940e6",
-          "type": "task"
-        },
-        {
-          "id": "6bc5358c",
-          "type": "data"
-        },
-        {
-          "id": "a73769e9",
           "type": "task"
         }
       ]

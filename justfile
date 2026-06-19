@@ -60,9 +60,13 @@ run-thin *args:
 viz *args:
     uv run kedro viz run {{args}}
 
-# Export the DAG as a static site for embedding in the docs/blog.
+# Export the DAG as the static site embedded in the docs (docs/pipeline-viz). KEDRO_ENV=viz
+# collapses each attack cell to one node per surrogate×recipe so the graph is readable; the run
+# itself shards (conf/base). Re-run after pipeline changes, then commit docs/pipeline-viz.
 viz-build:
-    uv run kedro viz build
+    KEDRO_ENV=viz uv run kedro viz build
+    rm -rf docs/pipeline-viz
+    mv build docs/pipeline-viz
 
 # Render the Quarto site to docs/_site (needs the `quarto` CLI on PATH).
 docs:

@@ -1,0 +1,20 @@
+# Visualization-only override (KEDRO_ENV=viz, used by `just viz-build`). It forces one shard per
+# (surrogate, recipe) cell — shard_size far above eval_set_size — so the static Kedro-Viz graph on
+# the docs site collapses to a single attack_{surrogate}__{recipe} node per cell (no shard
+# suffixes, no reduce), which is far easier to read. This changes only the *picture*: the real run
+# uses conf/base, where the shard count scales to the box's cores. Kedro replaces the whole
+# `attacks` block per environment, so this file is self-contained (it mirrors conf/base except for
+# the sharding knob).
+attacks:
+  recipes:
+    - deepwordbug
+    - pwws
+    - textfooler
+    - bae
+    - bert-attack
+  semantic_encoder: sentence-transformers
+  eval_set_size: 191
+  max_seq_len: 512
+  max_prompt_chars: 3200
+  query_budget: 6000
+  shard_size: 100000 # >> eval_set_size -> one shard per cell (one node per surrogate × recipe)
