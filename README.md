@@ -8,7 +8,7 @@ Measure how easily a text-based AI safety classifier (here, a prompt-injection d
 
 This is a measurement tool, not a certification tool. It quantifies and compares how leaky a given filter is and predicts which surrogate models yield successful transfer. It does **not** certify robustness: Vassilev (2025) proves complete guardrails are impossible, because the set of adversarial prompts that evade any finite checker is infinite. The right question is therefore "how leaky is this filter, relative to others?", not "is this filter safe?".
 
-**Headline result (first run).** Against a deployed DeBERTa-v3 prompt-injection detector, CKA similarity predicts attack transfer — Spearman ρ = 0.72 per attack, 0.79 across surrogates — and the high-similarity surrogate half transfers about 3× the low-similarity half, with the same-backbone surrogate topping both similarity and transfer. Write-up: [docs/posts/2026-06-17-transferability-results.qmd](docs/posts/2026-06-17-transferability-results.qmd).
+**Status.** Representational similarity is computed for the production run: over a 2,000-prompt probe at a 512-token window, CKA orders the ten-surrogate pool as expected — the same-backbone anchor highest, a from-scratch BiLSTM lowest — and splits it into high-similarity (M1) and low-similarity (M2) sets. The attack-transfer sweep runs on a high-core cloud box and completes the measurement. Write-up and interactive pipeline graph: the [project site](https://turn1a.github.io/safety-classifier-transfer-risk/).
 
 ## Method
 
@@ -19,9 +19,9 @@ For a target classifier `T` and a pool of surrogate classifiers trained on the s
 1. Calibrate thresholds `r1`/`r2` from the observed similarity distribution and split the pool into high-similarity (`M1`) and low-similarity (`M2`) sets.
 1. Attack the surrogates with TextAttack recipes (TextFooler, BERT-Attack, BAE, PWWS, DeepWordBug).
 1. Feed the adversarial examples to the frozen target and record the transfer success rate.
-1. Fit a regression predicting transfer rate from similarity features, and run a CKA-guided-vs-random ablation with a bootstrap paired t-test.
+1. Fit a regression predicting transfer rate from similarity features, and run a one-sided permutation test comparing the high-similarity set (`M1`) against the low-similarity set (`M2`) on mean and max transfer rate.
 
-The headline question: does CKA-guided surrogate selection beat random selection on maximum transfer rate, with statistical significance?
+The headline question: do high-similarity (`M1`) surrogates yield more transferable attacks than low-similarity (`M2`) surrogates?
 
 ## Framing
 
@@ -47,7 +47,7 @@ src/transfer_risk/
 └── settings.py
 conf/base/           # catalog.yml, parameters_*.yml, mlflow.yml
 data/                # Kedro data layers (01_raw … 08_reporting; gitignored)
-docs/                # Quarto site (the blog series)
+docs/                # Quarto site (paper + interactive pipeline viz)
 tests/               # lib/ unit tests + pipeline registry test
 refs/                # the three reference papers
 ```

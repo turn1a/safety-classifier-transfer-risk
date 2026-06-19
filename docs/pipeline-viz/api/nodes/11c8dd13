@@ -1,0 +1,13 @@
+{
+  "code": "def plot_transfer_scatter(master_results_table: pd.DataFrame) -> Figure:\n    \"\"\"Scatter of transfer rate vs mean CKA, coloured by attack recipe.\"\"\"\n    fig, ax = plt.subplots(figsize=(6, 4))\n    sns.scatterplot(\n        data=master_results_table, x=\"mean_cka\", y=\"transfer_rate\", hue=\"recipe\", s=90, ax=ax\n    )\n    ax.set(xlabel=\"mean CKA\", ylabel=\"transfer rate\", title=\"Transfer rate vs CKA similarity\")\n    fig.tight_layout()\n    return fig\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/reporting/nodes.py",
+  "parameters": {},
+  "run_command": "kedro run --to-nodes='plot_transfer_scatter'",
+  "inputs": [
+    "master_results_table"
+  ],
+  "outputs": [
+    "fig_transfer_scatter"
+  ],
+  "preview": null
+}

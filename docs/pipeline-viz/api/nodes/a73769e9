@@ -1,0 +1,14 @@
+{
+  "code": "def plot_regression_ablation(\n    regressors: dict[str, Any], ablation_results: dict[str, Any]\n) -> Figure:\n    \"\"\"Feature importances (left) and the M1-vs-M2 mean-transfer contrast (right).\"\"\"\n    fig, (ax_left, ax_right) = plt.subplots(1, 2, figsize=(10, 4))\n    ax_left.bar(regressors[\"feature_names\"], regressors[\"random_forest_importances\"])\n    ax_left.set(title=\"Random-forest feature importance\", ylabel=\"importance\")\n    m1_mean = ablation_results.get(\"m1_mean\", 0.0)\n    m2_mean = ablation_results.get(\"m2_mean\", 0.0)\n    ax_right.bar(\n        [\"M1 (high CKA)\", \"M2 (low CKA)\"], [m1_mean, m2_mean], color=[\"#2a9d8f\", \"#999999\"]\n    )\n    effect = ablation_results.get(\"mean_diff_pp\", ablation_results.get(\"effect_size_pp\", 0.0))\n    p_value = ablation_results.get(\"mean_p_value\", ablation_results.get(\"empirical_p_value\", 1.0))\n    ax_right.set(\n        title=f\"Selection ablation ({effect:+.1f}pp, p={p_value:.3f})\",\n        ylabel=\"mean transfer rate\",\n    )\n    fig.tight_layout()\n    return fig\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/reporting/nodes.py",
+  "parameters": {},
+  "run_command": "kedro run --to-nodes='plot_regression_ablation'",
+  "inputs": [
+    "regressors",
+    "ablation_results"
+  ],
+  "outputs": [
+    "fig_regression_ablation"
+  ],
+  "preview": null
+}

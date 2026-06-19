@@ -1,0 +1,49 @@
+{
+  "code": "def build_surrogate_registry(params: dict[str, Any]) -> dict[str, Any]:\n    \"\"\"Resolve and validate the surrogate pool; verify HF auth if gated models are used.\n\n    Args:\n        params: the ``models`` parameter block (``target``, ``surrogates``).\n\n    Returns:\n        A registry dict with the ``target`` id and the validated ``surrogates`` specs.\n    \"\"\"\n    specs = list(params[\"surrogates\"])\n    validate_surrogate_specs(specs)\n    if requires_gated_auth(specs):\n        logger.info(\"HuggingFace authenticated as %s (gated models enabled)\", assert_hf_auth())\n    return {\"target\": params[\"target\"], \"surrogates\": specs}\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/models/nodes.py",
+  "parameters": {
+    "models": {
+      "target": "protectai/deberta-v3-base-prompt-injection-v2",
+      "surrogates": [
+        {
+          "name": "deberta-small-pi-v2",
+          "kind": "pretrained",
+          "gated": true
+        },
+        {
+          "name": "electra-small-ft",
+          "kind": "finetune"
+        },
+        {
+          "name": "bilstm-attention",
+          "kind": "bilstm"
+        }
+      ],
+      "finetune": {
+        "lr": 0.00002,
+        "batch_size": 32,
+        "epochs": 1,
+        "max_seq_len": 256
+      },
+      "bilstm": {
+        "embed_dim": 128,
+        "hidden_dim": 256,
+        "num_layers": 2,
+        "dropout": 0.3,
+        "lr": 0.001,
+        "batch_size": 64,
+        "epochs": 2,
+        "max_vocab": 20000,
+        "max_seq_len": 256
+      }
+    }
+  },
+  "run_command": "kedro run --to-nodes='build_surrogate_registry'",
+  "inputs": [
+    "params:models"
+  ],
+  "outputs": [
+    "surrogate_registry"
+  ],
+  "preview": null
+}

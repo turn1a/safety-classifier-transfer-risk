@@ -1,0 +1,8 @@
+{
+  "type": "artifacts.mlflow_artifact_dataset.JSONDataset.MlflowJSONDataset",
+  "filepath": "/Users/aholszewska/dev/risk-transfer/data/07_model_output/ablation_results.json",
+  "run_command": "kedro run --to-outputs=ablation_results",
+  "preview": null,
+  "preview_type": null,
+  "stats": null
+}

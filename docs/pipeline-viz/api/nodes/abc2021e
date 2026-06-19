@@ -1,0 +1,8 @@
+{
+  "type": "artifacts.mlflow_artifact_dataset.ParquetDataset.MlflowParquetDataset",
+  "filepath": "/Users/aholszewska/dev/risk-transfer/data/07_model_output/master_results_table.parquet",
+  "run_command": "kedro run --to-outputs=master_results_table",
+  "preview": null,
+  "preview_type": null,
+  "stats": null
+}

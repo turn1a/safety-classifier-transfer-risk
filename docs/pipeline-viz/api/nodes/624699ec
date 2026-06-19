@@ -1,0 +1,20 @@
+{
+  "code": "def record_environment(project: dict[str, Any], seed: int) -> dict[str, Any]:\n    \"\"\"Record a small environment fingerprint.\n\n    Writing this through the catalog (``smoke_report``) and running it under\n    kedro-mlflow proves the catalog + tracking wiring without any heavy ML\n    dependency.\n\n    Args:\n        project: The ``project`` parameter block (name, version).\n        seed: The project root seed.\n\n    Returns:\n        A JSON-serialisable dict describing the runtime environment.\n    \"\"\"\n    return {\n        \"status\": \"ok\",\n        \"project\": project.get(\"name\", \"unknown\"),\n        \"version\": project.get(\"version\", \"unknown\"),\n        \"seed\": seed,\n        \"kedro_version\": kedro.__version__,\n        \"python_version\": sys.version.split()[0],\n        \"platform\": platform.platform(),\n    }\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/smoke/nodes.py",
+  "parameters": {
+    "project": {
+      "name": "safety-classifier-transfer-risk",
+      "version": "0.1.0"
+    },
+    "seed": 20260616
+  },
+  "run_command": "kedro run --to-nodes='record_environment'",
+  "inputs": [
+    "params:project",
+    "params:seed"
+  ],
+  "outputs": [
+    "smoke_report"
+  ],
+  "preview": null
+}

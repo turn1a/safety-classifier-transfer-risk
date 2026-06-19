@@ -1,0 +1,13 @@
+{
+  "code": "def plot_cka_heatmap(similarity_table: pd.DataFrame) -> Figure:\n    \"\"\"Render a heatmap of the per-surrogate similarity scalars (mean CKA, DBS).\"\"\"\n    fig, ax = plt.subplots(figsize=(6, 0.6 * len(similarity_table) + 2))\n    data = similarity_table.set_index(\"surrogate\")[[\"mean_cka\", \"dbs\"]]\n    sns.heatmap(data, annot=True, fmt=\".3f\", cmap=\"viridis\", vmin=0.0, vmax=1.0, ax=ax)\n    ax.set(title=\"Target-vs-surrogate similarity\", xlabel=\"\", ylabel=\"surrogate\")\n    fig.tight_layout()\n    return fig\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/reporting/nodes.py",
+  "parameters": {},
+  "run_command": "kedro run --to-nodes='plot_cka_heatmap'",
+  "inputs": [
+    "similarity_table"
+  ],
+  "outputs": [
+    "fig_cka_heatmap"
+  ],
+  "preview": null
+}

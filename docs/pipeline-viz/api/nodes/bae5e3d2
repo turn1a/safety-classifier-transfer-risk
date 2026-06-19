@@ -1,0 +1,30 @@
+{
+  "code": "def calibrate_thresholds(\n    similarity_table: pd.DataFrame, params: dict[str, Any]\n) -> dict[str, float]:\n    \"\"\"Calibrate r1/r2 from the observed mean-CKA distribution (quartiles).\"\"\"\n    quantiles = params[\"thresholds\"]\n    thresholds = calibrate(\n        similarity_table[\"mean_cka\"].tolist(),\n        quantiles[\"r1_quantile\"],\n        quantiles[\"r2_quantile\"],\n    )\n    return {\"r1\": thresholds.r1, \"r2\": thresholds.r2}\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/similarity/nodes.py",
+  "parameters": {
+    "similarity": {
+      "n_probe": 64,
+      "pooling": "cls",
+      "cka": {
+        "mode": "linear",
+        "batch_size": 32
+      },
+      "dbs": {
+        "box": 1
+      },
+      "thresholds": {
+        "r1_quantile": 0.75,
+        "r2_quantile": 0.25
+      }
+    }
+  },
+  "run_command": "kedro run --to-nodes='calibrate_thresholds'",
+  "inputs": [
+    "similarity_table",
+    "params:similarity"
+  ],
+  "outputs": [
+    "thresholds"
+  ],
+  "preview": null
+}

@@ -1,0 +1,30 @@
+{
+  "code": null,
+  "filepath": null,
+  "parameters": {
+    "attacks": {
+      "recipes": [
+        "deepwordbug",
+        "pwws",
+        "textfooler"
+      ],
+      "semantic_encoder": "sentence-transformers",
+      "eval_set_size": 12,
+      "query_budget": 200,
+      "max_prompt_chars": 512,
+      "shard_size": 4
+    },
+    "seed": 20260616
+  },
+  "run_command": "kedro run --to-nodes='attack_electra-small-ft__pwws__4'",
+  "inputs": [
+    "task_splits",
+    "onnx__electra-small-ft",
+    "params:attacks",
+    "params:seed"
+  ],
+  "outputs": [
+    "adversarial_shard__electra-small-ft__pwws__4"
+  ],
+  "preview": null
+}

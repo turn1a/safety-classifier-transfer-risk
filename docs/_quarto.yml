@@ -1,6 +1,11 @@
 project:
   type: website
   output-dir: _site
+  render:
+    - index.qmd
+    - pipeline.qmd
+  resources:
+    - pipeline-viz/**
 
 website:
   title: "safety-classifier-transfer-risk"
@@ -9,9 +14,9 @@ website:
   navbar:
     left:
       - href: index.qmd
-        text: Home
-      - href: posts/index.qmd
-        text: Blog
+        text: Paper
+      - href: pipeline.qmd
+        text: Pipeline
     right:
       - icon: github
         href: https://github.com/turn1a/safety-classifier-transfer-risk
@@ -28,8 +33,9 @@ format:
     code-copy: true
     code-overflow: wrap
 
-# Cache executed cells so CI renders without re-running heavy code. With no
-# executable cells yet this is a no-op, but it is the right default for the
-# computational essays to come.
+# Cells are not executed at render time; numbers and tables that come from a run are
+# written in from the run's catalog artifacts (the similarity stage is complete; the
+# attack-transfer results are filled when the sweep finishes). This keeps the GitHub
+# Pages build a pure render with no data or Python dependency.
 execute:
   freeze: auto

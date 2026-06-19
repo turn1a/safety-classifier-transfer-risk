@@ -4,6 +4,11 @@
 
 default_install_hook_types: [pre-commit, pre-push]
 
+# The vendored Kedro-Viz static bundle (docs/pipeline-viz/) is a generated artifact. Exclude it
+# from every hook so the file-hygiene fixers do not rewrite its minified assets and the
+# large-file check ignores its ~7 MB bundle chunk.
+exclude: '^docs/pipeline-viz/'
+
 repos:
   # File hygiene (fast)
   - repo: https://github.com/pre-commit/pre-commit-hooks

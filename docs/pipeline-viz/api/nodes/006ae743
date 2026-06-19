@@ -1,0 +1,8 @@
+{
+  "type": "json.json_dataset.JSONDataset",
+  "filepath": "/Users/aholszewska/dev/risk-transfer/data/07_model_output/run_metrics.json",
+  "run_command": "kedro run --to-outputs=run_metrics",
+  "preview": null,
+  "preview_type": null,
+  "stats": null
+}

@@ -1,0 +1,39 @@
+{
+  "parameters": {
+    "models": {
+      "target": "protectai/deberta-v3-base-prompt-injection-v2",
+      "surrogates": [
+        {
+          "name": "deberta-small-pi-v2",
+          "kind": "pretrained",
+          "gated": true
+        },
+        {
+          "name": "electra-small-ft",
+          "kind": "finetune"
+        },
+        {
+          "name": "bilstm-attention",
+          "kind": "bilstm"
+        }
+      ],
+      "finetune": {
+        "lr": 0.00002,
+        "batch_size": 32,
+        "epochs": 1,
+        "max_seq_len": 256
+      },
+      "bilstm": {
+        "embed_dim": 128,
+        "hidden_dim": 256,
+        "num_layers": 2,
+        "dropout": 0.3,
+        "lr": 0.001,
+        "batch_size": 64,
+        "epochs": 2,
+        "max_vocab": 20000,
+        "max_seq_len": 256
+      }
+    }
+  }
+}

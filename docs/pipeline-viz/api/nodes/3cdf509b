@@ -1,0 +1,28 @@
+{
+  "code": "def evaluate_transfer(\n    adversarial_examples: dict[str, Any],\n    target: dict[str, Any],\n    params: dict[str, Any],\n    device_params: dict[str, Any],\n) -> tuple[pd.DataFrame, list[dict[str, Any]]]:\n    \"\"\"Feed successful adversarial examples to the frozen target; record transfer rate.\n\n    The transfer rate per (surrogate, recipe) is the fraction of the surrogate's\n    successful adversarial examples (injection -> benign on the surrogate) that the\n    frozen target *also* predicts benign — i.e. the attack transfers. Alongside the rate\n    table, a few genuinely transferred examples (surrogate and target both flipped) are\n    selected for the write-up's before/after illustration.\n\n    Args:\n        adversarial_examples: PartitionedDataset of per-cell loaders (one cell per partition).\n        target: the frozen target bundle (``{\"model\", \"tokenizer\"}``) from ``target_model``.\n        params: the ``transfer`` block.\n        device_params: the ``device`` block.\n\n    Returns:\n        The per-(surrogate, recipe) transfer-rate table and a small list of worked\n        transferred examples (``surrogate``, ``recipe``, ``original``, ``perturbed``,\n        ``n_words_changed``).\n    \"\"\"\n    device = resolve_device(device_params[\"policy\"])\n    model = target[\"model\"].to(device).eval()\n    tokenizer = target[\"tokenizer\"]\n    max_seq_len = int(params.get(\"max_seq_len\", 256))\n    batch_size = int(params[\"batch_size\"])\n    max_examples = int(params.get(\"max_transferred_examples\", 8))\n    rows: list[dict[str, Any]] = []\n    candidates: list[dict[str, Any]] = []\n    for key, records in adversarial_examples.items():\n        # adversarial_examples is the assembled {cell -> records} table; the cell key carries the\n        # (surrogate, recipe) identity that the per-cell partition filename encoded.\n        surrogate, recipe = key.split(\"__\", 1)\n        successful = [record for record in records if record.get(\"success\")]\n        if not successful:\n            rows.append(\n                {\"surrogate\": surrogate, \"recipe\": recipe, \"n_successful\": 0, \"transfer_rate\": 0.0}\n            )\n            continue\n        perturbed = [record[\"perturbed\"] for record in successful]\n        target_preds = predict(\n            model,\n            tokenizer,\n            perturbed,\n            max_seq_len=max_seq_len,\n            batch_size=batch_size,\n            device=device,\n        )\n        rate = transfer_rate(target_preds)\n        rows.append(\n            {\n                \"surrogate\": surrogate,\n                \"recipe\": recipe,\n                \"n_successful\": len(successful),\n                \"transfer_rate\": rate,\n            }\n        )\n        for record, prediction in zip(successful, target_preds, strict=True):\n            if prediction == _BENIGN_LABEL:\n                candidates.append(\n                    {\n                        \"surrogate\": surrogate,\n                        \"recipe\": recipe,\n                        \"original\": record[\"original\"],\n                        \"perturbed\": record[\"perturbed\"],\n                        \"n_words_changed\": _words_changed(record[\"original\"], record[\"perturbed\"]),\n                    }\n                )\n        logger.info(\n            \"%s/%s: transfer rate %.3f over %d successful\", surrogate, recipe, rate, len(successful)\n        )\n    transferred = _select_transferred(candidates, max_examples)\n    logger.info(\n        \"Selected %d transferred examples from %d candidates\", len(transferred), len(candidates)\n    )\n    return pd.DataFrame(rows), transferred\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/transfer/nodes.py",
+  "parameters": {
+    "transfer": {
+      "target": "protectai/deberta-v3-base-prompt-injection-v2",
+      "batch_size": 64,
+      "max_seq_len": 512,
+      "max_transferred_examples": 8
+    },
+    "device": {
+      "policy": "mps_or_cpu",
+      "allow_mps_fallback": true
+    }
+  },
+  "run_command": "kedro run --to-nodes='evaluate_transfer'",
+  "inputs": [
+    "adversarial_examples",
+    "target_model",
+    "params:transfer",
+    "params:device"
+  ],
+  "outputs": [
+    "transfer_results",
+    "transferred_examples"
+  ],
+  "preview": null
+}

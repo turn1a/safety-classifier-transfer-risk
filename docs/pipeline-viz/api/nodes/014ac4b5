@@ -1,0 +1,8 @@
+{
+  "type": "json.json_dataset.JSONDataset",
+  "filepath": "/Users/aholszewska/dev/risk-transfer/data/08_reporting/dataset_audit.json",
+  "run_command": "kedro run --to-outputs=dataset_audit",
+  "preview": null,
+  "preview_type": null,
+  "stats": null
+}

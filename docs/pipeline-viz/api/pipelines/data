@@ -1,0 +1,462 @@
+{
+  "nodes": [
+    {
+      "id": "349b977c",
+      "name": "build_canonical_dataset",
+      "tags": [],
+      "pipelines": [
+        "stage",
+        "data",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "data": {
+          "train_sources": [
+            {
+              "id": "deepset/prompt-injections",
+              "text_col": "text",
+              "label_col": "label"
+            },
+            {
+              "id": "jackhhao/jailbreak-classification",
+              "text_col": "prompt",
+              "label_col": "type",
+              "label_map": {
+                "benign": 0,
+                "jailbreak": 1
+              }
+            },
+            {
+              "id": "Lakera/gandalf_ignore_instructions",
+              "text_col": "text",
+              "label_const": 1
+            }
+          ],
+          "eval_sources": [
+            "hackaprompt/hackaprompt-dataset",
+            "lakeraai/pint-benchmark"
+          ],
+          "min_chars": 3,
+          "dedup": "normalized",
+          "max_seq_len": 256,
+          "splits": {
+            "train": 0.8,
+            "val": 0.1,
+            "test": 0.1
+          }
+        }
+      },
+      "full_name": "build_canonical_dataset"
+    },
+    {
+      "id": "021a8ebe",
+      "name": "raw_deepset",
+      "tags": [],
+      "pipelines": [
+        "stage",
+        "data",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "raw",
+      "dataset_type": "huggingface.hugging_face_dataset.HFDataset"
+    },
+    {
+      "id": "b33736fd",
+      "name": "raw_jackhhao",
+      "tags": [],
+      "pipelines": [
+        "stage",
+        "data",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "raw",
+      "dataset_type": "huggingface.hugging_face_dataset.HFDataset"
+    },
+    {
+      "id": "92cc0247",
+      "name": "raw_lakera",
+      "tags": [],
+      "pipelines": [
+        "stage",
+        "data",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "raw",
+      "dataset_type": "huggingface.hugging_face_dataset.HFDataset"
+    },
+    {
+      "id": "84e86f23",
+      "name": "params:data",
+      "tags": [],
+      "pipelines": [
+        "stage",
+        "data",
+        "__default__"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "21d22ec4",
+      "name": "canonical_dataset",
+      "tags": [
+        "similarity"
+      ],
+      "pipelines": [
+        "similarity",
+        "data",
+        "__default__",
+        "stage"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": {
+        "stats": {
+          "rows": 2947,
+          "columns": 3,
+          "file_size": 986532
+        },
+        "styles": null
+      },
+      "layer": "primary",
+      "dataset_type": "pandas.parquet_dataset.ParquetDataset"
+    },
+    {
+      "id": "014ac4b5",
+      "name": "dataset_audit",
+      "tags": [],
+      "pipelines": [
+        "stage",
+        "data",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "reporting",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "85e11043",
+      "name": "params:seed",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "pwws",
+        "models",
+        "deepwordbug",
+        "electra-small-ft",
+        "deberta-small-pi-v2",
+        "similarity",
+        "bilstm-attention"
+      ],
+      "pipelines": [
+        "data",
+        "__default__",
+        "attacks",
+        "models",
+        "stage",
+        "similarity",
+        "downstream",
+        "risk",
+        "smoke"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "69c62486",
+      "name": "split_dataset",
+      "tags": [],
+      "pipelines": [
+        "stage",
+        "data",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "data": {
+          "train_sources": [
+            {
+              "id": "deepset/prompt-injections",
+              "text_col": "text",
+              "label_col": "label"
+            },
+            {
+              "id": "jackhhao/jailbreak-classification",
+              "text_col": "prompt",
+              "label_col": "type",
+              "label_map": {
+                "benign": 0,
+                "jailbreak": 1
+              }
+            },
+            {
+              "id": "Lakera/gandalf_ignore_instructions",
+              "text_col": "text",
+              "label_const": 1
+            }
+          ],
+          "eval_sources": [
+            "hackaprompt/hackaprompt-dataset",
+            "lakeraai/pint-benchmark"
+          ],
+          "min_chars": 3,
+          "dedup": "normalized",
+          "max_seq_len": 256,
+          "splits": {
+            "train": 0.8,
+            "val": 0.1,
+            "test": 0.1
+          }
+        },
+        "seed": 20260616
+      },
+      "full_name": "split_dataset"
+    },
+    {
+      "id": "8289686f",
+      "name": "task_splits",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "pwws",
+        "models",
+        "deepwordbug",
+        "electra-small-ft",
+        "deberta-small-pi-v2",
+        "bilstm-attention"
+      ],
+      "pipelines": [
+        "data",
+        "attacks",
+        "__default__",
+        "models",
+        "stage"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_input",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    }
+  ],
+  "edges": [
+    {
+      "source": "349b977c",
+      "target": "014ac4b5"
+    },
+    {
+      "source": "69c62486",
+      "target": "8289686f"
+    },
+    {
+      "source": "84e86f23",
+      "target": "349b977c"
+    },
+    {
+      "source": "21d22ec4",
+      "target": "69c62486"
+    },
+    {
+      "source": "b33736fd",
+      "target": "349b977c"
+    },
+    {
+      "source": "84e86f23",
+      "target": "69c62486"
+    },
+    {
+      "source": "85e11043",
+      "target": "69c62486"
+    },
+    {
+      "source": "021a8ebe",
+      "target": "349b977c"
+    },
+    {
+      "source": "92cc0247",
+      "target": "349b977c"
+    },
+    {
+      "source": "349b977c",
+      "target": "21d22ec4"
+    }
+  ],
+  "layers": [
+    "feature",
+    "raw",
+    "model_output",
+    "models",
+    "primary",
+    "reporting",
+    "model_input"
+  ],
+  "tags": [
+    {
+      "id": "attacks",
+      "name": "attacks"
+    },
+    {
+      "id": "bilstm-attention",
+      "name": "bilstm-attention"
+    },
+    {
+      "id": "deberta-small-pi-v2",
+      "name": "deberta-small-pi-v2"
+    },
+    {
+      "id": "deepwordbug",
+      "name": "deepwordbug"
+    },
+    {
+      "id": "electra-small-ft",
+      "name": "electra-small-ft"
+    },
+    {
+      "id": "models",
+      "name": "models"
+    },
+    {
+      "id": "pwws",
+      "name": "pwws"
+    },
+    {
+      "id": "similarity",
+      "name": "similarity"
+    },
+    {
+      "id": "textfooler",
+      "name": "textfooler"
+    },
+    {
+      "id": "transfer",
+      "name": "transfer"
+    }
+  ],
+  "pipelines": [
+    {
+      "id": "__default__",
+      "name": "__default__"
+    },
+    {
+      "id": "smoke",
+      "name": "smoke"
+    },
+    {
+      "id": "reporting",
+      "name": "reporting"
+    },
+    {
+      "id": "similarity",
+      "name": "similarity"
+    },
+    {
+      "id": "transfer",
+      "name": "transfer"
+    },
+    {
+      "id": "models",
+      "name": "models"
+    },
+    {
+      "id": "data",
+      "name": "data"
+    },
+    {
+      "id": "risk",
+      "name": "risk"
+    },
+    {
+      "id": "attacks",
+      "name": "attacks"
+    },
+    {
+      "id": "stage",
+      "name": "stage"
+    },
+    {
+      "id": "downstream",
+      "name": "downstream"
+    }
+  ],
+  "modular_pipelines": {
+    "__root__": {
+      "id": "__root__",
+      "name": "__root__",
+      "inputs": [],
+      "outputs": [],
+      "children": [
+        {
+          "id": "b33736fd",
+          "type": "data"
+        },
+        {
+          "id": "349b977c",
+          "type": "task"
+        },
+        {
+          "id": "85e11043",
+          "type": "data"
+        },
+        {
+          "id": "84e86f23",
+          "type": "parameters"
+        },
+        {
+          "id": "85e11043",
+          "type": "parameters"
+        },
+        {
+          "id": "69c62486",
+          "type": "task"
+        },
+        {
+          "id": "92cc0247",
+          "type": "data"
+        },
+        {
+          "id": "021a8ebe",
+          "type": "data"
+        },
+        {
+          "id": "21d22ec4",
+          "type": "data"
+        },
+        {
+          "id": "014ac4b5",
+          "type": "data"
+        },
+        {
+          "id": "84e86f23",
+          "type": "data"
+        },
+        {
+          "id": "8289686f",
+          "type": "data"
+        }
+      ]
+    }
+  },
+  "selected_pipeline": "data"
+}

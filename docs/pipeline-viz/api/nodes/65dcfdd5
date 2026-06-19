@@ -1,0 +1,30 @@
+{
+  "code": "def reduce_similarity(cka_matrices: dict[str, Any], params: dict[str, Any]) -> pd.DataFrame:\n    \"\"\"Reduce each CKA matrix to (mean CKA, DBS) scalars per surrogate.\"\"\"\n    box = int(params[\"dbs\"][\"box\"])\n    rows = [\n        {\n            \"surrogate\": name,\n            \"mean_cka\": float(matrix.mean()),\n            \"dbs\": diagonal_box_similarity(matrix, box),\n        }\n        for name, matrix in cka_matrices.items()\n    ]\n    return pd.DataFrame(rows).sort_values(\"mean_cka\", ascending=False).reset_index(drop=True)\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/similarity/nodes.py",
+  "parameters": {
+    "similarity": {
+      "n_probe": 64,
+      "pooling": "cls",
+      "cka": {
+        "mode": "linear",
+        "batch_size": 32
+      },
+      "dbs": {
+        "box": 1
+      },
+      "thresholds": {
+        "r1_quantile": 0.75,
+        "r2_quantile": 0.25
+      }
+    }
+  },
+  "run_command": "kedro run --to-nodes='reduce_similarity'",
+  "inputs": [
+    "cka_matrices",
+    "params:similarity"
+  ],
+  "outputs": [
+    "similarity_table"
+  ],
+  "preview": null
+}

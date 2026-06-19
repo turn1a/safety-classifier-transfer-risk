@@ -1,0 +1,926 @@
+{
+  "nodes": [
+    {
+      "id": "527c9834",
+      "name": "build_surrogate_registry",
+      "tags": [
+        "models"
+      ],
+      "pipelines": [
+        "models",
+        "stage",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "models": {
+          "target": "protectai/deberta-v3-base-prompt-injection-v2",
+          "surrogates": [
+            {
+              "name": "deberta-small-pi-v2",
+              "kind": "pretrained",
+              "gated": true
+            },
+            {
+              "name": "electra-small-ft",
+              "kind": "finetune"
+            },
+            {
+              "name": "bilstm-attention",
+              "kind": "bilstm"
+            }
+          ],
+          "finetune": {
+            "lr": 0.00002,
+            "batch_size": 32,
+            "epochs": 1,
+            "max_seq_len": 256
+          },
+          "bilstm": {
+            "embed_dim": 128,
+            "hidden_dim": 256,
+            "num_layers": 2,
+            "dropout": 0.3,
+            "lr": 0.001,
+            "batch_size": 64,
+            "epochs": 2,
+            "max_vocab": 20000,
+            "max_seq_len": 256
+          }
+        }
+      },
+      "full_name": "build_surrogate_registry"
+    },
+    {
+      "id": "d3e844b2",
+      "name": "params:models",
+      "tags": [
+        "bilstm-attention",
+        "deberta-small-pi-v2",
+        "models",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "models",
+        "stage",
+        "__default__"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "a526bcbb",
+      "name": "surrogate_registry",
+      "tags": [
+        "transfer",
+        "models"
+      ],
+      "pipelines": [
+        "__default__",
+        "models",
+        "stage",
+        "downstream",
+        "transfer"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "primary",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "665c0650",
+      "name": "materialize_deberta-small-pi-v2",
+      "tags": [
+        "models",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "models",
+        "stage",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "materialize_deberta-small-pi-v2"
+    },
+    {
+      "id": "84db9061",
+      "name": "hub__deberta-small-pi-v2",
+      "tags": [
+        "models",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "models",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "raw",
+      "dataset_type": "datasets.hub_model_dataset.HuggingFaceHubModelDataset"
+    },
+    {
+      "id": "d46a082c",
+      "name": "surrogate__deberta-small-pi-v2",
+      "tags": [
+        "deberta-small-pi-v2",
+        "similarity",
+        "models"
+      ],
+      "pipelines": [
+        "models",
+        "similarity",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "datasets.surrogate_model_dataset.SurrogateModelDataset"
+    },
+    {
+      "id": "7e39a93a",
+      "name": "surrogate_meta__deberta-small-pi-v2",
+      "tags": [
+        "models",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "models",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "85e11043",
+      "name": "params:seed",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "pwws",
+        "models",
+        "deepwordbug",
+        "electra-small-ft",
+        "deberta-small-pi-v2",
+        "similarity",
+        "bilstm-attention"
+      ],
+      "pipelines": [
+        "data",
+        "__default__",
+        "attacks",
+        "models",
+        "stage",
+        "similarity",
+        "downstream",
+        "risk",
+        "smoke"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "b3adc04b",
+      "name": "export_onnx_deberta-small-pi-v2",
+      "tags": [
+        "models",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "models",
+        "stage",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "models": {
+          "target": "protectai/deberta-v3-base-prompt-injection-v2",
+          "surrogates": [
+            {
+              "name": "deberta-small-pi-v2",
+              "kind": "pretrained",
+              "gated": true
+            },
+            {
+              "name": "electra-small-ft",
+              "kind": "finetune"
+            },
+            {
+              "name": "bilstm-attention",
+              "kind": "bilstm"
+            }
+          ],
+          "finetune": {
+            "lr": 0.00002,
+            "batch_size": 32,
+            "epochs": 1,
+            "max_seq_len": 256
+          },
+          "bilstm": {
+            "embed_dim": 128,
+            "hidden_dim": 256,
+            "num_layers": 2,
+            "dropout": 0.3,
+            "lr": 0.001,
+            "batch_size": 64,
+            "epochs": 2,
+            "max_vocab": 20000,
+            "max_seq_len": 256
+          }
+        }
+      },
+      "full_name": "export_onnx_deberta-small-pi-v2"
+    },
+    {
+      "id": "6c63e960",
+      "name": "onnx__deberta-small-pi-v2",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "pwws",
+        "models",
+        "deepwordbug",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "models",
+        "attacks",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "datasets.onnx_model_dataset.OnnxModelDataset"
+    },
+    {
+      "id": "8289686f",
+      "name": "task_splits",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "pwws",
+        "models",
+        "deepwordbug",
+        "electra-small-ft",
+        "deberta-small-pi-v2",
+        "bilstm-attention"
+      ],
+      "pipelines": [
+        "data",
+        "attacks",
+        "__default__",
+        "models",
+        "stage"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_input",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "a4a96eb9",
+      "name": "params:device",
+      "tags": [
+        "bilstm-attention",
+        "similarity",
+        "deberta-small-pi-v2",
+        "transfer",
+        "models",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "__default__",
+        "models",
+        "stage",
+        "similarity",
+        "downstream",
+        "transfer"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "b84e4166",
+      "name": "train_bilstm-attention",
+      "tags": [
+        "models",
+        "bilstm-attention"
+      ],
+      "pipelines": [
+        "models",
+        "stage",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "models": {
+          "target": "protectai/deberta-v3-base-prompt-injection-v2",
+          "surrogates": [
+            {
+              "name": "deberta-small-pi-v2",
+              "kind": "pretrained",
+              "gated": true
+            },
+            {
+              "name": "electra-small-ft",
+              "kind": "finetune"
+            },
+            {
+              "name": "bilstm-attention",
+              "kind": "bilstm"
+            }
+          ],
+          "finetune": {
+            "lr": 0.00002,
+            "batch_size": 32,
+            "epochs": 1,
+            "max_seq_len": 256
+          },
+          "bilstm": {
+            "embed_dim": 128,
+            "hidden_dim": 256,
+            "num_layers": 2,
+            "dropout": 0.3,
+            "lr": 0.001,
+            "batch_size": 64,
+            "epochs": 2,
+            "max_vocab": 20000,
+            "max_seq_len": 256
+          }
+        },
+        "device": {
+          "policy": "mps_or_cpu",
+          "allow_mps_fallback": true
+        },
+        "seed": 20260616
+      },
+      "full_name": "train_bilstm-attention"
+    },
+    {
+      "id": "b97b6ffe",
+      "name": "surrogate__bilstm-attention",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "pwws",
+        "models",
+        "deepwordbug",
+        "bilstm-attention",
+        "similarity"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__",
+        "models",
+        "stage",
+        "similarity"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "datasets.surrogate_model_dataset.SurrogateModelDataset"
+    },
+    {
+      "id": "234f4a5a",
+      "name": "surrogate_meta__bilstm-attention",
+      "tags": [
+        "models",
+        "bilstm-attention"
+      ],
+      "pipelines": [
+        "models",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "982df815",
+      "name": "train_electra-small-ft",
+      "tags": [
+        "models",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "models",
+        "stage",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "models": {
+          "target": "protectai/deberta-v3-base-prompt-injection-v2",
+          "surrogates": [
+            {
+              "name": "deberta-small-pi-v2",
+              "kind": "pretrained",
+              "gated": true
+            },
+            {
+              "name": "electra-small-ft",
+              "kind": "finetune"
+            },
+            {
+              "name": "bilstm-attention",
+              "kind": "bilstm"
+            }
+          ],
+          "finetune": {
+            "lr": 0.00002,
+            "batch_size": 32,
+            "epochs": 1,
+            "max_seq_len": 256
+          },
+          "bilstm": {
+            "embed_dim": 128,
+            "hidden_dim": 256,
+            "num_layers": 2,
+            "dropout": 0.3,
+            "lr": 0.001,
+            "batch_size": 64,
+            "epochs": 2,
+            "max_vocab": 20000,
+            "max_seq_len": 256
+          }
+        },
+        "device": {
+          "policy": "mps_or_cpu",
+          "allow_mps_fallback": true
+        },
+        "seed": 20260616
+      },
+      "full_name": "train_electra-small-ft"
+    },
+    {
+      "id": "ad8c2809",
+      "name": "hub__electra-small-ft",
+      "tags": [
+        "models",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "models",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "raw",
+      "dataset_type": "datasets.hub_model_dataset.HuggingFaceHubModelDataset"
+    },
+    {
+      "id": "a7b70e72",
+      "name": "surrogate__electra-small-ft",
+      "tags": [
+        "similarity",
+        "models",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "models",
+        "similarity",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "datasets.surrogate_model_dataset.SurrogateModelDataset"
+    },
+    {
+      "id": "1b570ad2",
+      "name": "surrogate_meta__electra-small-ft",
+      "tags": [
+        "models",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "models",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "c9319213",
+      "name": "export_onnx_electra-small-ft",
+      "tags": [
+        "models",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "models",
+        "stage",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "models": {
+          "target": "protectai/deberta-v3-base-prompt-injection-v2",
+          "surrogates": [
+            {
+              "name": "deberta-small-pi-v2",
+              "kind": "pretrained",
+              "gated": true
+            },
+            {
+              "name": "electra-small-ft",
+              "kind": "finetune"
+            },
+            {
+              "name": "bilstm-attention",
+              "kind": "bilstm"
+            }
+          ],
+          "finetune": {
+            "lr": 0.00002,
+            "batch_size": 32,
+            "epochs": 1,
+            "max_seq_len": 256
+          },
+          "bilstm": {
+            "embed_dim": 128,
+            "hidden_dim": 256,
+            "num_layers": 2,
+            "dropout": 0.3,
+            "lr": 0.001,
+            "batch_size": 64,
+            "epochs": 2,
+            "max_vocab": 20000,
+            "max_seq_len": 256
+          }
+        }
+      },
+      "full_name": "export_onnx_electra-small-ft"
+    },
+    {
+      "id": "948d6213",
+      "name": "onnx__electra-small-ft",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "pwws",
+        "models",
+        "deepwordbug",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "models",
+        "attacks",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "datasets.onnx_model_dataset.OnnxModelDataset"
+    }
+  ],
+  "edges": [
+    {
+      "source": "85e11043",
+      "target": "b84e4166"
+    },
+    {
+      "source": "982df815",
+      "target": "a7b70e72"
+    },
+    {
+      "source": "8289686f",
+      "target": "b84e4166"
+    },
+    {
+      "source": "d46a082c",
+      "target": "b3adc04b"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "982df815"
+    },
+    {
+      "source": "ad8c2809",
+      "target": "982df815"
+    },
+    {
+      "source": "d3e844b2",
+      "target": "982df815"
+    },
+    {
+      "source": "84db9061",
+      "target": "665c0650"
+    },
+    {
+      "source": "b84e4166",
+      "target": "b97b6ffe"
+    },
+    {
+      "source": "d3e844b2",
+      "target": "527c9834"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "b84e4166"
+    },
+    {
+      "source": "d3e844b2",
+      "target": "b84e4166"
+    },
+    {
+      "source": "b3adc04b",
+      "target": "6c63e960"
+    },
+    {
+      "source": "665c0650",
+      "target": "d46a082c"
+    },
+    {
+      "source": "d3e844b2",
+      "target": "b3adc04b"
+    },
+    {
+      "source": "982df815",
+      "target": "1b570ad2"
+    },
+    {
+      "source": "8289686f",
+      "target": "982df815"
+    },
+    {
+      "source": "85e11043",
+      "target": "982df815"
+    },
+    {
+      "source": "c9319213",
+      "target": "948d6213"
+    },
+    {
+      "source": "665c0650",
+      "target": "7e39a93a"
+    },
+    {
+      "source": "d3e844b2",
+      "target": "c9319213"
+    },
+    {
+      "source": "527c9834",
+      "target": "a526bcbb"
+    },
+    {
+      "source": "b84e4166",
+      "target": "234f4a5a"
+    },
+    {
+      "source": "a7b70e72",
+      "target": "c9319213"
+    }
+  ],
+  "layers": [
+    "feature",
+    "model_input",
+    "model_output",
+    "raw",
+    "primary",
+    "reporting",
+    "models"
+  ],
+  "tags": [
+    {
+      "id": "attacks",
+      "name": "attacks"
+    },
+    {
+      "id": "bilstm-attention",
+      "name": "bilstm-attention"
+    },
+    {
+      "id": "deberta-small-pi-v2",
+      "name": "deberta-small-pi-v2"
+    },
+    {
+      "id": "deepwordbug",
+      "name": "deepwordbug"
+    },
+    {
+      "id": "electra-small-ft",
+      "name": "electra-small-ft"
+    },
+    {
+      "id": "models",
+      "name": "models"
+    },
+    {
+      "id": "pwws",
+      "name": "pwws"
+    },
+    {
+      "id": "similarity",
+      "name": "similarity"
+    },
+    {
+      "id": "textfooler",
+      "name": "textfooler"
+    },
+    {
+      "id": "transfer",
+      "name": "transfer"
+    }
+  ],
+  "pipelines": [
+    {
+      "id": "__default__",
+      "name": "__default__"
+    },
+    {
+      "id": "smoke",
+      "name": "smoke"
+    },
+    {
+      "id": "reporting",
+      "name": "reporting"
+    },
+    {
+      "id": "similarity",
+      "name": "similarity"
+    },
+    {
+      "id": "transfer",
+      "name": "transfer"
+    },
+    {
+      "id": "models",
+      "name": "models"
+    },
+    {
+      "id": "data",
+      "name": "data"
+    },
+    {
+      "id": "risk",
+      "name": "risk"
+    },
+    {
+      "id": "attacks",
+      "name": "attacks"
+    },
+    {
+      "id": "stage",
+      "name": "stage"
+    },
+    {
+      "id": "downstream",
+      "name": "downstream"
+    }
+  ],
+  "modular_pipelines": {
+    "__root__": {
+      "id": "__root__",
+      "name": "__root__",
+      "inputs": [],
+      "outputs": [],
+      "children": [
+        {
+          "id": "527c9834",
+          "type": "task"
+        },
+        {
+          "id": "a4a96eb9",
+          "type": "data"
+        },
+        {
+          "id": "ad8c2809",
+          "type": "data"
+        },
+        {
+          "id": "d3e844b2",
+          "type": "data"
+        },
+        {
+          "id": "6c63e960",
+          "type": "data"
+        },
+        {
+          "id": "84db9061",
+          "type": "data"
+        },
+        {
+          "id": "982df815",
+          "type": "task"
+        },
+        {
+          "id": "a7b70e72",
+          "type": "data"
+        },
+        {
+          "id": "234f4a5a",
+          "type": "data"
+        },
+        {
+          "id": "c9319213",
+          "type": "task"
+        },
+        {
+          "id": "85e11043",
+          "type": "parameters"
+        },
+        {
+          "id": "d46a082c",
+          "type": "data"
+        },
+        {
+          "id": "948d6213",
+          "type": "data"
+        },
+        {
+          "id": "1b570ad2",
+          "type": "data"
+        },
+        {
+          "id": "7e39a93a",
+          "type": "data"
+        },
+        {
+          "id": "b97b6ffe",
+          "type": "data"
+        },
+        {
+          "id": "85e11043",
+          "type": "data"
+        },
+        {
+          "id": "8289686f",
+          "type": "data"
+        },
+        {
+          "id": "665c0650",
+          "type": "task"
+        },
+        {
+          "id": "b84e4166",
+          "type": "task"
+        },
+        {
+          "id": "b3adc04b",
+          "type": "task"
+        },
+        {
+          "id": "a4a96eb9",
+          "type": "parameters"
+        },
+        {
+          "id": "a526bcbb",
+          "type": "data"
+        },
+        {
+          "id": "d3e844b2",
+          "type": "parameters"
+        }
+      ]
+    }
+  },
+  "selected_pipeline": "models"
+}

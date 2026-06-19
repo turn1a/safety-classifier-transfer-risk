@@ -1,0 +1,31 @@
+{
+  "code": "def run_ablation(\n    master: pd.DataFrame,\n    selection: dict[str, Any],\n    params: dict[str, Any],\n    seed: int,\n) -> dict[str, Any]:\n    \"\"\"Compare high-CKA (M1) vs low-CKA (M2) surrogates on transfer rate.\n\n    The pure :func:`selection_ablation` runs a one-sided permutation test on the difference in\n    group-mean transfer rate between M1 (similarity >= r1) and M2 (similarity <= r2), on both\n    each surrogate's mean-across-recipes and max-across-recipes transfer. With small groups the\n    permutation p-value has a coarse floor (three vs three gives a minimum of 1/20 = 0.05), so\n    the exact p-value is reported, not thresholded blindly. ``effect_size_pp`` and\n    ``empirical_p_value`` alias the mean-transfer contrast for the metrics node and the figure.\n    \"\"\"\n    transfer_mean = {\n        str(name): float(value)\n        for name, value in master.groupby(\"surrogate\")[\"transfer_rate\"].mean().items()\n    }\n    transfer_max = {\n        str(name): float(value)\n        for name, value in master.groupby(\"surrogate\")[\"transfer_rate\"].max().items()\n    }\n    m1 = [name for name in selection[\"M1\"] if name in transfer_mean]\n    m2 = [name for name in selection[\"M2\"] if name in transfer_mean]\n    if not m1 or not m2:\n        logger.warning(\"Ablation skipped: M1=%s M2=%s (need >=1 attacked surrogate each)\", m1, m2)\n        return {\n            \"m1\": m1,\n            \"m2\": m2,\n            \"effect_size_pp\": 0.0,\n            \"empirical_p_value\": 1.0,\n            \"success_criterion_met\": False,\n            \"note\": \"empty M1 or M2 after intersecting with attacked surrogates\",\n        }\n    n_permutations = int(params[\"ablation\"][\"n_permutations\"])\n    rng = np.random.default_rng(derive_seeds(seed).numpy)\n    stats = selection_ablation(\n        transfer_mean, transfer_max, m1, m2, n_permutations=n_permutations, rng=rng\n    )\n    met = bool(\n        stats[\"mean_diff_pp\"] >= _SUCCESS_EFFECT_PP\n        and stats[\"mean_p_value\"] < params[\"ablation\"][\"alpha\"]\n    )\n    result: dict[str, Any] = {\n        \"m1\": m1,\n        \"m2\": m2,\n        **stats,\n        \"effect_size_pp\": stats[\"mean_diff_pp\"],\n        \"empirical_p_value\": stats[\"mean_p_value\"],\n        \"n_permutations\": n_permutations,\n        \"success_criterion_met\": met,\n    }\n    logger.info(\n        \"Ablation M1 vs M2: mean %.3f/%.3f (%+.1fpp p=%.3f), max %.3f/%.3f (%+.1fpp p=%.3f)\",\n        stats[\"m1_mean\"],\n        stats[\"m2_mean\"],\n        stats[\"mean_diff_pp\"],\n        stats[\"mean_p_value\"],\n        stats[\"m1_max_mean\"],\n        stats[\"m2_max_mean\"],\n        stats[\"max_diff_pp\"],\n        stats[\"max_p_value\"],\n    )\n    return result\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/risk/nodes.py",
+  "parameters": {
+    "risk": {
+      "decision_tree": {
+        "max_depth": 3
+      },
+      "random_forest": {
+        "n_estimators": 200,
+        "max_depth": 4
+      },
+      "ablation": {
+        "n_permutations": 10000,
+        "alpha": 0.05
+      }
+    },
+    "seed": 20260616
+  },
+  "run_command": "kedro run --to-nodes='run_ablation'",
+  "inputs": [
+    "master_results_table",
+    "surrogate_selection",
+    "params:risk",
+    "params:seed"
+  ],
+  "outputs": [
+    "ablation_results"
+  ],
+  "preview": null
+}

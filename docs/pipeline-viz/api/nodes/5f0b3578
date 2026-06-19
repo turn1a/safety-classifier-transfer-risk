@@ -1,0 +1,8 @@
+{
+  "type": "json.json_dataset.JSONDataset",
+  "filepath": "/Users/aholszewska/dev/risk-transfer/data/08_reporting/transferred_examples.json",
+  "run_command": "kedro run --to-outputs=transferred_examples",
+  "preview": null,
+  "preview_type": null,
+  "stats": null
+}

@@ -1,0 +1,15 @@
+{
+  "code": "def assemble_results_table(\n    transfer_results: pd.DataFrame,\n    similarity_table: pd.DataFrame,\n    registry: dict[str, Any],\n) -> pd.DataFrame:\n    \"\"\"Join transfer rates with the per-surrogate similarity scalars (mean CKA, DBS).\"\"\"\n    merged = transfer_results.merge(similarity_table, on=\"surrogate\", how=\"left\")\n    merged[\"target\"] = registry[\"target\"]\n    return merged\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/transfer/nodes.py",
+  "parameters": {},
+  "run_command": "kedro run --to-nodes='assemble_results_table'",
+  "inputs": [
+    "transfer_results",
+    "similarity_table",
+    "surrogate_registry"
+  ],
+  "outputs": [
+    "master_results_table"
+  ],
+  "preview": null
+}

@@ -1,0 +1,15 @@
+{
+  "code": "def reduce_cell(*shard_records: list[dict[str, Any]]) -> list[dict[str, Any]]:\n    \"\"\"Concatenate a cell's shard records (in shard order) into its partition.\n\n    The shard inputs are wired in ascending start order, so flattening preserves the eval-set\n    order. The cell's ``(surrogate, recipe)`` identity is carried by the partition filename\n    (``<surrogate>__<recipe>.pkl``), which the transfer stage parses, so the records stay minimal.\n    \"\"\"\n    return [record for shard in shard_records for record in shard]\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/attacks/nodes.py",
+  "parameters": {},
+  "run_command": "kedro run --to-nodes='reduce_bilstm-attention__textfooler'",
+  "inputs": [
+    "adversarial_shard__bilstm-attention__textfooler__0",
+    "adversarial_shard__bilstm-attention__textfooler__4",
+    "adversarial_shard__bilstm-attention__textfooler__8"
+  ],
+  "outputs": [
+    "adversarial__bilstm-attention__textfooler"
+  ],
+  "preview": null
+}

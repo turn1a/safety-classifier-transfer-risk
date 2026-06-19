@@ -1,0 +1,39 @@
+{
+  "parameters": {
+    "data": {
+      "train_sources": [
+        {
+          "id": "deepset/prompt-injections",
+          "text_col": "text",
+          "label_col": "label"
+        },
+        {
+          "id": "jackhhao/jailbreak-classification",
+          "text_col": "prompt",
+          "label_col": "type",
+          "label_map": {
+            "benign": 0,
+            "jailbreak": 1
+          }
+        },
+        {
+          "id": "Lakera/gandalf_ignore_instructions",
+          "text_col": "text",
+          "label_const": 1
+        }
+      ],
+      "eval_sources": [
+        "hackaprompt/hackaprompt-dataset",
+        "lakeraai/pint-benchmark"
+      ],
+      "min_chars": 3,
+      "dedup": "normalized",
+      "max_seq_len": 256,
+      "splits": {
+        "train": 0.8,
+        "val": 0.1,
+        "test": 0.1
+      }
+    }
+  }
+}

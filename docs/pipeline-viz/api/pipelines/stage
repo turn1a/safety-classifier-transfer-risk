@@ -1,0 +1,1944 @@
+{
+  "nodes": [
+    {
+      "id": "349b977c",
+      "name": "build_canonical_dataset",
+      "tags": [],
+      "pipelines": [
+        "stage",
+        "data",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "data": {
+          "train_sources": [
+            {
+              "id": "deepset/prompt-injections",
+              "text_col": "text",
+              "label_col": "label"
+            },
+            {
+              "id": "jackhhao/jailbreak-classification",
+              "text_col": "prompt",
+              "label_col": "type",
+              "label_map": {
+                "benign": 0,
+                "jailbreak": 1
+              }
+            },
+            {
+              "id": "Lakera/gandalf_ignore_instructions",
+              "text_col": "text",
+              "label_const": 1
+            }
+          ],
+          "eval_sources": [
+            "hackaprompt/hackaprompt-dataset",
+            "lakeraai/pint-benchmark"
+          ],
+          "min_chars": 3,
+          "dedup": "normalized",
+          "max_seq_len": 256,
+          "splits": {
+            "train": 0.8,
+            "val": 0.1,
+            "test": 0.1
+          }
+        }
+      },
+      "full_name": "build_canonical_dataset"
+    },
+    {
+      "id": "021a8ebe",
+      "name": "raw_deepset",
+      "tags": [],
+      "pipelines": [
+        "stage",
+        "data",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "raw",
+      "dataset_type": "huggingface.hugging_face_dataset.HFDataset"
+    },
+    {
+      "id": "b33736fd",
+      "name": "raw_jackhhao",
+      "tags": [],
+      "pipelines": [
+        "stage",
+        "data",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "raw",
+      "dataset_type": "huggingface.hugging_face_dataset.HFDataset"
+    },
+    {
+      "id": "92cc0247",
+      "name": "raw_lakera",
+      "tags": [],
+      "pipelines": [
+        "stage",
+        "data",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "raw",
+      "dataset_type": "huggingface.hugging_face_dataset.HFDataset"
+    },
+    {
+      "id": "84e86f23",
+      "name": "params:data",
+      "tags": [],
+      "pipelines": [
+        "stage",
+        "data",
+        "__default__"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "21d22ec4",
+      "name": "canonical_dataset",
+      "tags": [
+        "similarity"
+      ],
+      "pipelines": [
+        "similarity",
+        "data",
+        "__default__",
+        "stage"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": {
+        "stats": {
+          "rows": 2947,
+          "columns": 3,
+          "file_size": 986532
+        },
+        "styles": null
+      },
+      "layer": "primary",
+      "dataset_type": "pandas.parquet_dataset.ParquetDataset"
+    },
+    {
+      "id": "014ac4b5",
+      "name": "dataset_audit",
+      "tags": [],
+      "pipelines": [
+        "stage",
+        "data",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "reporting",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "527c9834",
+      "name": "build_surrogate_registry",
+      "tags": [
+        "models"
+      ],
+      "pipelines": [
+        "models",
+        "stage",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "models": {
+          "target": "protectai/deberta-v3-base-prompt-injection-v2",
+          "surrogates": [
+            {
+              "name": "deberta-small-pi-v2",
+              "kind": "pretrained",
+              "gated": true
+            },
+            {
+              "name": "electra-small-ft",
+              "kind": "finetune"
+            },
+            {
+              "name": "bilstm-attention",
+              "kind": "bilstm"
+            }
+          ],
+          "finetune": {
+            "lr": 0.00002,
+            "batch_size": 32,
+            "epochs": 1,
+            "max_seq_len": 256
+          },
+          "bilstm": {
+            "embed_dim": 128,
+            "hidden_dim": 256,
+            "num_layers": 2,
+            "dropout": 0.3,
+            "lr": 0.001,
+            "batch_size": 64,
+            "epochs": 2,
+            "max_vocab": 20000,
+            "max_seq_len": 256
+          }
+        }
+      },
+      "full_name": "build_surrogate_registry"
+    },
+    {
+      "id": "d3e844b2",
+      "name": "params:models",
+      "tags": [
+        "bilstm-attention",
+        "deberta-small-pi-v2",
+        "models",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "models",
+        "stage",
+        "__default__"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "a526bcbb",
+      "name": "surrogate_registry",
+      "tags": [
+        "transfer",
+        "models"
+      ],
+      "pipelines": [
+        "__default__",
+        "models",
+        "stage",
+        "downstream",
+        "transfer"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "primary",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "665c0650",
+      "name": "materialize_deberta-small-pi-v2",
+      "tags": [
+        "models",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "models",
+        "stage",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "materialize_deberta-small-pi-v2"
+    },
+    {
+      "id": "84db9061",
+      "name": "hub__deberta-small-pi-v2",
+      "tags": [
+        "models",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "models",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "raw",
+      "dataset_type": "datasets.hub_model_dataset.HuggingFaceHubModelDataset"
+    },
+    {
+      "id": "d46a082c",
+      "name": "surrogate__deberta-small-pi-v2",
+      "tags": [
+        "deberta-small-pi-v2",
+        "similarity",
+        "models"
+      ],
+      "pipelines": [
+        "models",
+        "similarity",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "datasets.surrogate_model_dataset.SurrogateModelDataset"
+    },
+    {
+      "id": "7e39a93a",
+      "name": "surrogate_meta__deberta-small-pi-v2",
+      "tags": [
+        "models",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "models",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "32f45e43",
+      "name": "build_probe_set",
+      "tags": [
+        "similarity"
+      ],
+      "pipelines": [
+        "similarity",
+        "stage",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity": {
+          "n_probe": 64,
+          "pooling": "cls",
+          "cka": {
+            "mode": "linear",
+            "batch_size": 32
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        },
+        "seed": 20260616
+      },
+      "full_name": "build_probe_set"
+    },
+    {
+      "id": "4734aa1f",
+      "name": "params:similarity",
+      "tags": [
+        "deberta-small-pi-v2",
+        "bilstm-attention",
+        "similarity",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "similarity",
+        "stage",
+        "__default__"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "85e11043",
+      "name": "params:seed",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "pwws",
+        "models",
+        "deepwordbug",
+        "electra-small-ft",
+        "deberta-small-pi-v2",
+        "similarity",
+        "bilstm-attention"
+      ],
+      "pipelines": [
+        "data",
+        "__default__",
+        "attacks",
+        "models",
+        "stage",
+        "similarity",
+        "downstream",
+        "risk",
+        "smoke"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "a8404e80",
+      "name": "probe_set",
+      "tags": [
+        "deberta-small-pi-v2",
+        "bilstm-attention",
+        "similarity",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "similarity",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_input",
+      "dataset_type": "pandas.parquet_dataset.ParquetDataset"
+    },
+    {
+      "id": "b3adc04b",
+      "name": "export_onnx_deberta-small-pi-v2",
+      "tags": [
+        "models",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "models",
+        "stage",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "models": {
+          "target": "protectai/deberta-v3-base-prompt-injection-v2",
+          "surrogates": [
+            {
+              "name": "deberta-small-pi-v2",
+              "kind": "pretrained",
+              "gated": true
+            },
+            {
+              "name": "electra-small-ft",
+              "kind": "finetune"
+            },
+            {
+              "name": "bilstm-attention",
+              "kind": "bilstm"
+            }
+          ],
+          "finetune": {
+            "lr": 0.00002,
+            "batch_size": 32,
+            "epochs": 1,
+            "max_seq_len": 256
+          },
+          "bilstm": {
+            "embed_dim": 128,
+            "hidden_dim": 256,
+            "num_layers": 2,
+            "dropout": 0.3,
+            "lr": 0.001,
+            "batch_size": 64,
+            "epochs": 2,
+            "max_vocab": 20000,
+            "max_seq_len": 256
+          }
+        }
+      },
+      "full_name": "export_onnx_deberta-small-pi-v2"
+    },
+    {
+      "id": "6c63e960",
+      "name": "onnx__deberta-small-pi-v2",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "pwws",
+        "models",
+        "deepwordbug",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "models",
+        "attacks",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "datasets.onnx_model_dataset.OnnxModelDataset"
+    },
+    {
+      "id": "69c62486",
+      "name": "split_dataset",
+      "tags": [],
+      "pipelines": [
+        "stage",
+        "data",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "data": {
+          "train_sources": [
+            {
+              "id": "deepset/prompt-injections",
+              "text_col": "text",
+              "label_col": "label"
+            },
+            {
+              "id": "jackhhao/jailbreak-classification",
+              "text_col": "prompt",
+              "label_col": "type",
+              "label_map": {
+                "benign": 0,
+                "jailbreak": 1
+              }
+            },
+            {
+              "id": "Lakera/gandalf_ignore_instructions",
+              "text_col": "text",
+              "label_const": 1
+            }
+          ],
+          "eval_sources": [
+            "hackaprompt/hackaprompt-dataset",
+            "lakeraai/pint-benchmark"
+          ],
+          "min_chars": 3,
+          "dedup": "normalized",
+          "max_seq_len": 256,
+          "splits": {
+            "train": 0.8,
+            "val": 0.1,
+            "test": 0.1
+          }
+        },
+        "seed": 20260616
+      },
+      "full_name": "split_dataset"
+    },
+    {
+      "id": "8289686f",
+      "name": "task_splits",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "pwws",
+        "models",
+        "deepwordbug",
+        "electra-small-ft",
+        "deberta-small-pi-v2",
+        "bilstm-attention"
+      ],
+      "pipelines": [
+        "data",
+        "attacks",
+        "__default__",
+        "models",
+        "stage"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_input",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "bdb4add2",
+      "name": "compute_target_reps",
+      "tags": [
+        "similarity"
+      ],
+      "pipelines": [
+        "similarity",
+        "stage",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity": {
+          "n_probe": 64,
+          "pooling": "cls",
+          "cka": {
+            "mode": "linear",
+            "batch_size": 32
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        },
+        "device": {
+          "policy": "mps_or_cpu",
+          "allow_mps_fallback": true
+        }
+      },
+      "full_name": "compute_target_reps"
+    },
+    {
+      "id": "7e09f027",
+      "name": "target_model",
+      "tags": [
+        "transfer",
+        "similarity"
+      ],
+      "pipelines": [
+        "__default__",
+        "stage",
+        "similarity",
+        "downstream",
+        "transfer"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "raw",
+      "dataset_type": "datasets.hub_model_dataset.HuggingFaceHubModelDataset"
+    },
+    {
+      "id": "a4a96eb9",
+      "name": "params:device",
+      "tags": [
+        "bilstm-attention",
+        "similarity",
+        "deberta-small-pi-v2",
+        "transfer",
+        "models",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "__default__",
+        "models",
+        "stage",
+        "similarity",
+        "downstream",
+        "transfer"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "941617db",
+      "name": "target_reps",
+      "tags": [
+        "deberta-small-pi-v2",
+        "bilstm-attention",
+        "similarity",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "similarity",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": "io.memory_dataset.MemoryDataset"
+    },
+    {
+      "id": "b84e4166",
+      "name": "train_bilstm-attention",
+      "tags": [
+        "models",
+        "bilstm-attention"
+      ],
+      "pipelines": [
+        "models",
+        "stage",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "models": {
+          "target": "protectai/deberta-v3-base-prompt-injection-v2",
+          "surrogates": [
+            {
+              "name": "deberta-small-pi-v2",
+              "kind": "pretrained",
+              "gated": true
+            },
+            {
+              "name": "electra-small-ft",
+              "kind": "finetune"
+            },
+            {
+              "name": "bilstm-attention",
+              "kind": "bilstm"
+            }
+          ],
+          "finetune": {
+            "lr": 0.00002,
+            "batch_size": 32,
+            "epochs": 1,
+            "max_seq_len": 256
+          },
+          "bilstm": {
+            "embed_dim": 128,
+            "hidden_dim": 256,
+            "num_layers": 2,
+            "dropout": 0.3,
+            "lr": 0.001,
+            "batch_size": 64,
+            "epochs": 2,
+            "max_vocab": 20000,
+            "max_seq_len": 256
+          }
+        },
+        "device": {
+          "policy": "mps_or_cpu",
+          "allow_mps_fallback": true
+        },
+        "seed": 20260616
+      },
+      "full_name": "train_bilstm-attention"
+    },
+    {
+      "id": "b97b6ffe",
+      "name": "surrogate__bilstm-attention",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "pwws",
+        "models",
+        "deepwordbug",
+        "bilstm-attention",
+        "similarity"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__",
+        "models",
+        "stage",
+        "similarity"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "datasets.surrogate_model_dataset.SurrogateModelDataset"
+    },
+    {
+      "id": "234f4a5a",
+      "name": "surrogate_meta__bilstm-attention",
+      "tags": [
+        "models",
+        "bilstm-attention"
+      ],
+      "pipelines": [
+        "models",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "982df815",
+      "name": "train_electra-small-ft",
+      "tags": [
+        "models",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "models",
+        "stage",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "models": {
+          "target": "protectai/deberta-v3-base-prompt-injection-v2",
+          "surrogates": [
+            {
+              "name": "deberta-small-pi-v2",
+              "kind": "pretrained",
+              "gated": true
+            },
+            {
+              "name": "electra-small-ft",
+              "kind": "finetune"
+            },
+            {
+              "name": "bilstm-attention",
+              "kind": "bilstm"
+            }
+          ],
+          "finetune": {
+            "lr": 0.00002,
+            "batch_size": 32,
+            "epochs": 1,
+            "max_seq_len": 256
+          },
+          "bilstm": {
+            "embed_dim": 128,
+            "hidden_dim": 256,
+            "num_layers": 2,
+            "dropout": 0.3,
+            "lr": 0.001,
+            "batch_size": 64,
+            "epochs": 2,
+            "max_vocab": 20000,
+            "max_seq_len": 256
+          }
+        },
+        "device": {
+          "policy": "mps_or_cpu",
+          "allow_mps_fallback": true
+        },
+        "seed": 20260616
+      },
+      "full_name": "train_electra-small-ft"
+    },
+    {
+      "id": "ad8c2809",
+      "name": "hub__electra-small-ft",
+      "tags": [
+        "models",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "models",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "raw",
+      "dataset_type": "datasets.hub_model_dataset.HuggingFaceHubModelDataset"
+    },
+    {
+      "id": "a7b70e72",
+      "name": "surrogate__electra-small-ft",
+      "tags": [
+        "similarity",
+        "models",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "models",
+        "similarity",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "datasets.surrogate_model_dataset.SurrogateModelDataset"
+    },
+    {
+      "id": "1b570ad2",
+      "name": "surrogate_meta__electra-small-ft",
+      "tags": [
+        "models",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "models",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "5e603373",
+      "name": "cka_bilstm-attention",
+      "tags": [
+        "bilstm-attention",
+        "similarity"
+      ],
+      "pipelines": [
+        "similarity",
+        "stage",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity": {
+          "n_probe": 64,
+          "pooling": "cls",
+          "cka": {
+            "mode": "linear",
+            "batch_size": 32
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        },
+        "device": {
+          "policy": "mps_or_cpu",
+          "allow_mps_fallback": true
+        }
+      },
+      "full_name": "cka_bilstm-attention"
+    },
+    {
+      "id": "704dd573",
+      "name": "cka__bilstm-attention",
+      "tags": [
+        "bilstm-attention",
+        "similarity"
+      ],
+      "pipelines": [
+        "similarity",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "feature",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "bffffd40",
+      "name": "cka_deberta-small-pi-v2",
+      "tags": [
+        "deberta-small-pi-v2",
+        "similarity"
+      ],
+      "pipelines": [
+        "similarity",
+        "stage",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity": {
+          "n_probe": 64,
+          "pooling": "cls",
+          "cka": {
+            "mode": "linear",
+            "batch_size": 32
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        },
+        "device": {
+          "policy": "mps_or_cpu",
+          "allow_mps_fallback": true
+        }
+      },
+      "full_name": "cka_deberta-small-pi-v2"
+    },
+    {
+      "id": "0a6ff107",
+      "name": "cka__deberta-small-pi-v2",
+      "tags": [
+        "deberta-small-pi-v2",
+        "similarity"
+      ],
+      "pipelines": [
+        "similarity",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "feature",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "27fb4337",
+      "name": "cka_electra-small-ft",
+      "tags": [
+        "similarity",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "similarity",
+        "stage",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity": {
+          "n_probe": 64,
+          "pooling": "cls",
+          "cka": {
+            "mode": "linear",
+            "batch_size": 32
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        },
+        "device": {
+          "policy": "mps_or_cpu",
+          "allow_mps_fallback": true
+        }
+      },
+      "full_name": "cka_electra-small-ft"
+    },
+    {
+      "id": "203a7a78",
+      "name": "cka__electra-small-ft",
+      "tags": [
+        "similarity",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "similarity",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "feature",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "c9319213",
+      "name": "export_onnx_electra-small-ft",
+      "tags": [
+        "models",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "models",
+        "stage",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "models": {
+          "target": "protectai/deberta-v3-base-prompt-injection-v2",
+          "surrogates": [
+            {
+              "name": "deberta-small-pi-v2",
+              "kind": "pretrained",
+              "gated": true
+            },
+            {
+              "name": "electra-small-ft",
+              "kind": "finetune"
+            },
+            {
+              "name": "bilstm-attention",
+              "kind": "bilstm"
+            }
+          ],
+          "finetune": {
+            "lr": 0.00002,
+            "batch_size": 32,
+            "epochs": 1,
+            "max_seq_len": 256
+          },
+          "bilstm": {
+            "embed_dim": 128,
+            "hidden_dim": 256,
+            "num_layers": 2,
+            "dropout": 0.3,
+            "lr": 0.001,
+            "batch_size": 64,
+            "epochs": 2,
+            "max_vocab": 20000,
+            "max_seq_len": 256
+          }
+        }
+      },
+      "full_name": "export_onnx_electra-small-ft"
+    },
+    {
+      "id": "948d6213",
+      "name": "onnx__electra-small-ft",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "pwws",
+        "models",
+        "deepwordbug",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "models",
+        "attacks",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "datasets.onnx_model_dataset.OnnxModelDataset"
+    },
+    {
+      "id": "b200a82d",
+      "name": "reduce_cka",
+      "tags": [
+        "similarity"
+      ],
+      "pipelines": [
+        "similarity",
+        "stage",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "reduce_cka"
+    },
+    {
+      "id": "c992e96c",
+      "name": "cka_matrices",
+      "tags": [
+        "similarity"
+      ],
+      "pipelines": [
+        "similarity",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "feature",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "65dcfdd5",
+      "name": "reduce_similarity",
+      "tags": [
+        "similarity"
+      ],
+      "pipelines": [
+        "similarity",
+        "stage",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity": {
+          "n_probe": 64,
+          "pooling": "cls",
+          "cka": {
+            "mode": "linear",
+            "batch_size": 32
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        }
+      },
+      "full_name": "reduce_similarity"
+    },
+    {
+      "id": "3d21843d",
+      "name": "similarity_table",
+      "tags": [
+        "transfer",
+        "similarity"
+      ],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "stage",
+        "similarity",
+        "downstream",
+        "transfer"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pandas.parquet_dataset.ParquetDataset"
+    },
+    {
+      "id": "bae5e3d2",
+      "name": "calibrate_thresholds",
+      "tags": [
+        "similarity"
+      ],
+      "pipelines": [
+        "similarity",
+        "stage",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity": {
+          "n_probe": 64,
+          "pooling": "cls",
+          "cka": {
+            "mode": "linear",
+            "batch_size": 32
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        }
+      },
+      "full_name": "calibrate_thresholds"
+    },
+    {
+      "id": "df5b3cfe",
+      "name": "thresholds",
+      "tags": [
+        "similarity"
+      ],
+      "pipelines": [
+        "__default__",
+        "stage",
+        "similarity",
+        "downstream",
+        "risk"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "ea493d3e",
+      "name": "select_surrogates",
+      "tags": [
+        "similarity"
+      ],
+      "pipelines": [
+        "similarity",
+        "stage",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "select_surrogates"
+    },
+    {
+      "id": "8bb4724c",
+      "name": "surrogate_selection",
+      "tags": [
+        "similarity"
+      ],
+      "pipelines": [
+        "__default__",
+        "stage",
+        "similarity",
+        "downstream",
+        "risk"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    }
+  ],
+  "edges": [
+    {
+      "source": "85e11043",
+      "target": "32f45e43"
+    },
+    {
+      "source": "32f45e43",
+      "target": "a8404e80"
+    },
+    {
+      "source": "d46a082c",
+      "target": "b3adc04b"
+    },
+    {
+      "source": "85e11043",
+      "target": "b84e4166"
+    },
+    {
+      "source": "8289686f",
+      "target": "b84e4166"
+    },
+    {
+      "source": "a8404e80",
+      "target": "bdb4add2"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "982df815"
+    },
+    {
+      "source": "982df815",
+      "target": "a7b70e72"
+    },
+    {
+      "source": "5e603373",
+      "target": "704dd573"
+    },
+    {
+      "source": "84e86f23",
+      "target": "69c62486"
+    },
+    {
+      "source": "85e11043",
+      "target": "69c62486"
+    },
+    {
+      "source": "ad8c2809",
+      "target": "982df815"
+    },
+    {
+      "source": "d3e844b2",
+      "target": "982df815"
+    },
+    {
+      "source": "bdb4add2",
+      "target": "941617db"
+    },
+    {
+      "source": "941617db",
+      "target": "bffffd40"
+    },
+    {
+      "source": "d46a082c",
+      "target": "bffffd40"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "bffffd40"
+    },
+    {
+      "source": "bffffd40",
+      "target": "0a6ff107"
+    },
+    {
+      "source": "c992e96c",
+      "target": "65dcfdd5"
+    },
+    {
+      "source": "3d21843d",
+      "target": "bae5e3d2"
+    },
+    {
+      "source": "84db9061",
+      "target": "665c0650"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "65dcfdd5"
+    },
+    {
+      "source": "df5b3cfe",
+      "target": "ea493d3e"
+    },
+    {
+      "source": "349b977c",
+      "target": "014ac4b5"
+    },
+    {
+      "source": "a8404e80",
+      "target": "bffffd40"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "27fb4337"
+    },
+    {
+      "source": "b84e4166",
+      "target": "b97b6ffe"
+    },
+    {
+      "source": "0a6ff107",
+      "target": "b200a82d"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "bae5e3d2"
+    },
+    {
+      "source": "b33736fd",
+      "target": "349b977c"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "5e603373"
+    },
+    {
+      "source": "021a8ebe",
+      "target": "349b977c"
+    },
+    {
+      "source": "d3e844b2",
+      "target": "527c9834"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "b84e4166"
+    },
+    {
+      "source": "92cc0247",
+      "target": "349b977c"
+    },
+    {
+      "source": "349b977c",
+      "target": "21d22ec4"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "bdb4add2"
+    },
+    {
+      "source": "941617db",
+      "target": "5e603373"
+    },
+    {
+      "source": "d3e844b2",
+      "target": "b84e4166"
+    },
+    {
+      "source": "b3adc04b",
+      "target": "6c63e960"
+    },
+    {
+      "source": "665c0650",
+      "target": "d46a082c"
+    },
+    {
+      "source": "b97b6ffe",
+      "target": "5e603373"
+    },
+    {
+      "source": "27fb4337",
+      "target": "203a7a78"
+    },
+    {
+      "source": "a8404e80",
+      "target": "5e603373"
+    },
+    {
+      "source": "a7b70e72",
+      "target": "27fb4337"
+    },
+    {
+      "source": "d3e844b2",
+      "target": "b3adc04b"
+    },
+    {
+      "source": "704dd573",
+      "target": "b200a82d"
+    },
+    {
+      "source": "982df815",
+      "target": "1b570ad2"
+    },
+    {
+      "source": "ea493d3e",
+      "target": "8bb4724c"
+    },
+    {
+      "source": "b200a82d",
+      "target": "c992e96c"
+    },
+    {
+      "source": "8289686f",
+      "target": "982df815"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "bffffd40"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "27fb4337"
+    },
+    {
+      "source": "21d22ec4",
+      "target": "32f45e43"
+    },
+    {
+      "source": "85e11043",
+      "target": "982df815"
+    },
+    {
+      "source": "665c0650",
+      "target": "7e39a93a"
+    },
+    {
+      "source": "941617db",
+      "target": "27fb4337"
+    },
+    {
+      "source": "69c62486",
+      "target": "8289686f"
+    },
+    {
+      "source": "d3e844b2",
+      "target": "c9319213"
+    },
+    {
+      "source": "c9319213",
+      "target": "948d6213"
+    },
+    {
+      "source": "84e86f23",
+      "target": "349b977c"
+    },
+    {
+      "source": "21d22ec4",
+      "target": "69c62486"
+    },
+    {
+      "source": "527c9834",
+      "target": "a526bcbb"
+    },
+    {
+      "source": "65dcfdd5",
+      "target": "3d21843d"
+    },
+    {
+      "source": "7e09f027",
+      "target": "bdb4add2"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "bdb4add2"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "32f45e43"
+    },
+    {
+      "source": "a8404e80",
+      "target": "27fb4337"
+    },
+    {
+      "source": "b84e4166",
+      "target": "234f4a5a"
+    },
+    {
+      "source": "3d21843d",
+      "target": "ea493d3e"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "5e603373"
+    },
+    {
+      "source": "203a7a78",
+      "target": "b200a82d"
+    },
+    {
+      "source": "bae5e3d2",
+      "target": "df5b3cfe"
+    },
+    {
+      "source": "a7b70e72",
+      "target": "c9319213"
+    }
+  ],
+  "layers": [
+    "raw",
+    "primary",
+    "reporting",
+    "model_input",
+    "models",
+    "feature",
+    "model_output"
+  ],
+  "tags": [
+    {
+      "id": "attacks",
+      "name": "attacks"
+    },
+    {
+      "id": "bilstm-attention",
+      "name": "bilstm-attention"
+    },
+    {
+      "id": "deberta-small-pi-v2",
+      "name": "deberta-small-pi-v2"
+    },
+    {
+      "id": "deepwordbug",
+      "name": "deepwordbug"
+    },
+    {
+      "id": "electra-small-ft",
+      "name": "electra-small-ft"
+    },
+    {
+      "id": "models",
+      "name": "models"
+    },
+    {
+      "id": "pwws",
+      "name": "pwws"
+    },
+    {
+      "id": "similarity",
+      "name": "similarity"
+    },
+    {
+      "id": "textfooler",
+      "name": "textfooler"
+    },
+    {
+      "id": "transfer",
+      "name": "transfer"
+    }
+  ],
+  "pipelines": [
+    {
+      "id": "__default__",
+      "name": "__default__"
+    },
+    {
+      "id": "smoke",
+      "name": "smoke"
+    },
+    {
+      "id": "reporting",
+      "name": "reporting"
+    },
+    {
+      "id": "similarity",
+      "name": "similarity"
+    },
+    {
+      "id": "transfer",
+      "name": "transfer"
+    },
+    {
+      "id": "models",
+      "name": "models"
+    },
+    {
+      "id": "data",
+      "name": "data"
+    },
+    {
+      "id": "risk",
+      "name": "risk"
+    },
+    {
+      "id": "attacks",
+      "name": "attacks"
+    },
+    {
+      "id": "stage",
+      "name": "stage"
+    },
+    {
+      "id": "downstream",
+      "name": "downstream"
+    }
+  ],
+  "modular_pipelines": {
+    "__root__": {
+      "id": "__root__",
+      "name": "__root__",
+      "inputs": [],
+      "outputs": [],
+      "children": [
+        {
+          "id": "527c9834",
+          "type": "task"
+        },
+        {
+          "id": "69c62486",
+          "type": "task"
+        },
+        {
+          "id": "5e603373",
+          "type": "task"
+        },
+        {
+          "id": "a4a96eb9",
+          "type": "data"
+        },
+        {
+          "id": "ad8c2809",
+          "type": "data"
+        },
+        {
+          "id": "b200a82d",
+          "type": "task"
+        },
+        {
+          "id": "bffffd40",
+          "type": "task"
+        },
+        {
+          "id": "d3e844b2",
+          "type": "data"
+        },
+        {
+          "id": "6c63e960",
+          "type": "data"
+        },
+        {
+          "id": "bae5e3d2",
+          "type": "task"
+        },
+        {
+          "id": "b33736fd",
+          "type": "data"
+        },
+        {
+          "id": "84db9061",
+          "type": "data"
+        },
+        {
+          "id": "203a7a78",
+          "type": "data"
+        },
+        {
+          "id": "92cc0247",
+          "type": "data"
+        },
+        {
+          "id": "982df815",
+          "type": "task"
+        },
+        {
+          "id": "a7b70e72",
+          "type": "data"
+        },
+        {
+          "id": "021a8ebe",
+          "type": "data"
+        },
+        {
+          "id": "4734aa1f",
+          "type": "parameters"
+        },
+        {
+          "id": "21d22ec4",
+          "type": "data"
+        },
+        {
+          "id": "234f4a5a",
+          "type": "data"
+        },
+        {
+          "id": "3d21843d",
+          "type": "data"
+        },
+        {
+          "id": "27fb4337",
+          "type": "task"
+        },
+        {
+          "id": "c992e96c",
+          "type": "data"
+        },
+        {
+          "id": "c9319213",
+          "type": "task"
+        },
+        {
+          "id": "4734aa1f",
+          "type": "data"
+        },
+        {
+          "id": "7e09f027",
+          "type": "data"
+        },
+        {
+          "id": "349b977c",
+          "type": "task"
+        },
+        {
+          "id": "941617db",
+          "type": "data"
+        },
+        {
+          "id": "84e86f23",
+          "type": "parameters"
+        },
+        {
+          "id": "d46a082c",
+          "type": "data"
+        },
+        {
+          "id": "0a6ff107",
+          "type": "data"
+        },
+        {
+          "id": "32f45e43",
+          "type": "task"
+        },
+        {
+          "id": "85e11043",
+          "type": "parameters"
+        },
+        {
+          "id": "948d6213",
+          "type": "data"
+        },
+        {
+          "id": "1b570ad2",
+          "type": "data"
+        },
+        {
+          "id": "014ac4b5",
+          "type": "data"
+        },
+        {
+          "id": "7e39a93a",
+          "type": "data"
+        },
+        {
+          "id": "b97b6ffe",
+          "type": "data"
+        },
+        {
+          "id": "85e11043",
+          "type": "data"
+        },
+        {
+          "id": "84e86f23",
+          "type": "data"
+        },
+        {
+          "id": "8289686f",
+          "type": "data"
+        },
+        {
+          "id": "a8404e80",
+          "type": "data"
+        },
+        {
+          "id": "df5b3cfe",
+          "type": "data"
+        },
+        {
+          "id": "8bb4724c",
+          "type": "data"
+        },
+        {
+          "id": "665c0650",
+          "type": "task"
+        },
+        {
+          "id": "65dcfdd5",
+          "type": "task"
+        },
+        {
+          "id": "bdb4add2",
+          "type": "task"
+        },
+        {
+          "id": "b84e4166",
+          "type": "task"
+        },
+        {
+          "id": "b3adc04b",
+          "type": "task"
+        },
+        {
+          "id": "704dd573",
+          "type": "data"
+        },
+        {
+          "id": "a4a96eb9",
+          "type": "parameters"
+        },
+        {
+          "id": "a526bcbb",
+          "type": "data"
+        },
+        {
+          "id": "ea493d3e",
+          "type": "task"
+        },
+        {
+          "id": "d3e844b2",
+          "type": "parameters"
+        }
+      ]
+    }
+  },
+  "selected_pipeline": "stage"
+}

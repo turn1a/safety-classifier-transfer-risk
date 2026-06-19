@@ -1,0 +1,14 @@
+{
+  "code": "def select_surrogates(\n    similarity_table: pd.DataFrame, thresholds: dict[str, float]\n) -> dict[str, Any]:\n    \"\"\"Split surrogates into high-similarity (M1) and low-similarity (M2) pools.\"\"\"\n    r1, r2 = thresholds[\"r1\"], thresholds[\"r2\"]\n    high = similarity_table.loc[similarity_table[\"mean_cka\"] >= r1, \"surrogate\"].tolist()\n    low = similarity_table.loc[similarity_table[\"mean_cka\"] <= r2, \"surrogate\"].tolist()\n    logger.info(\"Selected M1=%s M2=%s (r1=%.4f r2=%.4f)\", high, low, r1, r2)\n    return {\"M1\": high, \"M2\": low, \"r1\": r1, \"r2\": r2, \"signal\": \"mean_cka\"}\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/similarity/nodes.py",
+  "parameters": {},
+  "run_command": "kedro run --to-nodes='select_surrogates'",
+  "inputs": [
+    "similarity_table",
+    "thresholds"
+  ],
+  "outputs": [
+    "surrogate_selection"
+  ],
+  "preview": null
+}

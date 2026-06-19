@@ -1,0 +1,8 @@
+{
+  "parameters": {
+    "project": {
+      "name": "safety-classifier-transfer-risk",
+      "version": "0.1.0"
+    }
+  }
+}

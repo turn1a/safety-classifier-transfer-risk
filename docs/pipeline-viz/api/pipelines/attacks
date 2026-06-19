@@ -1,0 +1,2969 @@
+{
+  "nodes": [
+    {
+      "id": "85e11043",
+      "name": "params:seed",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "pwws",
+        "models",
+        "deepwordbug",
+        "electra-small-ft",
+        "deberta-small-pi-v2",
+        "similarity",
+        "bilstm-attention"
+      ],
+      "pipelines": [
+        "data",
+        "__default__",
+        "attacks",
+        "models",
+        "stage",
+        "similarity",
+        "downstream",
+        "risk",
+        "smoke"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "6c63e960",
+      "name": "onnx__deberta-small-pi-v2",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "pwws",
+        "models",
+        "deepwordbug",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "models",
+        "attacks",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "datasets.onnx_model_dataset.OnnxModelDataset"
+    },
+    {
+      "id": "8289686f",
+      "name": "task_splits",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "pwws",
+        "models",
+        "deepwordbug",
+        "electra-small-ft",
+        "deberta-small-pi-v2",
+        "bilstm-attention"
+      ],
+      "pipelines": [
+        "data",
+        "attacks",
+        "__default__",
+        "models",
+        "stage"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_input",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "a1801049",
+      "name": "attack_deberta-small-pi-v2__deepwordbug__0",
+      "tags": [
+        "deberta-small-pi-v2",
+        "attacks",
+        "deepwordbug"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_deberta-small-pi-v2__deepwordbug__0"
+    },
+    {
+      "id": "9d4defaf",
+      "name": "params:attacks",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "pwws",
+        "deepwordbug",
+        "electra-small-ft",
+        "deberta-small-pi-v2",
+        "bilstm-attention"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "7eae13cf",
+      "name": "adversarial_shard__deberta-small-pi-v2__deepwordbug__0",
+      "tags": [
+        "deberta-small-pi-v2",
+        "attacks",
+        "deepwordbug"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "aa6f8c04",
+      "name": "attack_deberta-small-pi-v2__deepwordbug__4",
+      "tags": [
+        "deberta-small-pi-v2",
+        "attacks",
+        "deepwordbug"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_deberta-small-pi-v2__deepwordbug__4"
+    },
+    {
+      "id": "8f36d6f1",
+      "name": "adversarial_shard__deberta-small-pi-v2__deepwordbug__4",
+      "tags": [
+        "deberta-small-pi-v2",
+        "attacks",
+        "deepwordbug"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "dfa64f7f",
+      "name": "attack_deberta-small-pi-v2__deepwordbug__8",
+      "tags": [
+        "deberta-small-pi-v2",
+        "attacks",
+        "deepwordbug"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_deberta-small-pi-v2__deepwordbug__8"
+    },
+    {
+      "id": "c961af1a",
+      "name": "adversarial_shard__deberta-small-pi-v2__deepwordbug__8",
+      "tags": [
+        "deberta-small-pi-v2",
+        "attacks",
+        "deepwordbug"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "f2d7144a",
+      "name": "attack_deberta-small-pi-v2__pwws__0",
+      "tags": [
+        "deberta-small-pi-v2",
+        "attacks",
+        "pwws"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_deberta-small-pi-v2__pwws__0"
+    },
+    {
+      "id": "c185d536",
+      "name": "adversarial_shard__deberta-small-pi-v2__pwws__0",
+      "tags": [
+        "deberta-small-pi-v2",
+        "attacks",
+        "pwws"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "206c7720",
+      "name": "attack_deberta-small-pi-v2__pwws__4",
+      "tags": [
+        "deberta-small-pi-v2",
+        "attacks",
+        "pwws"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_deberta-small-pi-v2__pwws__4"
+    },
+    {
+      "id": "829e7328",
+      "name": "adversarial_shard__deberta-small-pi-v2__pwws__4",
+      "tags": [
+        "deberta-small-pi-v2",
+        "attacks",
+        "pwws"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "5341fae6",
+      "name": "attack_deberta-small-pi-v2__pwws__8",
+      "tags": [
+        "deberta-small-pi-v2",
+        "attacks",
+        "pwws"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_deberta-small-pi-v2__pwws__8"
+    },
+    {
+      "id": "5902ad6f",
+      "name": "adversarial_shard__deberta-small-pi-v2__pwws__8",
+      "tags": [
+        "deberta-small-pi-v2",
+        "attacks",
+        "pwws"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "5af3c300",
+      "name": "attack_deberta-small-pi-v2__textfooler__0",
+      "tags": [
+        "deberta-small-pi-v2",
+        "textfooler",
+        "attacks"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_deberta-small-pi-v2__textfooler__0"
+    },
+    {
+      "id": "f1c064fa",
+      "name": "adversarial_shard__deberta-small-pi-v2__textfooler__0",
+      "tags": [
+        "deberta-small-pi-v2",
+        "textfooler",
+        "attacks"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "8eb3f901",
+      "name": "attack_deberta-small-pi-v2__textfooler__4",
+      "tags": [
+        "deberta-small-pi-v2",
+        "textfooler",
+        "attacks"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_deberta-small-pi-v2__textfooler__4"
+    },
+    {
+      "id": "5bb4f487",
+      "name": "adversarial_shard__deberta-small-pi-v2__textfooler__4",
+      "tags": [
+        "deberta-small-pi-v2",
+        "textfooler",
+        "attacks"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "fb210e09",
+      "name": "attack_deberta-small-pi-v2__textfooler__8",
+      "tags": [
+        "deberta-small-pi-v2",
+        "textfooler",
+        "attacks"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_deberta-small-pi-v2__textfooler__8"
+    },
+    {
+      "id": "be26ab27",
+      "name": "adversarial_shard__deberta-small-pi-v2__textfooler__8",
+      "tags": [
+        "deberta-small-pi-v2",
+        "textfooler",
+        "attacks"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "b97b6ffe",
+      "name": "surrogate__bilstm-attention",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "pwws",
+        "models",
+        "deepwordbug",
+        "bilstm-attention",
+        "similarity"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__",
+        "models",
+        "stage",
+        "similarity"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "datasets.surrogate_model_dataset.SurrogateModelDataset"
+    },
+    {
+      "id": "79502837",
+      "name": "attack_bilstm-attention__deepwordbug__0",
+      "tags": [
+        "bilstm-attention",
+        "attacks",
+        "deepwordbug"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_bilstm-attention__deepwordbug__0"
+    },
+    {
+      "id": "766107ff",
+      "name": "adversarial_shard__bilstm-attention__deepwordbug__0",
+      "tags": [
+        "bilstm-attention",
+        "attacks",
+        "deepwordbug"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "0a856729",
+      "name": "attack_bilstm-attention__deepwordbug__4",
+      "tags": [
+        "bilstm-attention",
+        "attacks",
+        "deepwordbug"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_bilstm-attention__deepwordbug__4"
+    },
+    {
+      "id": "76be1206",
+      "name": "adversarial_shard__bilstm-attention__deepwordbug__4",
+      "tags": [
+        "bilstm-attention",
+        "attacks",
+        "deepwordbug"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "1ef5415a",
+      "name": "attack_bilstm-attention__deepwordbug__8",
+      "tags": [
+        "bilstm-attention",
+        "attacks",
+        "deepwordbug"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_bilstm-attention__deepwordbug__8"
+    },
+    {
+      "id": "fcd3e985",
+      "name": "adversarial_shard__bilstm-attention__deepwordbug__8",
+      "tags": [
+        "bilstm-attention",
+        "attacks",
+        "deepwordbug"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "dad2940a",
+      "name": "attack_bilstm-attention__pwws__0",
+      "tags": [
+        "bilstm-attention",
+        "attacks",
+        "pwws"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_bilstm-attention__pwws__0"
+    },
+    {
+      "id": "269191ae",
+      "name": "adversarial_shard__bilstm-attention__pwws__0",
+      "tags": [
+        "bilstm-attention",
+        "attacks",
+        "pwws"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "60dfa654",
+      "name": "attack_bilstm-attention__pwws__4",
+      "tags": [
+        "bilstm-attention",
+        "attacks",
+        "pwws"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_bilstm-attention__pwws__4"
+    },
+    {
+      "id": "8a403832",
+      "name": "adversarial_shard__bilstm-attention__pwws__4",
+      "tags": [
+        "bilstm-attention",
+        "attacks",
+        "pwws"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "2222d123",
+      "name": "attack_bilstm-attention__pwws__8",
+      "tags": [
+        "bilstm-attention",
+        "attacks",
+        "pwws"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_bilstm-attention__pwws__8"
+    },
+    {
+      "id": "5b5fef84",
+      "name": "adversarial_shard__bilstm-attention__pwws__8",
+      "tags": [
+        "bilstm-attention",
+        "attacks",
+        "pwws"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "a0619cd6",
+      "name": "attack_bilstm-attention__textfooler__0",
+      "tags": [
+        "bilstm-attention",
+        "textfooler",
+        "attacks"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_bilstm-attention__textfooler__0"
+    },
+    {
+      "id": "78375536",
+      "name": "adversarial_shard__bilstm-attention__textfooler__0",
+      "tags": [
+        "bilstm-attention",
+        "textfooler",
+        "attacks"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "2c1819a7",
+      "name": "attack_bilstm-attention__textfooler__4",
+      "tags": [
+        "bilstm-attention",
+        "textfooler",
+        "attacks"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_bilstm-attention__textfooler__4"
+    },
+    {
+      "id": "8a4d19bb",
+      "name": "adversarial_shard__bilstm-attention__textfooler__4",
+      "tags": [
+        "bilstm-attention",
+        "textfooler",
+        "attacks"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "9934ccb6",
+      "name": "attack_bilstm-attention__textfooler__8",
+      "tags": [
+        "bilstm-attention",
+        "textfooler",
+        "attacks"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_bilstm-attention__textfooler__8"
+    },
+    {
+      "id": "34bf1fc0",
+      "name": "adversarial_shard__bilstm-attention__textfooler__8",
+      "tags": [
+        "bilstm-attention",
+        "textfooler",
+        "attacks"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "948d6213",
+      "name": "onnx__electra-small-ft",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "pwws",
+        "models",
+        "deepwordbug",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "models",
+        "attacks",
+        "stage",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "datasets.onnx_model_dataset.OnnxModelDataset"
+    },
+    {
+      "id": "b412498e",
+      "name": "reduce_deberta-small-pi-v2__deepwordbug",
+      "tags": [
+        "deberta-small-pi-v2",
+        "attacks",
+        "deepwordbug"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "reduce_deberta-small-pi-v2__deepwordbug"
+    },
+    {
+      "id": "5499fe83",
+      "name": "adversarial__deberta-small-pi-v2__deepwordbug",
+      "tags": [
+        "deberta-small-pi-v2",
+        "attacks",
+        "transfer",
+        "deepwordbug"
+      ],
+      "pipelines": [
+        "transfer",
+        "attacks",
+        "__default__",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "ae122c1d",
+      "name": "reduce_deberta-small-pi-v2__pwws",
+      "tags": [
+        "deberta-small-pi-v2",
+        "attacks",
+        "pwws"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "reduce_deberta-small-pi-v2__pwws"
+    },
+    {
+      "id": "a5e0f6c8",
+      "name": "adversarial__deberta-small-pi-v2__pwws",
+      "tags": [
+        "deberta-small-pi-v2",
+        "attacks",
+        "pwws",
+        "transfer"
+      ],
+      "pipelines": [
+        "transfer",
+        "attacks",
+        "__default__",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "f8fd9da5",
+      "name": "reduce_deberta-small-pi-v2__textfooler",
+      "tags": [
+        "deberta-small-pi-v2",
+        "textfooler",
+        "attacks"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "reduce_deberta-small-pi-v2__textfooler"
+    },
+    {
+      "id": "ff9596b4",
+      "name": "adversarial__deberta-small-pi-v2__textfooler",
+      "tags": [
+        "deberta-small-pi-v2",
+        "textfooler",
+        "attacks",
+        "transfer"
+      ],
+      "pipelines": [
+        "transfer",
+        "attacks",
+        "__default__",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "a12919ef",
+      "name": "attack_electra-small-ft__deepwordbug__0",
+      "tags": [
+        "attacks",
+        "deepwordbug",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_electra-small-ft__deepwordbug__0"
+    },
+    {
+      "id": "7632fe9b",
+      "name": "adversarial_shard__electra-small-ft__deepwordbug__0",
+      "tags": [
+        "attacks",
+        "deepwordbug",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "6d92b31e",
+      "name": "attack_electra-small-ft__deepwordbug__4",
+      "tags": [
+        "attacks",
+        "deepwordbug",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_electra-small-ft__deepwordbug__4"
+    },
+    {
+      "id": "808d46d8",
+      "name": "adversarial_shard__electra-small-ft__deepwordbug__4",
+      "tags": [
+        "attacks",
+        "deepwordbug",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "90e283dc",
+      "name": "attack_electra-small-ft__deepwordbug__8",
+      "tags": [
+        "attacks",
+        "deepwordbug",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_electra-small-ft__deepwordbug__8"
+    },
+    {
+      "id": "8bb3eb4b",
+      "name": "adversarial_shard__electra-small-ft__deepwordbug__8",
+      "tags": [
+        "attacks",
+        "deepwordbug",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "167e136d",
+      "name": "attack_electra-small-ft__pwws__0",
+      "tags": [
+        "attacks",
+        "pwws",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_electra-small-ft__pwws__0"
+    },
+    {
+      "id": "a4898dfa",
+      "name": "adversarial_shard__electra-small-ft__pwws__0",
+      "tags": [
+        "attacks",
+        "pwws",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "f24f6084",
+      "name": "attack_electra-small-ft__pwws__4",
+      "tags": [
+        "attacks",
+        "pwws",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_electra-small-ft__pwws__4"
+    },
+    {
+      "id": "7ad2e5e3",
+      "name": "adversarial_shard__electra-small-ft__pwws__4",
+      "tags": [
+        "attacks",
+        "pwws",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "a6e297da",
+      "name": "attack_electra-small-ft__pwws__8",
+      "tags": [
+        "attacks",
+        "pwws",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_electra-small-ft__pwws__8"
+    },
+    {
+      "id": "70f62ec6",
+      "name": "adversarial_shard__electra-small-ft__pwws__8",
+      "tags": [
+        "attacks",
+        "pwws",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "14854982",
+      "name": "attack_electra-small-ft__textfooler__0",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_electra-small-ft__textfooler__0"
+    },
+    {
+      "id": "44a76af9",
+      "name": "adversarial_shard__electra-small-ft__textfooler__0",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "21c72308",
+      "name": "attack_electra-small-ft__textfooler__4",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_electra-small-ft__textfooler__4"
+    },
+    {
+      "id": "96751825",
+      "name": "adversarial_shard__electra-small-ft__textfooler__4",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "bc690a66",
+      "name": "attack_electra-small-ft__textfooler__8",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 12,
+          "query_budget": 200,
+          "max_prompt_chars": 512,
+          "shard_size": 4
+        },
+        "seed": 20260616
+      },
+      "full_name": "attack_electra-small-ft__textfooler__8"
+    },
+    {
+      "id": "1db939c2",
+      "name": "adversarial_shard__electra-small-ft__textfooler__8",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "66bf9b67",
+      "name": "reduce_bilstm-attention__deepwordbug",
+      "tags": [
+        "bilstm-attention",
+        "attacks",
+        "deepwordbug"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "reduce_bilstm-attention__deepwordbug"
+    },
+    {
+      "id": "70cc20bd",
+      "name": "adversarial__bilstm-attention__deepwordbug",
+      "tags": [
+        "bilstm-attention",
+        "attacks",
+        "transfer",
+        "deepwordbug"
+      ],
+      "pipelines": [
+        "transfer",
+        "attacks",
+        "__default__",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "c1646248",
+      "name": "reduce_bilstm-attention__pwws",
+      "tags": [
+        "bilstm-attention",
+        "attacks",
+        "pwws"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "reduce_bilstm-attention__pwws"
+    },
+    {
+      "id": "b8d1c687",
+      "name": "adversarial__bilstm-attention__pwws",
+      "tags": [
+        "bilstm-attention",
+        "attacks",
+        "pwws",
+        "transfer"
+      ],
+      "pipelines": [
+        "transfer",
+        "attacks",
+        "__default__",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "5c2dc665",
+      "name": "reduce_bilstm-attention__textfooler",
+      "tags": [
+        "bilstm-attention",
+        "textfooler",
+        "attacks"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "reduce_bilstm-attention__textfooler"
+    },
+    {
+      "id": "f50a2280",
+      "name": "adversarial__bilstm-attention__textfooler",
+      "tags": [
+        "bilstm-attention",
+        "textfooler",
+        "attacks",
+        "transfer"
+      ],
+      "pipelines": [
+        "transfer",
+        "attacks",
+        "__default__",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "d95eb527",
+      "name": "reduce_electra-small-ft__deepwordbug",
+      "tags": [
+        "attacks",
+        "deepwordbug",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "reduce_electra-small-ft__deepwordbug"
+    },
+    {
+      "id": "63bb53d3",
+      "name": "adversarial__electra-small-ft__deepwordbug",
+      "tags": [
+        "attacks",
+        "transfer",
+        "deepwordbug",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "transfer",
+        "attacks",
+        "__default__",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "69158527",
+      "name": "reduce_electra-small-ft__pwws",
+      "tags": [
+        "attacks",
+        "pwws",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "reduce_electra-small-ft__pwws"
+    },
+    {
+      "id": "ab0aa67d",
+      "name": "adversarial__electra-small-ft__pwws",
+      "tags": [
+        "attacks",
+        "pwws",
+        "transfer",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "transfer",
+        "attacks",
+        "__default__",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "49cdacc5",
+      "name": "reduce_electra-small-ft__textfooler",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "attacks",
+        "__default__"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "reduce_electra-small-ft__textfooler"
+    },
+    {
+      "id": "6944e3b5",
+      "name": "adversarial__electra-small-ft__textfooler",
+      "tags": [
+        "textfooler",
+        "attacks",
+        "transfer",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "transfer",
+        "attacks",
+        "__default__",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    }
+  ],
+  "edges": [
+    {
+      "source": "85e11043",
+      "target": "fb210e09"
+    },
+    {
+      "source": "85e11043",
+      "target": "aa6f8c04"
+    },
+    {
+      "source": "6c63e960",
+      "target": "206c7720"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "14854982"
+    },
+    {
+      "source": "76be1206",
+      "target": "66bf9b67"
+    },
+    {
+      "source": "1ef5415a",
+      "target": "fcd3e985"
+    },
+    {
+      "source": "2222d123",
+      "target": "5b5fef84"
+    },
+    {
+      "source": "8289686f",
+      "target": "2c1819a7"
+    },
+    {
+      "source": "85e11043",
+      "target": "5341fae6"
+    },
+    {
+      "source": "78375536",
+      "target": "5c2dc665"
+    },
+    {
+      "source": "948d6213",
+      "target": "90e283dc"
+    },
+    {
+      "source": "d95eb527",
+      "target": "63bb53d3"
+    },
+    {
+      "source": "8289686f",
+      "target": "8eb3f901"
+    },
+    {
+      "source": "85e11043",
+      "target": "9934ccb6"
+    },
+    {
+      "source": "a6e297da",
+      "target": "70f62ec6"
+    },
+    {
+      "source": "7ad2e5e3",
+      "target": "69158527"
+    },
+    {
+      "source": "f24f6084",
+      "target": "7ad2e5e3"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "dfa64f7f"
+    },
+    {
+      "source": "6c63e960",
+      "target": "5af3c300"
+    },
+    {
+      "source": "85e11043",
+      "target": "a12919ef"
+    },
+    {
+      "source": "5b5fef84",
+      "target": "c1646248"
+    },
+    {
+      "source": "c961af1a",
+      "target": "b412498e"
+    },
+    {
+      "source": "f1c064fa",
+      "target": "f8fd9da5"
+    },
+    {
+      "source": "6d92b31e",
+      "target": "808d46d8"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "fb210e09"
+    },
+    {
+      "source": "b97b6ffe",
+      "target": "1ef5415a"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "aa6f8c04"
+    },
+    {
+      "source": "b97b6ffe",
+      "target": "a0619cd6"
+    },
+    {
+      "source": "14854982",
+      "target": "44a76af9"
+    },
+    {
+      "source": "8289686f",
+      "target": "1ef5415a"
+    },
+    {
+      "source": "8289686f",
+      "target": "a0619cd6"
+    },
+    {
+      "source": "8289686f",
+      "target": "206c7720"
+    },
+    {
+      "source": "85e11043",
+      "target": "a6e297da"
+    },
+    {
+      "source": "5c2dc665",
+      "target": "f50a2280"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "5341fae6"
+    },
+    {
+      "source": "8289686f",
+      "target": "bc690a66"
+    },
+    {
+      "source": "ae122c1d",
+      "target": "a5e0f6c8"
+    },
+    {
+      "source": "6c63e960",
+      "target": "f2d7144a"
+    },
+    {
+      "source": "dfa64f7f",
+      "target": "c961af1a"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "9934ccb6"
+    },
+    {
+      "source": "85e11043",
+      "target": "dad2940a"
+    },
+    {
+      "source": "85e11043",
+      "target": "167e136d"
+    },
+    {
+      "source": "85e11043",
+      "target": "21c72308"
+    },
+    {
+      "source": "1db939c2",
+      "target": "49cdacc5"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "a12919ef"
+    },
+    {
+      "source": "8289686f",
+      "target": "5af3c300"
+    },
+    {
+      "source": "96751825",
+      "target": "49cdacc5"
+    },
+    {
+      "source": "5af3c300",
+      "target": "f1c064fa"
+    },
+    {
+      "source": "8289686f",
+      "target": "6d92b31e"
+    },
+    {
+      "source": "8289686f",
+      "target": "5341fae6"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "a6e297da"
+    },
+    {
+      "source": "b97b6ffe",
+      "target": "2222d123"
+    },
+    {
+      "source": "8289686f",
+      "target": "2222d123"
+    },
+    {
+      "source": "a4898dfa",
+      "target": "69158527"
+    },
+    {
+      "source": "5bb4f487",
+      "target": "f8fd9da5"
+    },
+    {
+      "source": "8289686f",
+      "target": "f24f6084"
+    },
+    {
+      "source": "44a76af9",
+      "target": "49cdacc5"
+    },
+    {
+      "source": "85e11043",
+      "target": "60dfa654"
+    },
+    {
+      "source": "b97b6ffe",
+      "target": "0a856729"
+    },
+    {
+      "source": "a1801049",
+      "target": "7eae13cf"
+    },
+    {
+      "source": "8289686f",
+      "target": "f2d7144a"
+    },
+    {
+      "source": "85e11043",
+      "target": "90e283dc"
+    },
+    {
+      "source": "8289686f",
+      "target": "0a856729"
+    },
+    {
+      "source": "808d46d8",
+      "target": "d95eb527"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "dad2940a"
+    },
+    {
+      "source": "6c63e960",
+      "target": "dfa64f7f"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "21c72308"
+    },
+    {
+      "source": "6c63e960",
+      "target": "fb210e09"
+    },
+    {
+      "source": "948d6213",
+      "target": "bc690a66"
+    },
+    {
+      "source": "6c63e960",
+      "target": "aa6f8c04"
+    },
+    {
+      "source": "7eae13cf",
+      "target": "b412498e"
+    },
+    {
+      "source": "c185d536",
+      "target": "ae122c1d"
+    },
+    {
+      "source": "6c63e960",
+      "target": "5341fae6"
+    },
+    {
+      "source": "8289686f",
+      "target": "14854982"
+    },
+    {
+      "source": "21c72308",
+      "target": "96751825"
+    },
+    {
+      "source": "206c7720",
+      "target": "829e7328"
+    },
+    {
+      "source": "69158527",
+      "target": "ab0aa67d"
+    },
+    {
+      "source": "66bf9b67",
+      "target": "70cc20bd"
+    },
+    {
+      "source": "9934ccb6",
+      "target": "34bf1fc0"
+    },
+    {
+      "source": "8289686f",
+      "target": "21c72308"
+    },
+    {
+      "source": "85e11043",
+      "target": "79502837"
+    },
+    {
+      "source": "948d6213",
+      "target": "6d92b31e"
+    },
+    {
+      "source": "8289686f",
+      "target": "dfa64f7f"
+    },
+    {
+      "source": "f8fd9da5",
+      "target": "ff9596b4"
+    },
+    {
+      "source": "8289686f",
+      "target": "fb210e09"
+    },
+    {
+      "source": "8289686f",
+      "target": "aa6f8c04"
+    },
+    {
+      "source": "85e11043",
+      "target": "2c1819a7"
+    },
+    {
+      "source": "948d6213",
+      "target": "f24f6084"
+    },
+    {
+      "source": "bc690a66",
+      "target": "1db939c2"
+    },
+    {
+      "source": "be26ab27",
+      "target": "f8fd9da5"
+    },
+    {
+      "source": "8bb3eb4b",
+      "target": "d95eb527"
+    },
+    {
+      "source": "fb210e09",
+      "target": "be26ab27"
+    },
+    {
+      "source": "0a856729",
+      "target": "76be1206"
+    },
+    {
+      "source": "85e11043",
+      "target": "8eb3f901"
+    },
+    {
+      "source": "b97b6ffe",
+      "target": "9934ccb6"
+    },
+    {
+      "source": "8289686f",
+      "target": "9934ccb6"
+    },
+    {
+      "source": "60dfa654",
+      "target": "8a403832"
+    },
+    {
+      "source": "8a403832",
+      "target": "c1646248"
+    },
+    {
+      "source": "85e11043",
+      "target": "a1801049"
+    },
+    {
+      "source": "167e136d",
+      "target": "a4898dfa"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "79502837"
+    },
+    {
+      "source": "2c1819a7",
+      "target": "8a4d19bb"
+    },
+    {
+      "source": "8289686f",
+      "target": "a12919ef"
+    },
+    {
+      "source": "948d6213",
+      "target": "14854982"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "167e136d"
+    },
+    {
+      "source": "85e11043",
+      "target": "1ef5415a"
+    },
+    {
+      "source": "85e11043",
+      "target": "a0619cd6"
+    },
+    {
+      "source": "85e11043",
+      "target": "206c7720"
+    },
+    {
+      "source": "8eb3f901",
+      "target": "5bb4f487"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "2c1819a7"
+    },
+    {
+      "source": "85e11043",
+      "target": "bc690a66"
+    },
+    {
+      "source": "8289686f",
+      "target": "a6e297da"
+    },
+    {
+      "source": "c1646248",
+      "target": "b8d1c687"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "8eb3f901"
+    },
+    {
+      "source": "7632fe9b",
+      "target": "d95eb527"
+    },
+    {
+      "source": "dad2940a",
+      "target": "269191ae"
+    },
+    {
+      "source": "b97b6ffe",
+      "target": "dad2940a"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "a1801049"
+    },
+    {
+      "source": "8289686f",
+      "target": "dad2940a"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "60dfa654"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "90e283dc"
+    },
+    {
+      "source": "8289686f",
+      "target": "167e136d"
+    },
+    {
+      "source": "a0619cd6",
+      "target": "78375536"
+    },
+    {
+      "source": "85e11043",
+      "target": "5af3c300"
+    },
+    {
+      "source": "b97b6ffe",
+      "target": "2c1819a7"
+    },
+    {
+      "source": "85e11043",
+      "target": "6d92b31e"
+    },
+    {
+      "source": "8f36d6f1",
+      "target": "b412498e"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "1ef5415a"
+    },
+    {
+      "source": "5902ad6f",
+      "target": "ae122c1d"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "a0619cd6"
+    },
+    {
+      "source": "aa6f8c04",
+      "target": "8f36d6f1"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "206c7720"
+    },
+    {
+      "source": "fcd3e985",
+      "target": "66bf9b67"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "bc690a66"
+    },
+    {
+      "source": "85e11043",
+      "target": "2222d123"
+    },
+    {
+      "source": "b412498e",
+      "target": "5499fe83"
+    },
+    {
+      "source": "8a4d19bb",
+      "target": "5c2dc665"
+    },
+    {
+      "source": "85e11043",
+      "target": "f24f6084"
+    },
+    {
+      "source": "79502837",
+      "target": "766107ff"
+    },
+    {
+      "source": "34bf1fc0",
+      "target": "5c2dc665"
+    },
+    {
+      "source": "f2d7144a",
+      "target": "c185d536"
+    },
+    {
+      "source": "b97b6ffe",
+      "target": "60dfa654"
+    },
+    {
+      "source": "8289686f",
+      "target": "a1801049"
+    },
+    {
+      "source": "85e11043",
+      "target": "f2d7144a"
+    },
+    {
+      "source": "8289686f",
+      "target": "60dfa654"
+    },
+    {
+      "source": "85e11043",
+      "target": "0a856729"
+    },
+    {
+      "source": "948d6213",
+      "target": "a12919ef"
+    },
+    {
+      "source": "8289686f",
+      "target": "90e283dc"
+    },
+    {
+      "source": "90e283dc",
+      "target": "8bb3eb4b"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "5af3c300"
+    },
+    {
+      "source": "948d6213",
+      "target": "a6e297da"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "6d92b31e"
+    },
+    {
+      "source": "85e11043",
+      "target": "14854982"
+    },
+    {
+      "source": "5341fae6",
+      "target": "5902ad6f"
+    },
+    {
+      "source": "766107ff",
+      "target": "66bf9b67"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "2222d123"
+    },
+    {
+      "source": "269191ae",
+      "target": "c1646248"
+    },
+    {
+      "source": "a12919ef",
+      "target": "7632fe9b"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "f24f6084"
+    },
+    {
+      "source": "6c63e960",
+      "target": "8eb3f901"
+    },
+    {
+      "source": "829e7328",
+      "target": "ae122c1d"
+    },
+    {
+      "source": "948d6213",
+      "target": "167e136d"
+    },
+    {
+      "source": "948d6213",
+      "target": "21c72308"
+    },
+    {
+      "source": "6c63e960",
+      "target": "a1801049"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "f2d7144a"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "0a856729"
+    },
+    {
+      "source": "70f62ec6",
+      "target": "69158527"
+    },
+    {
+      "source": "b97b6ffe",
+      "target": "79502837"
+    },
+    {
+      "source": "49cdacc5",
+      "target": "6944e3b5"
+    },
+    {
+      "source": "8289686f",
+      "target": "79502837"
+    },
+    {
+      "source": "85e11043",
+      "target": "dfa64f7f"
+    }
+  ],
+  "layers": [
+    "feature",
+    "model_input",
+    "models",
+    "primary",
+    "raw",
+    "reporting",
+    "model_output"
+  ],
+  "tags": [
+    {
+      "id": "attacks",
+      "name": "attacks"
+    },
+    {
+      "id": "bilstm-attention",
+      "name": "bilstm-attention"
+    },
+    {
+      "id": "deberta-small-pi-v2",
+      "name": "deberta-small-pi-v2"
+    },
+    {
+      "id": "deepwordbug",
+      "name": "deepwordbug"
+    },
+    {
+      "id": "electra-small-ft",
+      "name": "electra-small-ft"
+    },
+    {
+      "id": "models",
+      "name": "models"
+    },
+    {
+      "id": "pwws",
+      "name": "pwws"
+    },
+    {
+      "id": "similarity",
+      "name": "similarity"
+    },
+    {
+      "id": "textfooler",
+      "name": "textfooler"
+    },
+    {
+      "id": "transfer",
+      "name": "transfer"
+    }
+  ],
+  "pipelines": [
+    {
+      "id": "__default__",
+      "name": "__default__"
+    },
+    {
+      "id": "smoke",
+      "name": "smoke"
+    },
+    {
+      "id": "reporting",
+      "name": "reporting"
+    },
+    {
+      "id": "similarity",
+      "name": "similarity"
+    },
+    {
+      "id": "transfer",
+      "name": "transfer"
+    },
+    {
+      "id": "models",
+      "name": "models"
+    },
+    {
+      "id": "data",
+      "name": "data"
+    },
+    {
+      "id": "risk",
+      "name": "risk"
+    },
+    {
+      "id": "attacks",
+      "name": "attacks"
+    },
+    {
+      "id": "stage",
+      "name": "stage"
+    },
+    {
+      "id": "downstream",
+      "name": "downstream"
+    }
+  ],
+  "modular_pipelines": {
+    "__root__": {
+      "id": "__root__",
+      "name": "__root__",
+      "inputs": [],
+      "outputs": [],
+      "children": [
+        {
+          "id": "1db939c2",
+          "type": "data"
+        },
+        {
+          "id": "79502837",
+          "type": "task"
+        },
+        {
+          "id": "b8d1c687",
+          "type": "data"
+        },
+        {
+          "id": "aa6f8c04",
+          "type": "task"
+        },
+        {
+          "id": "44a76af9",
+          "type": "data"
+        },
+        {
+          "id": "49cdacc5",
+          "type": "task"
+        },
+        {
+          "id": "85e11043",
+          "type": "data"
+        },
+        {
+          "id": "90e283dc",
+          "type": "task"
+        },
+        {
+          "id": "8a403832",
+          "type": "data"
+        },
+        {
+          "id": "f2d7144a",
+          "type": "task"
+        },
+        {
+          "id": "5341fae6",
+          "type": "task"
+        },
+        {
+          "id": "5c2dc665",
+          "type": "task"
+        },
+        {
+          "id": "fcd3e985",
+          "type": "data"
+        },
+        {
+          "id": "5bb4f487",
+          "type": "data"
+        },
+        {
+          "id": "9d4defaf",
+          "type": "data"
+        },
+        {
+          "id": "ab0aa67d",
+          "type": "data"
+        },
+        {
+          "id": "b412498e",
+          "type": "task"
+        },
+        {
+          "id": "63bb53d3",
+          "type": "data"
+        },
+        {
+          "id": "206c7720",
+          "type": "task"
+        },
+        {
+          "id": "f1c064fa",
+          "type": "data"
+        },
+        {
+          "id": "85e11043",
+          "type": "parameters"
+        },
+        {
+          "id": "a0619cd6",
+          "type": "task"
+        },
+        {
+          "id": "808d46d8",
+          "type": "data"
+        },
+        {
+          "id": "8f36d6f1",
+          "type": "data"
+        },
+        {
+          "id": "70f62ec6",
+          "type": "data"
+        },
+        {
+          "id": "1ef5415a",
+          "type": "task"
+        },
+        {
+          "id": "766107ff",
+          "type": "data"
+        },
+        {
+          "id": "a6e297da",
+          "type": "task"
+        },
+        {
+          "id": "66bf9b67",
+          "type": "task"
+        },
+        {
+          "id": "829e7328",
+          "type": "data"
+        },
+        {
+          "id": "dad2940a",
+          "type": "task"
+        },
+        {
+          "id": "ff9596b4",
+          "type": "data"
+        },
+        {
+          "id": "ae122c1d",
+          "type": "task"
+        },
+        {
+          "id": "70cc20bd",
+          "type": "data"
+        },
+        {
+          "id": "0a856729",
+          "type": "task"
+        },
+        {
+          "id": "bc690a66",
+          "type": "task"
+        },
+        {
+          "id": "9d4defaf",
+          "type": "parameters"
+        },
+        {
+          "id": "be26ab27",
+          "type": "data"
+        },
+        {
+          "id": "76be1206",
+          "type": "data"
+        },
+        {
+          "id": "5902ad6f",
+          "type": "data"
+        },
+        {
+          "id": "269191ae",
+          "type": "data"
+        },
+        {
+          "id": "7ad2e5e3",
+          "type": "data"
+        },
+        {
+          "id": "6c63e960",
+          "type": "data"
+        },
+        {
+          "id": "fb210e09",
+          "type": "task"
+        },
+        {
+          "id": "2222d123",
+          "type": "task"
+        },
+        {
+          "id": "8bb3eb4b",
+          "type": "data"
+        },
+        {
+          "id": "69158527",
+          "type": "task"
+        },
+        {
+          "id": "dfa64f7f",
+          "type": "task"
+        },
+        {
+          "id": "167e136d",
+          "type": "task"
+        },
+        {
+          "id": "b97b6ffe",
+          "type": "data"
+        },
+        {
+          "id": "9934ccb6",
+          "type": "task"
+        },
+        {
+          "id": "8289686f",
+          "type": "data"
+        },
+        {
+          "id": "8a4d19bb",
+          "type": "data"
+        },
+        {
+          "id": "c1646248",
+          "type": "task"
+        },
+        {
+          "id": "34bf1fc0",
+          "type": "data"
+        },
+        {
+          "id": "f8fd9da5",
+          "type": "task"
+        },
+        {
+          "id": "a12919ef",
+          "type": "task"
+        },
+        {
+          "id": "8eb3f901",
+          "type": "task"
+        },
+        {
+          "id": "6944e3b5",
+          "type": "data"
+        },
+        {
+          "id": "5b5fef84",
+          "type": "data"
+        },
+        {
+          "id": "a4898dfa",
+          "type": "data"
+        },
+        {
+          "id": "c961af1a",
+          "type": "data"
+        },
+        {
+          "id": "7eae13cf",
+          "type": "data"
+        },
+        {
+          "id": "7632fe9b",
+          "type": "data"
+        },
+        {
+          "id": "96751825",
+          "type": "data"
+        },
+        {
+          "id": "a1801049",
+          "type": "task"
+        },
+        {
+          "id": "2c1819a7",
+          "type": "task"
+        },
+        {
+          "id": "60dfa654",
+          "type": "task"
+        },
+        {
+          "id": "6d92b31e",
+          "type": "task"
+        },
+        {
+          "id": "21c72308",
+          "type": "task"
+        },
+        {
+          "id": "a5e0f6c8",
+          "type": "data"
+        },
+        {
+          "id": "c185d536",
+          "type": "data"
+        },
+        {
+          "id": "948d6213",
+          "type": "data"
+        },
+        {
+          "id": "d95eb527",
+          "type": "task"
+        },
+        {
+          "id": "5af3c300",
+          "type": "task"
+        },
+        {
+          "id": "f24f6084",
+          "type": "task"
+        },
+        {
+          "id": "78375536",
+          "type": "data"
+        },
+        {
+          "id": "14854982",
+          "type": "task"
+        },
+        {
+          "id": "f50a2280",
+          "type": "data"
+        },
+        {
+          "id": "5499fe83",
+          "type": "data"
+        }
+      ]
+    }
+  },
+  "selected_pipeline": "attacks"
+}

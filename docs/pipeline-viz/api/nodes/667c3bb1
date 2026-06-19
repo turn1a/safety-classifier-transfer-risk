@@ -1,0 +1,30 @@
+{
+  "code": "def fit_regressors(master: pd.DataFrame, params: dict[str, Any], seed: int) -> dict[str, Any]:\n    \"\"\"Fit shallow DecisionTree + RandomForest regressors and report correlations.\n\n    With the small sample (n ~ surrogates x recipes) the trees are read for feature\n    importance, not prediction; Spearman(similarity, transfer) is the primary\n    correlation evidence. Cross-validated R2 is reported only when n is large enough.\n\n    Rows whose similarity features are non-finite are dropped first: a surrogate that\n    failed to yield valid representations (so CKA/DBS could not be computed) cannot inform\n    the regression, and scikit-learn rejects NaN inputs outright.\n    \"\"\"\n    finite = np.isfinite(master[_FEATURES].to_numpy()).all(axis=1)\n    if not bool(finite.all()):\n        dropped = sorted(master.loc[~finite, \"surrogate\"].unique())\n        logger.warning(\n            \"Dropping %d row(s) with non-finite %s before regression (surrogates: %s)\",\n            int((~finite).sum()),\n            _FEATURES,\n            dropped,\n        )\n        master = master.loc[finite]\n    features = master[_FEATURES].to_numpy()\n    target = master[\"transfer_rate\"].to_numpy()\n    n = len(master)\n    tree = DecisionTreeRegressor(max_depth=params[\"decision_tree\"][\"max_depth\"], random_state=seed)\n    forest = RandomForestRegressor(\n        n_estimators=params[\"random_forest\"][\"n_estimators\"],\n        max_depth=params[\"random_forest\"][\"max_depth\"],\n        random_state=seed,\n    )\n    tree.fit(features, target)\n    forest.fit(features, target)\n    result: dict[str, Any] = {\n        \"n_samples\": n,\n        \"feature_names\": _FEATURES,\n        \"decision_tree_importances\": tree.feature_importances_.tolist(),\n        \"random_forest_importances\": forest.feature_importances_.tolist(),\n        \"decision_tree_cv_r2\": None,\n        \"random_forest_cv_r2\": None,\n        \"spearman\": {},\n        \"models\": {\"decision_tree\": tree, \"random_forest\": forest},\n    }\n    if n >= _MIN_CV:\n        result[\"decision_tree_cv_r2\"] = float(cross_val_score(tree, features, target, cv=5).mean())\n        result[\"random_forest_cv_r2\"] = float(\n            cross_val_score(forest, features, target, cv=5).mean()\n        )\n    if n >= _MIN_CORR:\n        for feature in _FEATURES:\n            rho, p_value = spearmanr(master[feature], master[\"transfer_rate\"])\n            result[\"spearman\"][feature] = {\"rho\": float(rho), \"p\": float(p_value)}\n    logger.info(\n        \"Regression fit on %d rows; RF importances %s\", n, result[\"random_forest_importances\"]\n    )\n    return result\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/risk/nodes.py",
+  "parameters": {
+    "risk": {
+      "decision_tree": {
+        "max_depth": 3
+      },
+      "random_forest": {
+        "n_estimators": 200,
+        "max_depth": 4
+      },
+      "ablation": {
+        "n_permutations": 10000,
+        "alpha": 0.05
+      }
+    },
+    "seed": 20260616
+  },
+  "run_command": "kedro run --to-nodes='fit_regressors'",
+  "inputs": [
+    "master_results_table",
+    "params:risk",
+    "params:seed"
+  ],
+  "outputs": [
+    "regressors"
+  ],
+  "preview": null
+}

@@ -1,0 +1,17 @@
+{
+  "parameters": {
+    "risk": {
+      "decision_tree": {
+        "max_depth": 3
+      },
+      "random_forest": {
+        "n_estimators": 200,
+        "max_depth": 4
+      },
+      "ablation": {
+        "n_permutations": 10000,
+        "alpha": 0.05
+      }
+    }
+  }
+}

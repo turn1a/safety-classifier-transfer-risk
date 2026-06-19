@@ -1,0 +1,8 @@
+{
+  "type": "artifacts.mlflow_artifact_dataset.MatplotlibDataset.MlflowMatplotlibDataset",
+  "filepath": "/Users/aholszewska/dev/risk-transfer/data/08_reporting/fig_regression_ablation.png",
+  "run_command": "kedro run --to-outputs=fig_regression_ablation",
+  "preview": null,
+  "preview_type": null,
+  "stats": null
+}

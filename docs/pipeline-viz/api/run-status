@@ -1,0 +1,12 @@
+{
+  "nodes": {},
+  "datasets": {},
+  "pipeline": {
+    "run_id": "5e05bb63-57ee-4ec5-a234-76c06d2ad684",
+    "start_time": "2026-06-18T18:56:59.641574+00:00",
+    "end_time": "2026-06-18T18:56:59.646582+00:00",
+    "duration": 0.005008,
+    "status": "success",
+    "error": null
+  }
+}

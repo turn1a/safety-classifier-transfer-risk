@@ -1,0 +1,16 @@
+{
+  "code": "def track_run_metrics(\n    master: pd.DataFrame,\n    ablation: dict[str, Any],\n    regressors: dict[str, Any],\n    thresholds: dict[str, float],\n) -> dict[str, float]:\n    \"\"\"Log the headline run scalars to MLflow and return them as a flat dict.\n\n    Gathers the cross-surrogate aggregates — mean/max transfer rate, the\n    similarity-vs-transfer Spearman correlations, random-forest feature importances, the\n    ablation effect/p-value, and the calibrated thresholds — and logs them as metrics on\n    the active MLflow run (opened by kedro-mlflow). The same dict is returned so it is\n    also persisted locally (``run_metrics``) for inspection.\n\n    Args:\n        master: master results table (one row per surrogate x recipe).\n        ablation: the ablation result dict.\n        regressors: the regression result dict (feature names, importances, spearman).\n        thresholds: the calibrated ``{\"r1\", \"r2\"}`` thresholds.\n\n    Returns:\n        Flat ``{metric_name: value}`` dict of the logged run metrics.\n    \"\"\"\n    transfer = master[\"transfer_rate\"]\n    metrics: dict[str, float] = {\n        \"transfer_rate_mean\": float(transfer.mean()),\n        \"transfer_rate_max\": float(transfer.max()),\n        \"n_observations\": float(len(master)),\n        \"threshold_r1\": float(thresholds[\"r1\"]),\n        \"threshold_r2\": float(thresholds[\"r2\"]),\n        \"ablation_effect_pp\": float(ablation[\"effect_size_pp\"]),\n        \"ablation_p_value\": float(ablation[\"empirical_p_value\"]),\n        \"ablation_max_effect_pp\": float(ablation.get(\"max_diff_pp\", 0.0)),\n        \"ablation_max_p_value\": float(ablation.get(\"max_p_value\", 1.0)),\n        \"m1_mean_transfer\": float(ablation.get(\"m1_mean\", 0.0)),\n        \"m2_mean_transfer\": float(ablation.get(\"m2_mean\", 0.0)),\n    }\n    for feature, importance in zip(\n        regressors[\"feature_names\"], regressors[\"random_forest_importances\"], strict=False\n    ):\n        metrics[f\"rf_importance_{feature}\"] = float(importance)\n    for feature, stats in regressors.get(\"spearman\", {}).items():\n        metrics[f\"spearman_{feature}_rho\"] = float(stats[\"rho\"])\n        metrics[f\"spearman_{feature}_p\"] = float(stats[\"p\"])\n    _log_mlflow_metrics(metrics)\n    logger.info(\"Logged %d run metrics to MLflow\", len(metrics))\n    return metrics\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/risk/nodes.py",
+  "parameters": {},
+  "run_command": "kedro run --to-nodes='track_run_metrics'",
+  "inputs": [
+    "master_results_table",
+    "ablation_results",
+    "regressors",
+    "thresholds"
+  ],
+  "outputs": [
+    "run_metrics"
+  ],
+  "preview": null
+}

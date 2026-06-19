@@ -1,0 +1,8 @@
+{
+  "type": "datasets.surrogate_model_dataset.SurrogateModelDataset",
+  "filepath": "/Users/aholszewska/dev/risk-transfer/data/06_models/deberta-small-pi-v2",
+  "run_command": "kedro run --to-outputs=surrogate__deberta-small-pi-v2",
+  "preview": null,
+  "preview_type": null,
+  "stats": null
+}

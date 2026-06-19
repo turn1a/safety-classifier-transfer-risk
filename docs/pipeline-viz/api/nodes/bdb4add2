@@ -1,0 +1,36 @@
+{
+  "code": "def compute_target_reps(\n    target: dict[str, Any],\n    probe_set: pd.DataFrame,\n    sim_params: dict[str, Any],\n    device_params: dict[str, Any],\n) -> list[Any]:\n    \"\"\"Compute the frozen target's per-layer probe representations once (reused by every CKA).\"\"\"\n    device = resolve_device(device_params[\"policy\"])\n    return representations_from_loaded(\n        target[\"model\"],\n        target[\"tokenizer\"],\n        probe_set[\"text\"].tolist(),\n        pooling=sim_params[\"pooling\"],\n        max_seq_len=int(sim_params.get(\"max_seq_len\", 256)),\n        batch_size=sim_params[\"cka\"][\"batch_size\"],\n        device=device,\n    )\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/similarity/nodes.py",
+  "parameters": {
+    "similarity": {
+      "n_probe": 64,
+      "pooling": "cls",
+      "cka": {
+        "mode": "linear",
+        "batch_size": 32
+      },
+      "dbs": {
+        "box": 1
+      },
+      "thresholds": {
+        "r1_quantile": 0.75,
+        "r2_quantile": 0.25
+      }
+    },
+    "device": {
+      "policy": "mps_or_cpu",
+      "allow_mps_fallback": true
+    }
+  },
+  "run_command": "kedro run --to-nodes='compute_target_reps'",
+  "inputs": [
+    "target_model",
+    "probe_set",
+    "params:similarity",
+    "params:device"
+  ],
+  "outputs": [
+    "target_reps"
+  ],
+  "preview": null
+}

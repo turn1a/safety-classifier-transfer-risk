@@ -1,0 +1,8 @@
+{
+  "parameters": {
+    "device": {
+      "policy": "mps_or_cpu",
+      "allow_mps_fallback": true
+    }
+  }
+}

@@ -1,0 +1,58 @@
+{
+  "code": "def train_bilstm_surrogate(\n    splits: dict[str, pd.DataFrame],\n    models_params: dict[str, Any],\n    device_params: dict[str, Any],\n    seed: int,\n) -> tuple[dict[str, Any], dict[str, Any]]:\n    \"\"\"Train the from-scratch BiLSTM surrogate; return its checkpoint bundle and metadata.\"\"\"\n    device, torch_seed = _device_and_seed(device_params, seed)\n    return train_bilstm(\n        splits[\"train\"],\n        splits[\"val\"],\n        params=models_params[\"bilstm\"],\n        device=device,\n        seed=torch_seed,\n    )\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/models/nodes.py",
+  "parameters": {
+    "models": {
+      "target": "protectai/deberta-v3-base-prompt-injection-v2",
+      "surrogates": [
+        {
+          "name": "deberta-small-pi-v2",
+          "kind": "pretrained",
+          "gated": true
+        },
+        {
+          "name": "electra-small-ft",
+          "kind": "finetune"
+        },
+        {
+          "name": "bilstm-attention",
+          "kind": "bilstm"
+        }
+      ],
+      "finetune": {
+        "lr": 0.00002,
+        "batch_size": 32,
+        "epochs": 1,
+        "max_seq_len": 256
+      },
+      "bilstm": {
+        "embed_dim": 128,
+        "hidden_dim": 256,
+        "num_layers": 2,
+        "dropout": 0.3,
+        "lr": 0.001,
+        "batch_size": 64,
+        "epochs": 2,
+        "max_vocab": 20000,
+        "max_seq_len": 256
+      }
+    },
+    "device": {
+      "policy": "mps_or_cpu",
+      "allow_mps_fallback": true
+    },
+    "seed": 20260616
+  },
+  "run_command": "kedro run --to-nodes='train_bilstm-attention'",
+  "inputs": [
+    "task_splits",
+    "params:models",
+    "params:device",
+    "params:seed"
+  ],
+  "outputs": [
+    "surrogate__bilstm-attention",
+    "surrogate_meta__bilstm-attention"
+  ],
+  "preview": null
+}

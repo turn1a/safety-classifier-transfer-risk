@@ -1,0 +1,344 @@
+{
+  "nodes": [
+    {
+      "id": "3d21843d",
+      "name": "similarity_table",
+      "tags": [
+        "transfer",
+        "similarity"
+      ],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "stage",
+        "similarity",
+        "downstream",
+        "transfer"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pandas.parquet_dataset.ParquetDataset"
+    },
+    {
+      "id": "a20940e6",
+      "name": "plot_cka_heatmap",
+      "tags": [],
+      "pipelines": [
+        "downstream",
+        "__default__",
+        "reporting"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "plot_cka_heatmap"
+    },
+    {
+      "id": "6bc5358c",
+      "name": "fig_cka_heatmap",
+      "tags": [],
+      "pipelines": [
+        "downstream",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.MatplotlibDataset.MlflowMatplotlibDataset"
+    },
+    {
+      "id": "abc2021e",
+      "name": "master_results_table",
+      "tags": [
+        "transfer"
+      ],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream",
+        "transfer",
+        "risk"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.ParquetDataset.MlflowParquetDataset"
+    },
+    {
+      "id": "02cdda9d",
+      "name": "regressors",
+      "tags": [],
+      "pipelines": [
+        "risk",
+        "downstream",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "11c8dd13",
+      "name": "plot_transfer_scatter",
+      "tags": [],
+      "pipelines": [
+        "downstream",
+        "__default__",
+        "reporting"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "plot_transfer_scatter"
+    },
+    {
+      "id": "db2ca221",
+      "name": "fig_transfer_scatter",
+      "tags": [],
+      "pipelines": [
+        "downstream",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.MatplotlibDataset.MlflowMatplotlibDataset"
+    },
+    {
+      "id": "ba4b2fe1",
+      "name": "ablation_results",
+      "tags": [],
+      "pipelines": [
+        "risk",
+        "downstream",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.JSONDataset.MlflowJSONDataset"
+    },
+    {
+      "id": "a73769e9",
+      "name": "plot_regression_ablation",
+      "tags": [],
+      "pipelines": [
+        "downstream",
+        "__default__",
+        "reporting"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "plot_regression_ablation"
+    },
+    {
+      "id": "844e1a3b",
+      "name": "fig_regression_ablation",
+      "tags": [],
+      "pipelines": [
+        "downstream",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.MatplotlibDataset.MlflowMatplotlibDataset"
+    }
+  ],
+  "edges": [
+    {
+      "source": "11c8dd13",
+      "target": "db2ca221"
+    },
+    {
+      "source": "3d21843d",
+      "target": "a20940e6"
+    },
+    {
+      "source": "a20940e6",
+      "target": "6bc5358c"
+    },
+    {
+      "source": "a73769e9",
+      "target": "844e1a3b"
+    },
+    {
+      "source": "ba4b2fe1",
+      "target": "a73769e9"
+    },
+    {
+      "source": "02cdda9d",
+      "target": "a73769e9"
+    },
+    {
+      "source": "abc2021e",
+      "target": "11c8dd13"
+    }
+  ],
+  "layers": [
+    "feature",
+    "model_input",
+    "model_output",
+    "models",
+    "primary",
+    "raw",
+    "reporting"
+  ],
+  "tags": [
+    {
+      "id": "attacks",
+      "name": "attacks"
+    },
+    {
+      "id": "bilstm-attention",
+      "name": "bilstm-attention"
+    },
+    {
+      "id": "deberta-small-pi-v2",
+      "name": "deberta-small-pi-v2"
+    },
+    {
+      "id": "deepwordbug",
+      "name": "deepwordbug"
+    },
+    {
+      "id": "electra-small-ft",
+      "name": "electra-small-ft"
+    },
+    {
+      "id": "models",
+      "name": "models"
+    },
+    {
+      "id": "pwws",
+      "name": "pwws"
+    },
+    {
+      "id": "similarity",
+      "name": "similarity"
+    },
+    {
+      "id": "textfooler",
+      "name": "textfooler"
+    },
+    {
+      "id": "transfer",
+      "name": "transfer"
+    }
+  ],
+  "pipelines": [
+    {
+      "id": "__default__",
+      "name": "__default__"
+    },
+    {
+      "id": "smoke",
+      "name": "smoke"
+    },
+    {
+      "id": "reporting",
+      "name": "reporting"
+    },
+    {
+      "id": "similarity",
+      "name": "similarity"
+    },
+    {
+      "id": "transfer",
+      "name": "transfer"
+    },
+    {
+      "id": "models",
+      "name": "models"
+    },
+    {
+      "id": "data",
+      "name": "data"
+    },
+    {
+      "id": "risk",
+      "name": "risk"
+    },
+    {
+      "id": "attacks",
+      "name": "attacks"
+    },
+    {
+      "id": "stage",
+      "name": "stage"
+    },
+    {
+      "id": "downstream",
+      "name": "downstream"
+    }
+  ],
+  "modular_pipelines": {
+    "__root__": {
+      "id": "__root__",
+      "name": "__root__",
+      "inputs": [],
+      "outputs": [],
+      "children": [
+        {
+          "id": "6bc5358c",
+          "type": "data"
+        },
+        {
+          "id": "844e1a3b",
+          "type": "data"
+        },
+        {
+          "id": "db2ca221",
+          "type": "data"
+        },
+        {
+          "id": "ba4b2fe1",
+          "type": "data"
+        },
+        {
+          "id": "02cdda9d",
+          "type": "data"
+        },
+        {
+          "id": "abc2021e",
+          "type": "data"
+        },
+        {
+          "id": "a73769e9",
+          "type": "task"
+        },
+        {
+          "id": "3d21843d",
+          "type": "data"
+        },
+        {
+          "id": "a20940e6",
+          "type": "task"
+        },
+        {
+          "id": "11c8dd13",
+          "type": "task"
+        }
+      ]
+    }
+  },
+  "selected_pipeline": "reporting"
+}

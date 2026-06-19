@@ -1,0 +1,32 @@
+{
+  "code": "def build_probe_set(canonical: pd.DataFrame, params: dict[str, Any], seed: int) -> pd.DataFrame:\n    \"\"\"Sample a fixed, label-balanced probe set used for every model's CKA.\"\"\"\n    n_probe = int(params[\"n_probe\"])\n    rng_seed = derive_seeds(seed).numpy\n    half = n_probe // 2\n    positives = canonical[canonical[\"label\"] == 1]\n    negatives = canonical[canonical[\"label\"] == 0]\n    probe = pd.concat(\n        [\n            positives.sample(min(half, len(positives)), random_state=rng_seed),\n            negatives.sample(min(n_probe - half, len(negatives)), random_state=rng_seed),\n        ]\n    )\n    return probe.sample(frac=1.0, random_state=rng_seed).reset_index(drop=True)\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/similarity/nodes.py",
+  "parameters": {
+    "similarity": {
+      "n_probe": 64,
+      "pooling": "cls",
+      "cka": {
+        "mode": "linear",
+        "batch_size": 32
+      },
+      "dbs": {
+        "box": 1
+      },
+      "thresholds": {
+        "r1_quantile": 0.75,
+        "r2_quantile": 0.25
+      }
+    },
+    "seed": 20260616
+  },
+  "run_command": "kedro run --to-nodes='build_probe_set'",
+  "inputs": [
+    "canonical_dataset",
+    "params:similarity",
+    "params:seed"
+  ],
+  "outputs": [
+    "probe_set"
+  ],
+  "preview": null
+}
