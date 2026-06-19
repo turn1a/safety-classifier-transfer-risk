@@ -103,6 +103,12 @@ class ONNXModelWrapper(ModelWrapper):  # type: ignore[misc]  # ModelWrapper is u
         self.session = ort.InferenceSession(
             onnx_path, sess_options=options, providers=["CPUExecutionProvider"]
         )
+        # TextAttack's ``GoalFunction.__init__`` reads ``model_wrapper.model.__class__`` for its
+        # model/goal-function compatibility check, so a wrapper without ``.model`` raises
+        # AttributeError at recipe-build time (this killed a full cloud sweep on the first attack
+        # node). The session is the served model; queries still go through ``__call__``, never
+        # this attribute, so exposing it is enough — the validator only warns on an unknown class.
+        self.model = self.session
         self.tokenizer = AutoTokenizer.from_pretrained(tokenizer_source)
         self.input_names = {model_input.name for model_input in self.session.get_inputs()}
         self.max_seq_len = max_seq_len
