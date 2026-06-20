@@ -12,9 +12,12 @@
 # victim: torch — serve this transformer from its torch checkpoint (surrogate.{name}) during the
 #   attack sweep instead of its ONNX graph. DeBERTa-v2/v3's disentangled-attention ONNX graph
 #   triggers a "MatMul dimension mismatch" in the cloud box's aarch64 onnxruntime at every
-#   sequence length (HF transformers #18237); torch runs it correctly. Non-DeBERTa transformers
-#   keep the faster ONNX victim. The ONNX graph is still exported (CKA and similarity are
-#   unaffected); it is just not the attack victim for these models.
+#   sequence length (HF transformers #18237); torch runs it correctly. Set it for any model whose
+#   config ``model_type`` is ``deberta-v2`` — that includes Meta's Prompt-Guard
+#   (``llama-prompt-guard-*``), which is built on mDeBERTa despite the name, so the surrogate name
+#   alone is not a reliable signal. Standard-attention transformers (BERT/RoBERTa/ELECTRA) keep the
+#   faster ONNX victim. The ONNX graph is still exported (CKA and similarity are unaffected); it is
+#   just not the attack victim for these models.
 models:
   target: protectai/deberta-v3-base-prompt-injection-v2 # provenance label; loaded via target_model
   surrogates:
@@ -29,12 +32,15 @@ models:
     - name: deepset-deberta-injection
       kind: pretrained
       victim: torch
+    # Meta's Prompt-Guard is built on mDeBERTa (model_type deberta-v2), so it needs the torch victim.
     - name: llama-prompt-guard-86m
       kind: pretrained
       gated: true
+      victim: torch
     - name: llama-prompt-guard-22m
       kind: pretrained
       gated: true
+      victim: torch
     - name: bert-base-ft
       kind: finetune
     - name: roberta-base-ft

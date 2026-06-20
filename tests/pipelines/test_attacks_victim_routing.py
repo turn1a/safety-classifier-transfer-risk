@@ -36,12 +36,24 @@ def test_attacks_victim_routing_follows_flag() -> None:
         assert _victim_dataset_kind(pipeline, spec["name"]) == expected, spec["name"]
 
 
-def test_all_deberta_surrogates_are_flagged_torch() -> None:
-    """Every DeBERTa surrogate must carry victim: torch (ONNX fails on aarch64)."""
-    deberta = [spec for spec in surrogate_specs() if "deberta" in spec["name"]]
-    assert deberta  # the pool has DeBERTa surrogates to protect
-    for spec in deberta:
-        assert spec.get("victim") == "torch", (
-            f"{spec['name']} is a DeBERTa surrogate and must be `victim: torch`: the box's aarch64 "
-            "onnxruntime cannot run its disentangled-attention ONNX graph"
-        )
+# Surrogates whose checkpoint model_type is deberta-v2 (verified from each config). The name is not
+# a reliable signal: Meta's Prompt-Guard (llama-prompt-guard-*) is built on mDeBERTa. Their
+# disentangled-attention ONNX graph fails on the box's aarch64 runtime, so all must be torch.
+_DEBERTA_V2_SURROGATES = frozenset(
+    {
+        "deberta-base-pi-v1",
+        "deberta-small-pi-v2",
+        "deepset-deberta-injection",
+        "deberta-base-ft-seed",
+        "llama-prompt-guard-22m",
+        "llama-prompt-guard-86m",
+    }
+)
+
+
+def test_all_deberta_architecture_surrogates_are_flagged_torch() -> None:
+    """Every deberta-v2 surrogate carries victim: torch (its ONNX graph fails on aarch64)."""
+    present = {spec["name"] for spec in surrogate_specs()}
+    flagged = {spec["name"] for spec in surrogate_specs() if spec.get("victim") == "torch"}
+    missing = (_DEBERTA_V2_SURROGATES & present) - flagged
+    assert not missing, f"deberta-v2 surrogates missing `victim: torch`: {sorted(missing)}"
