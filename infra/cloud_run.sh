@@ -3,9 +3,10 @@
 # and runs the attack sweep under `--env cloud`, reading inputs (splits, surrogate checkpoints,
 # ONNX graphs) from S3 and writing each partition back to S3 *through the Kedro catalog* — no
 # aws s3 sync, and no HuggingFace access (every model is materialised from the catalog).
-# ParallelRunner uses the whole box; --only-missing-outputs makes a re-run (or a spot reclaim)
-# resume by skipping partitions already on S3. Config is written to /opt/config.env by user_data:
-# TR_BUCKET, TR_REGION, TR_REPO_REF.
+# RamBoundedParallelRunner runs one worker per core that fits in RAM (each torch-victim worker needs
+# several GB, so one-per-vCPU OOMs a memory-light box); --only-missing-outputs makes a re-run (or a
+# spot reclaim) resume by skipping partitions already on S3. Config is written to /opt/config.env by
+# user_data: TR_BUCKET, TR_REGION, TR_REPO_REF.
 set -euo pipefail
 # Export the box config into the environment so the catalog's ${tr.bucket:} / ${tr.region:}
 # resolvers and the AWS SDK (region) see it.
@@ -46,4 +47,5 @@ uv run python -m transfer_risk.scripts.fetch_assets
 # reads inputs from S3 and writes each shard/cell partition straight to S3; --only-missing-outputs
 # resumes; --async overlaps the per-shard S3 I/O with compute. `|| true` lets user_data do its
 # final log sync + shutdown even if the run errors.
-uv run kedro run --env cloud --pipeline attacks --runner ParallelRunner --async --only-missing-outputs || true
+uv run kedro run --env cloud --pipeline attacks \
+  --runner transfer_risk.runner.RamBoundedParallelRunner --async --only-missing-outputs || true
