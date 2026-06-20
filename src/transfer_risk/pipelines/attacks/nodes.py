@@ -4,10 +4,9 @@ The sweep is generated as one node per ``(surrogate, recipe, example-shard)`` pl
 node per cell. Each shard node attacks a slice of the eval set with one recipe against one
 victim and writes its partition through the catalog; ParallelRunner runs the shards across
 cores and ``--only-missing-outputs`` resumes by skipping partitions already written. The victim
-is wired at build time: most transformers are served from their ONNX graph (``onnx.{name}``),
-while the BiLSTM and any ``victim: torch`` surrogate (the DeBERTa models, whose ONNX graph the
-box's aarch64 runtime cannot run) are served from their torch checkpoint (``surrogate.{name}``).
-TextAttack runs
+is wired at build time: by default every surrogate is served from its torch checkpoint
+(``surrogate.{name}``), because the box's aarch64 onnxruntime fails transformer ONNX attention; a
+transformer opts into its faster ONNX graph (``onnx.{name}``) with ``victim: onnx``. TextAttack runs
 in-process via the ``turn1a/TextAttack`` fork; the runner binds its device at import, so the
 CPU/thread/encoder env is set before the runner is imported inside the worker process.
 """
@@ -43,15 +42,15 @@ def attack_shard(  # noqa: PLR0913 (a generated per-shard node: catalog inputs +
 
     Args:
         splits: train/val/test DataFrames; the eval set is drawn from ``test``.
-        victim_path: local directory of the victim, materialised from the catalog — the ONNX graph
-            (ONNX-served transformers) or a torch checkpoint (the BiLSTM and DeBERTa surrogates).
+        victim_path: local directory of the victim, materialised from the catalog — a torch
+            checkpoint by default, or the ONNX graph for a ``victim: onnx`` transformer.
         attacks_params: the ``attacks`` block (eval_set_size, max_prompt_chars, max_seq_len,
             query_budget, semantic_encoder).
         seed: root seed; this shard attacks with ``seed + start``.
         name: the surrogate name (for logging/provenance), bound at build time.
         kind: the surrogate kind, bound at build time (selects the victim wrapper).
-        use_onnx: serve the victim from its ONNX graph (True) or its torch checkpoint (False — the
-            BiLSTM and the DeBERTa surrogates), bound at build time.
+        use_onnx: serve the victim from its ONNX graph (True, ``victim: onnx`` transformers) or its
+            torch checkpoint (False — the default, and always for the BiLSTM), bound at build time.
         recipe: the TextAttack recipe key, bound at build time.
         start: shard start index into the eval set, bound at build time.
         stop: shard stop index (exclusive), bound at build time.
@@ -83,8 +82,8 @@ def attack_shard(  # noqa: PLR0913 (a generated per-shard node: catalog inputs +
             {"kind": kind}, torch.device("cpu"), onnx_dir=victim_path, max_seq_len=max_seq_len
         )
     else:
-        # BiLSTM (its own wrapper) or a transformer served from its torch checkpoint — the DeBERTa
-        # surrogates, whose disentangled-attention ONNX graph the aarch64 box cannot run.
+        # The default: the BiLSTM (its own wrapper) or a transformer served from its torch
+        # checkpoint (the box's aarch64 onnxruntime cannot run transformer ONNX attention).
         # build_wrapper returns a BiLSTMModelWrapper for kind ``bilstm``, else loads the checkpoint
         # and wraps it as a HuggingFaceModelWrapper.
         wrapper = build_wrapper({"kind": kind, "source": victim_path}, torch.device("cpu"))

@@ -1,11 +1,10 @@
-"""The attacks pipeline serves DeBERTa victims from torch and the standard models from ONNX.
+"""Every attack victim is served from its torch checkpoint by default.
 
-DeBERTa-v2/v3's disentangled-attention ONNX graph triggers a MatMul dimension mismatch in the
-cloud box's aarch64 onnxruntime at every sequence length (HF transformers #18237), so those
-surrogates carry ``victim: torch`` and attack from their torch checkpoint instead. These build-time
-tests guard the routing and the config requirement (a new DeBERTa surrogate without the flag is the
-exact mistake that aborted a full cloud sweep). They build the pipeline only, so they stay in the
-fast suite (no textattack/torch import).
+The cloud box's aarch64 onnxruntime fails every transformer's fused ONNX attention with a MatMul
+dimension mismatch — DeBERTa-v2 disentangled attention and the standard BERT/RoBERTa/ELECTRA graphs
+alike — so the sweep serves every surrogate from its torch checkpoint. A transformer may opt back
+into its faster ONNX graph with ``victim: onnx`` only where that is verified; the base config opts
+none in. These build-time tests guard the routing (no textattack/torch import, so they stay fast).
 """
 
 from __future__ import annotations
@@ -25,35 +24,16 @@ def _victim_dataset_kind(pipeline: object, surrogate: str) -> str:
     return ""
 
 
-def test_attacks_victim_routing_follows_flag() -> None:
-    """The victim is torch for the BiLSTM and victim: torch surrogates, ONNX for the rest."""
+def test_every_victim_defaults_to_the_torch_checkpoint() -> None:
+    """No surrogate wires an ONNX victim — the aarch64 box can't run transformer ONNX."""
     pipeline = create_pipeline()
-    routings = {_victim_dataset_kind(pipeline, spec["name"]) for spec in surrogate_specs()}
-    assert routings == {"onnx", "surrogate"}  # both paths are exercised by the pool
-    for spec in surrogate_specs():
-        torch_victim = spec["kind"] == "bilstm" or spec.get("victim") == "torch"
-        expected = "surrogate" if torch_victim else "onnx"
-        assert _victim_dataset_kind(pipeline, spec["name"]) == expected, spec["name"]
+    routing = {s["name"]: _victim_dataset_kind(pipeline, s["name"]) for s in surrogate_specs()}
+    onnx_victims = sorted(name for name, kind in routing.items() if kind == "onnx")
+    assert not onnx_victims, f"surrogates wiring an ONNX victim (broken on aarch64): {onnx_victims}"
+    assert set(routing.values()) == {"surrogate"}
 
 
-# Surrogates whose checkpoint model_type is deberta-v2 (verified from each config). The name is not
-# a reliable signal: Meta's Prompt-Guard (llama-prompt-guard-*) is built on mDeBERTa. Their
-# disentangled-attention ONNX graph fails on the box's aarch64 runtime, so all must be torch.
-_DEBERTA_V2_SURROGATES = frozenset(
-    {
-        "deberta-base-pi-v1",
-        "deberta-small-pi-v2",
-        "deepset-deberta-injection",
-        "deberta-base-ft-seed",
-        "llama-prompt-guard-22m",
-        "llama-prompt-guard-86m",
-    }
-)
-
-
-def test_all_deberta_architecture_surrogates_are_flagged_torch() -> None:
-    """Every deberta-v2 surrogate carries victim: torch (its ONNX graph fails on aarch64)."""
-    present = {spec["name"] for spec in surrogate_specs()}
-    flagged = {spec["name"] for spec in surrogate_specs() if spec.get("victim") == "torch"}
-    missing = (_DEBERTA_V2_SURROGATES & present) - flagged
-    assert not missing, f"deberta-v2 surrogates missing `victim: torch`: {sorted(missing)}"
+def test_base_config_opts_no_surrogate_into_onnx() -> None:
+    """The base config opts no surrogate into ONNX (victim: onnx is for verified platforms only)."""
+    opted_in = [spec["name"] for spec in surrogate_specs() if spec.get("victim") == "onnx"]
+    assert not opted_in, f"victim: onnx is not safe on the aarch64 run box: {opted_in}"

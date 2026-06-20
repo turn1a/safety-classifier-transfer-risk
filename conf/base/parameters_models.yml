@@ -9,38 +9,30 @@
 #   finetune   — a base backbone (Hub source loads with num_labels: 2) fine-tuned on the task.
 #   bilstm     — the from-scratch non-transformer floor.
 #
-# victim: torch — serve this transformer from its torch checkpoint (surrogate.{name}) during the
-#   attack sweep instead of its ONNX graph. DeBERTa-v2/v3's disentangled-attention ONNX graph
-#   triggers a "MatMul dimension mismatch" in the cloud box's aarch64 onnxruntime at every
-#   sequence length (HF transformers #18237); torch runs it correctly. Set it for any model whose
-#   config ``model_type`` is ``deberta-v2`` — that includes Meta's Prompt-Guard
-#   (``llama-prompt-guard-*``), which is built on mDeBERTa despite the name, so the surrogate name
-#   alone is not a reliable signal. Standard-attention transformers (BERT/RoBERTa/ELECTRA) keep the
-#   faster ONNX victim. The ONNX graph is still exported (CKA and similarity are unaffected); it is
-#   just not the attack victim for these models.
+# victim: onnx — opt this transformer into its ONNX graph (onnx.{name}) as the attack victim, ~2-3x
+#   faster per query on CPU. The DEFAULT victim is the torch checkpoint (surrogate.{name}): the cloud
+#   box's aarch64 onnxruntime fails transformer attention with a "MatMul dimension mismatch" on the
+#   fused attention nodes — DeBERTa-v2 disentangled attention (HF transformers #18237) and the
+#   standard BERT/RoBERTa/ELECTRA graphs alike — while torch runs them correctly. Set victim: onnx
+#   only where that model's ONNX victim is verified to work (e.g. an x86_64/macOS dev box). The ONNX
+#   graph is still exported either way (CKA and similarity are unaffected).
 models:
   target: protectai/deberta-v3-base-prompt-injection-v2 # provenance label; loaded via target_model
   surrogates:
     - name: deberta-base-pi-v1
       kind: pretrained
-      victim: torch
     # Gated: request access on its HF page before running (needs HF_TOKEN).
     - name: deberta-small-pi-v2
       kind: pretrained
       gated: true
-      victim: torch
     - name: deepset-deberta-injection
       kind: pretrained
-      victim: torch
-    # Meta's Prompt-Guard is built on mDeBERTa (model_type deberta-v2), so it needs the torch victim.
     - name: llama-prompt-guard-86m
       kind: pretrained
       gated: true
-      victim: torch
     - name: llama-prompt-guard-22m
       kind: pretrained
       gated: true
-      victim: torch
     - name: bert-base-ft
       kind: finetune
     - name: roberta-base-ft
@@ -50,7 +42,6 @@ models:
     # Same backbone as the target's base, a different seed — the CKA sanity anchor (~0.9).
     - name: deberta-base-ft-seed
       kind: finetune
-      victim: torch
     # The deliberate non-transformer floor of the similarity range.
     - name: bilstm-attention
       kind: bilstm
