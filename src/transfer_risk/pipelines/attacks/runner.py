@@ -115,11 +115,18 @@ class ONNXModelWrapper(ModelWrapper):  # type: ignore[misc]  # ModelWrapper is u
 
     def __call__(self, text_list: list[str]) -> Any:
         """Return softmax class probabilities ``(n, 2)`` for a list of texts."""
+        # Pad every batch to the full ``max_seq_len`` rather than to the batch's longest sequence.
+        # DeBERTa-v2/v3's disentangled-attention ONNX graph only runs at the sequence length it was
+        # traced at (the export pads to ``max_length``); the box's aarch64 onnxruntime fails other
+        # lengths with a "MatMul dimension mismatch" (HF transformers #18237; macOS ort happens to
+        # tolerate dynamic shapes, which hid it locally). Fixed-length padding makes every query
+        # match the traced shape; the attention mask keeps the pad tokens out of the logits, so the
+        # result is unchanged (verified equal to the torch checkpoint to ~2e-6).
         encoded = self.tokenizer(
             text_list,
             truncation=True,
             max_length=self.max_seq_len,
-            padding=True,
+            padding="max_length",
             return_tensors="np",
         )
         feeds = {name: encoded[name] for name in self.input_names if name in encoded}
