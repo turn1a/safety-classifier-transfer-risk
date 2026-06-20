@@ -45,7 +45,11 @@ def create_pipeline() -> Pipeline:
     nodes = []
     for spec in specs:
         name, kind = spec["name"], spec["kind"]
-        victim = f"surrogate__{name}" if kind == "bilstm" else f"onnx__{name}"
+        # Serve the victim from its torch checkpoint for the BiLSTM and any surrogate flagged
+        # ``victim: torch`` (the DeBERTa models, whose disentangled-attention ONNX graph the box's
+        # aarch64 onnxruntime cannot run); every other transformer uses its faster ONNX graph.
+        use_onnx = kind != "bilstm" and spec.get("victim") != "torch"
+        victim = f"onnx__{name}" if use_onnx else f"surrogate__{name}"
         inputs = ["task_splits", victim, "params:attacks", "params:seed"]
         for recipe in recipes:
             cell = cell_key(name, recipe)
@@ -57,6 +61,7 @@ def create_pipeline() -> Pipeline:
                             attack_shard,
                             name=name,
                             kind=kind,
+                            use_onnx=use_onnx,
                             recipe=recipe,
                             start=start,
                             stop=stop,
@@ -77,6 +82,7 @@ def create_pipeline() -> Pipeline:
                             attack_shard,
                             name=name,
                             kind=kind,
+                            use_onnx=use_onnx,
                             recipe=recipe,
                             start=start,
                             stop=stop,
