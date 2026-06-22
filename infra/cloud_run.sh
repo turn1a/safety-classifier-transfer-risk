@@ -24,6 +24,12 @@ export PATH="$HOME/.local/bin:$PATH"
 export TOKENIZERS_PARALLELISM=false
 export HF_HUB_DISABLE_PROGRESS_BARS=1
 export DO_NOT_TRACK=1
+# Pin every inner parallelism to one: the runner already runs one worker per core (capped to fit
+# RAM). Nested BLAS threads or joblib/loky process pools (textattack's embedding search spawns one
+# per worker, sized to the CPU count) would oversubscribe and exhaust processes/RAM — the
+# BrokenProcessPool that aborted an earlier sweep. Set here so each spawn worker inherits it before
+# importing numpy/torch (some of these are read only at import time).
+export OMP_NUM_THREADS=1 OPENBLAS_NUM_THREADS=1 MKL_NUM_THREADS=1 NUMEXPR_NUM_THREADS=1 LOKY_MAX_CPU_COUNT=1
 # ParallelRunner start method: spawn (not the Linux default fork). Each attack node sets
 # TA_DEVICE / OMP_NUM_THREADS and imports textattack/torch inside the worker, which only takes
 # effect in a fresh process; spawn also avoids fork-after-torch issues (Kedro loads every

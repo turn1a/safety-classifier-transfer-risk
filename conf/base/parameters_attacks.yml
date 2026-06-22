@@ -29,6 +29,11 @@ attacks:
   # victim reads and no prompt is clipped below its context (the long tail is p90 2655 chars).
   max_prompt_chars: 3200
   query_budget: 6000 # per-example victim-query cap; high enough to rarely bind except on robust victims
+  # Candidates per victim forward. Pure throughput knob (no effect on any prediction), but the
+  # dominant per-worker memory cost: a batch-128 forward through a deberta-v3-base torch victim at
+  # 512 tokens peaks ~14.5 GB resident (DeBERTa's disentangled attention), vs ~8 GB at 32. 32 keeps
+  # per-worker memory low enough for the run box to fan out across cores without OOM.
+  query_batch_size: 32
   # Fan-out scaled to the run box: each (surrogate, recipe) cell is split into shards so a slow
   # cell spreads over cores instead of pinning one. The shard count targets ~shard_multiple * cores
   # total shards across the surrogate×recipe cells (set `cores` to the box's vCPUs), rather than a

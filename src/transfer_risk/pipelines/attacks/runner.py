@@ -43,11 +43,14 @@ RECIPES = {
     "bert-attack": BERTAttackLi2020,
 }
 
-# Candidate-query batch size for the goal function (default 32). The per-example greedy
-# search is bandwidth-bound on CPU — each forward streams the full model weights once, so
-# batching more candidates per forward amortises that stream. Larger batches cut wall time
-# without changing any prediction (batching does not affect masked per-example logits).
-_QUERY_BATCH_SIZE = 128
+# Candidate-query batch size for the goal function, read from ``params:attacks``
+# (``query_batch_size``). Batching more candidates per forward amortises the model-weight stream and
+# cuts wall time without changing any prediction (it does not affect the masked per-example logits).
+# It is also the dominant memory knob: a batch-128 forward through a deberta-v3-base victim at 512
+# tokens peaks ~14.5 GB resident per worker (DeBERTa's disentangled attention materialises content-
+# and position-score tensors), versus ~8 GB at 32 — so a smaller batch lets the sweep fan out across
+# more cores without OOM. Used as the default when the param is absent.
+_QUERY_BATCH_SIZE = 32
 
 
 class BiLSTMModelWrapper(ModelWrapper):  # type: ignore[misc]  # ModelWrapper is untyped (Any)
@@ -164,6 +167,7 @@ def run_recipe(
     *,
     query_budget: int,
     seed: int,
+    query_batch_size: int = _QUERY_BATCH_SIZE,
 ) -> list[dict[str, Any]]:
     """Run one recipe over ``examples`` and return one record per attacked example.
 
@@ -173,6 +177,7 @@ def run_recipe(
         examples: ``[{"text", "label"}]`` rows the surrogate should classify as injection.
         query_budget: Per-example cap on victim queries (SPEC.md §11).
         seed: Seed for TextAttack's sampling, for reproducibility.
+        query_batch_size: Candidates per victim forward — throughput vs per-worker memory.
 
     Returns:
         One dict per example with ``original``, ``perturbed``, ``original_label``,
@@ -180,7 +185,7 @@ def run_recipe(
     """
     attack = RECIPES[recipe].build(wrapper)
     attack.goal_function.query_budget = query_budget
-    attack.goal_function.batch_size = _QUERY_BATCH_SIZE
+    attack.goal_function.batch_size = query_batch_size
     dataset = TextAttackDataset([(ex["text"], int(ex["label"])) for ex in examples])
     attack_args = AttackArgs(
         num_examples=len(examples),

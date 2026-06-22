@@ -61,7 +61,14 @@ def attack_shard(  # noqa: PLR0913 (a generated per-shard node: catalog inputs +
     # Set these before importing the runner: the fork binds its device at import time, and the
     # worker process inherits this env. CPU + single-threaded so N pool workers use N cores.
     os.environ["TA_DEVICE"] = "cpu"
+    # Pin every inner parallelism to one — the ParallelRunner already runs one worker per core.
+    # Nested BLAS threads or joblib/loky pools (textattack's embedding search spawns one per worker,
+    # sized to the CPU count) would oversubscribe and exhaust processes/RAM (the BrokenProcessPool).
     os.environ["OMP_NUM_THREADS"] = "1"
+    os.environ["OPENBLAS_NUM_THREADS"] = "1"
+    os.environ["MKL_NUM_THREADS"] = "1"
+    os.environ["NUMEXPR_NUM_THREADS"] = "1"
+    os.environ["LOKY_MAX_CPU_COUNT"] = "1"
     os.environ["TA_SENTENCE_ENCODER"] = str(
         attacks_params.get("semantic_encoder", "sentence-transformers")
     )
@@ -74,6 +81,7 @@ def attack_shard(  # noqa: PLR0913 (a generated per-shard node: catalog inputs +
     max_chars = int(attacks_params.get("max_prompt_chars") or 10**9)
     query_budget = int(attacks_params["query_budget"])
     max_seq_len = int(attacks_params.get("max_seq_len", 256))
+    query_batch_size = int(attacks_params.get("query_batch_size", 32))
     test_df = splits["test"]
     injections = test_df.loc[test_df["label"] == 1, "text"].head(eval_size).tolist()
     examples = [{"text": text[:max_chars], "label": 1} for text in injections]
@@ -88,7 +96,12 @@ def attack_shard(  # noqa: PLR0913 (a generated per-shard node: catalog inputs +
         # and wraps it as a HuggingFaceModelWrapper.
         wrapper = build_wrapper({"kind": kind, "source": victim_path}, torch.device("cpu"))
     return run_recipe(
-        wrapper, recipe, examples[start:stop], query_budget=query_budget, seed=seed + start
+        wrapper,
+        recipe,
+        examples[start:stop],
+        query_budget=query_budget,
+        seed=seed + start,
+        query_batch_size=query_batch_size,
     )
 
 

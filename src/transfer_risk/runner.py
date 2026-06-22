@@ -19,10 +19,12 @@ from kedro.runner import ParallelRunner
 if TYPE_CHECKING:
     from kedro.pipeline import Pipeline
 
-# Resident memory budgeted per worker: the torch + transformers + textattack imports, one
-# transformer victim (a deberta-v3-base checkpoint is the high end), and a recipe's offline assets
-# (counter-fitted embeddings + sentence encoder). Conservative, to leave headroom for the OS.
-_GB_PER_WORKER = 5.0
+# Resident memory budgeted per worker, from measurement: a deberta-v3-base torch victim attacking
+# at query_batch_size=32 over 512-token prompts peaks ~8.3 GB (imports + model + the recipe's
+# offline assets + the batch forward); the masked-LM recipes add a little. Budgeted above that so a
+# capped wave never OOMs even if every worker is the heaviest cell (on r8g.48xlarge: 1536/12 = 128
+# workers, ~1 TB peak, comfortably under 1536 GB).
+_GB_PER_WORKER = 12.0
 
 
 def ram_bounded_workers(
