@@ -12,6 +12,11 @@ data "aws_subnets" "default" {
     name   = "vpc-id"
     values = [data.aws_vpc.default.id]
   }
+  # Pin to the chosen AZ so the (spot) instance lands in the cheapest subzone — spot price varies by AZ.
+  filter {
+    name   = "availability-zone"
+    values = [var.availability_zone]
+  }
 }
 
 # Always the newest Amazon Linux 2023 AMI for the chosen arch — no hard-coded, expiring id.

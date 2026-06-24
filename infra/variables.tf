@@ -42,6 +42,12 @@ variable "instance_type" {
   default     = "c8g.16xlarge"
 }
 
+variable "availability_zone" {
+  description = "AZ to launch the instance in. Pin to the cheapest spot AZ — spot price varies by AZ within a region (r8g.48xlarge: 1c/1a ~$2.2 vs 1b ~$4.0)."
+  type        = string
+  default     = "eu-central-1c"
+}
+
 variable "use_spot" {
   description = "Use a spot instance (cheapest; the sweep is resumable so an interruption is safe)."
   type        = bool
