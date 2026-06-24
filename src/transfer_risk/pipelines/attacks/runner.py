@@ -138,6 +138,38 @@ class ONNXModelWrapper(ModelWrapper):  # type: ignore[misc]  # ModelWrapper is u
         return shifted / shifted.sum(axis=-1, keepdims=True)
 
 
+class DynamicPadHuggingFaceModelWrapper(HuggingFaceModelWrapper):  # type: ignore[misc]
+    """Pad each batch to its longest sequence, not a fixed 512 — a result-preserving speedup.
+
+    TextAttack's wrapper always pads to 512 tokens, so every victim query pays full-window cost,
+    even though the eval set is mostly short prompts (median ~24 tokens). Padding to the batch's
+    longest sequence gives byte-identical logits (the attention mask zeroes pad positions) at a
+    fraction of the compute for short inputs (DeBERTa attention is ~O(seq^2)). The forward also runs
+    under ``torch.inference_mode`` (cheaper than ``no_grad``). Only ``__call__`` differs from the
+    parent; ``get_grad`` is inherited and unused (every recipe here is black-box).
+    """
+
+    def __call__(self, text_input_list: list[str]) -> Any:
+        """Tokenise with dynamic padding, run the victim under inference_mode, return logits."""
+        max_length = (
+            512 if self.tokenizer.model_max_length == int(1e30) else self.tokenizer.model_max_length
+        )
+        inputs_dict = self.tokenizer(
+            text_input_list,
+            add_special_tokens=True,
+            padding=True,
+            max_length=max_length,
+            truncation=True,
+            return_tensors="pt",
+        )
+        inputs_dict.to(next(self.model.parameters()).device)
+        with torch.inference_mode():
+            outputs = self.model(**inputs_dict)
+        if isinstance(outputs[0], str):
+            return outputs
+        return outputs.logits
+
+
 def build_wrapper(
     entry: Mapping[str, Any],
     device: torch.device,
@@ -157,7 +189,7 @@ def build_wrapper(
     if onnx_dir is not None:
         return ONNXModelWrapper(f"{onnx_dir}/model.onnx", onnx_dir, max_seq_len=max_seq_len)
     model, tokenizer = load_transformer(entry["source"], device)
-    return HuggingFaceModelWrapper(model, tokenizer)
+    return DynamicPadHuggingFaceModelWrapper(model, tokenizer)
 
 
 def run_recipe(

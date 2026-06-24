@@ -20,11 +20,10 @@ if TYPE_CHECKING:
     from kedro.pipeline import Pipeline
 
 # Resident memory budgeted per worker, from measurement: a deberta-v3-base torch victim attacking
-# at query_batch_size=32 over 512-token prompts peaks ~8.3 GB (imports + model + the recipe's
-# offline assets + the batch forward); the masked-LM recipes add a little. Budgeted above that so a
-# capped wave never OOMs even if every worker is the heaviest cell (on r8g.48xlarge: 1536/12 = 128
-# workers, ~1 TB peak, comfortably under 1536 GB).
-_GB_PER_WORKER = 12.0
+# over 512-token prompts peaks ~7.4 GB at query_batch_size=16 (~7.9 GB for the masked-LM BAE/
+# BERT-Attack recipes). Budgeted above that so a capped wave never OOMs even if every worker is the
+# heaviest cell (on r8g.48xlarge: 1536/9 = 170 workers, ~1.3 TB peak, under 1536 GB with margin).
+_GB_PER_WORKER = 9.0
 
 
 def ram_bounded_workers(

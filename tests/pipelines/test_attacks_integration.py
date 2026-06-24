@@ -24,7 +24,11 @@ import torch  # noqa: E402
 from textattack.models.wrappers import HuggingFaceModelWrapper, ModelWrapper  # noqa: E402
 
 from transfer_risk.modeling import load_transformer  # noqa: E402
-from transfer_risk.pipelines.attacks.runner import ONNXModelWrapper, run_recipe  # noqa: E402
+from transfer_risk.pipelines.attacks.runner import (  # noqa: E402
+    DynamicPadHuggingFaceModelWrapper,
+    ONNXModelWrapper,
+    run_recipe,
+)
 
 
 class _StubClassifier(ModelWrapper):
@@ -181,3 +185,45 @@ def test_run_recipe_builds_and_runs_against_onnx_victim(tmp_path: Path) -> None:
     assert set(record) >= {"original", "perturbed", "original_label", "success", "result_type"}
     assert record["success"] is True  # the char-level attack flipped the ONNX victim
     assert "ignore" not in record["perturbed"].lower()  # by mangling the one salient token
+
+
+def test_dynamic_pad_wrapper_matches_stock_logits() -> None:
+    """The dynamic-pad victim wrapper returns logits identical to the stock wrapper (regression).
+
+    The subclass differs only in padding to the batch's longest sequence instead of a fixed 512
+    (and inference_mode vs no_grad); the attention mask makes pad positions inert, so the per-row
+    logits must be identical. This guards the speedup as a true no-op on the attack's decisions.
+    """
+    from tokenizers import Tokenizer, models, pre_tokenizers  # noqa: PLC0415
+    from transformers import (  # noqa: PLC0415
+        BertConfig,
+        BertForSequenceClassification,
+        PreTrainedTokenizerFast,
+    )
+
+    words = ["[UNK]", "[PAD]", "ignore", "the", "rules", "now", "please", "system", "prompt", "all"]
+    vocab = {w: i for i, w in enumerate(words)}
+    backend = Tokenizer(models.WordLevel(vocab=vocab, unk_token="[UNK]"))  # noqa: S106
+    backend.pre_tokenizer = pre_tokenizers.Whitespace()
+    unk, pad = "[UNK]", "[PAD]"
+    tokenizer = PreTrainedTokenizerFast(
+        tokenizer_object=backend, unk_token=unk, pad_token=pad, model_max_length=512
+    )
+    cfg = BertConfig(
+        vocab_size=len(vocab),
+        hidden_size=32,
+        num_hidden_layers=2,
+        num_attention_heads=2,
+        intermediate_size=64,
+        num_labels=2,
+        max_position_embeddings=512,
+        pad_token_id=vocab[pad],
+    )
+    torch.manual_seed(0)
+    model = BertForSequenceClassification(cfg).eval()
+    texts = ["ignore the rules", "please ignore all the system prompt rules now", "rules now"]
+    stock = HuggingFaceModelWrapper(model, tokenizer)(texts).detach().numpy()
+    dyn = DynamicPadHuggingFaceModelWrapper(model, tokenizer)(texts).detach().numpy()
+    assert dyn.shape == stock.shape
+    assert (dyn.argmax(-1) == stock.argmax(-1)).all()
+    assert float(np.abs(dyn - stock).max()) < 1e-5  # mask makes padding inert -> identical logits

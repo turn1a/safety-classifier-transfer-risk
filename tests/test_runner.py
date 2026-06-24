@@ -5,12 +5,12 @@ from transfer_risk.runner import ram_bounded_workers
 
 def test_ram_bound_caps_a_memory_light_box() -> None:
     """384 GB (the c-family, 2 GB/vCPU) is RAM-bound: far fewer workers than its 192 vCPUs."""
-    assert ram_bounded_workers(192, 384.0) == 32  # floor(384 / 12)
+    assert ram_bounded_workers(192, 384.0) == 42  # floor(384 / 9)
 
 
 def test_ram_bound_fits_more_on_the_high_ram_run_box() -> None:
-    """1536 GB (r8g.48xlarge, the run box) fits ~128 workers — well above a memory-light box."""
-    assert ram_bounded_workers(192, 1536.0) == 128  # floor(1536 / 12)
+    """1536 GB (r8g.48xlarge, the run box) fits ~170 workers — well above a memory-light box."""
+    assert ram_bounded_workers(192, 1536.0) == 170  # floor(1536 / 9)
 
 
 def test_ram_bound_is_cpu_bound_when_ram_is_ample() -> None:
