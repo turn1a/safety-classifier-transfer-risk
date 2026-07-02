@@ -244,4 +244,4 @@ ignore-module = false
 exclude = ["tests", "docs"]
 
 [tool.uv.sources]
-textattack = { git = "https://github.com/turn1a/TextAttack", rev = "transformers-5-compat" }
+textattack = { git = "https://github.com/turn1a/TextAttack", rev = "perf/optimizations" }

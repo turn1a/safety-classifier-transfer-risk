@@ -3365,7 +3365,7 @@ wheels = [
 [[package]]
 name = "textattack"
 version = "0.3.10"
-source = { git = "https://github.com/turn1a/TextAttack?rev=transformers-5-compat#62a7db83df0caecfe11f14a03e24a6abeeaa0277" }
+source = { git = "https://github.com/turn1a/TextAttack?rev=perf%2Foptimizations#873ef89e8d35398199f23009b8c041ef0fe2a7d3" }
 dependencies = [
     { name = "bert-score" },
     { name = "datasets" },
@@ -3571,7 +3571,7 @@ requires-dist = [
     { name = "scipy", specifier = ">=1.17.1" },
     { name = "seaborn", specifier = ">=0.13.2" },
     { name = "sentencepiece", specifier = ">=0.2.1" },
-    { name = "textattack", git = "https://github.com/turn1a/TextAttack?rev=transformers-5-compat" },
+    { name = "textattack", git = "https://github.com/turn1a/TextAttack?rev=perf%2Foptimizations" },
     { name = "torch", specifier = ">=2.12.0" },
     { name = "transformers", specifier = ">=5.12.1" },
 ]
