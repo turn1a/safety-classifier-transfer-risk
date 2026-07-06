@@ -8,13 +8,70 @@ grouping; victims are wired by kind (ONNX for transformers, torch for the BiLSTM
 ``--runner ParallelRunner --only-missing-outputs`` to parallelise and resume.
 """
 
-from functools import partial
+import inspect
+from collections.abc import Callable
+from functools import partial, update_wrapper
+from typing import Any
 
 from kedro.pipeline import Pipeline, node
 
 from transfer_risk.lib.sweep import auto_shard_size, cell_key, shard_key, shard_spans
 from transfer_risk.pipelines._dynamic import attack_params, surrogate_specs
 from transfer_risk.pipelines.attacks.nodes import attack_shard, reduce_cell
+
+
+def _bind_shard(
+    name: str,
+    kind: str,
+    use_onnx: bool,  # noqa: FBT001 (build-time identity flag, not a runtime boolean-trap arg)
+    recipe: str,
+    start: int,
+    stop: int,
+    label: str,
+) -> Callable[..., list[dict[str, Any]]]:
+    """Bind one shard's build-time identity into a picklable, introspectable node callable.
+
+    ``attack_shard`` is fanned out per ``(surrogate, recipe, shard)`` by binding its keyword-only
+    identity with :func:`functools.partial` — picklable, so ``ParallelRunner`` can ship it to a
+    spawned worker. A bare partial has no ``__name__`` and defeats ``typing.get_type_hints``, so
+    Kedro warns per node on both counts; here :func:`functools.update_wrapper` copies
+    ``attack_shard``'s name, docstring, annotations, and ``__wrapped__`` (for hint resolution), and
+    the reduced signature is pinned so ``inspect.signature`` keeps reporting this node's four real
+    inputs instead of unwrapping to the ten-arg original.
+
+    Args:
+        name: Surrogate name bound into the shard.
+        kind: Surrogate kind (selects the victim wrapper).
+        use_onnx: Serve the victim from its ONNX graph rather than its torch checkpoint.
+        recipe: TextAttack recipe key.
+        start: Shard start index into the eval set.
+        stop: Shard stop index (exclusive).
+        label: Readable node name (e.g. ``attack_<surrogate>__<recipe>__<start>``).
+
+    Returns:
+        The bound ``attack_shard`` callable, wrapped so Kedro can name it and read its type hints.
+    """
+    fn = partial(
+        attack_shard,
+        name=name,
+        kind=kind,
+        use_onnx=use_onnx,
+        recipe=recipe,
+        start=start,
+        stop=stop,
+    )
+    # Capture the reduced signature (four real inputs; bound identity as defaults) before
+    # update_wrapper sets __wrapped__ — which would otherwise make inspect.signature unwrap to
+    # attack_shard's full ten-arg signature.
+    signature = inspect.signature(fn)
+    update_wrapper(fn, attack_shard)
+    for attr, value in (
+        ("__signature__", signature),
+        ("__name__", label),
+        ("__qualname__", label),
+    ):
+        setattr(fn, attr, value)
+    return fn
 
 
 def create_pipeline() -> Pipeline:
@@ -58,15 +115,7 @@ def create_pipeline() -> Pipeline:
                 start, stop = spans[0]
                 nodes.append(
                     node(
-                        partial(
-                            attack_shard,
-                            name=name,
-                            kind=kind,
-                            use_onnx=use_onnx,
-                            recipe=recipe,
-                            start=start,
-                            stop=stop,
-                        ),
+                        _bind_shard(name, kind, use_onnx, recipe, start, stop, f"attack_{cell}"),
                         inputs=inputs,
                         outputs=f"adversarial__{cell}",
                         name=f"attack_{cell}",
@@ -79,15 +128,7 @@ def create_pipeline() -> Pipeline:
                 key = shard_key(name, recipe, start)
                 nodes.append(
                     node(
-                        partial(
-                            attack_shard,
-                            name=name,
-                            kind=kind,
-                            use_onnx=use_onnx,
-                            recipe=recipe,
-                            start=start,
-                            stop=stop,
-                        ),
+                        _bind_shard(name, kind, use_onnx, recipe, start, stop, f"attack_{key}"),
                         inputs=inputs,
                         outputs=f"adversarial_shard__{key}",
                         name=f"attack_{key}",
