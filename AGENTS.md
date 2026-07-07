@@ -22,7 +22,7 @@ src/transfer_risk/
 ├── lib/                  # PURE algorithms (no I/O, no Kedro): cka, dbs, seeds, thresholds
 ├── pipelines/<stage>/    # one Kedro pipeline per stage: nodes.py + pipeline.py
 │   ├── data models similarity attacks transfer risk reporting
-│   └── smoke             # the one implemented (wiring-check) pipeline
+│   └── smoke             # a wiring-check pipeline, excluded from __default__
 ├── pipeline_registry.py  # find_pipelines(); __default__ = data … reporting (smoke excluded)
 └── settings.py
 conf/base/                # catalog.yml, parameters_<stage>.yml, mlflow.yml
@@ -61,7 +61,7 @@ This mirrors the pure/glue split: the deterministic core is small, tested, and i
 ## 7. Code quality (non-negotiable)
 
 - **Google-style docstrings** on every module, class, and function — public and private (ruff `D` + `interrogate`; see §12).
-- `just lint` (ruff) must pass with zero diagnostics; `just type` (mypy strict on `src/`) must pass. Placeholder nodes carry a scoped `ARG` ignore (see `pyproject.toml`); remove it as each node is implemented.
+- `just lint` (ruff) must pass with zero diagnostics; `just type` (mypy strict on `src/`) must pass. A scoped `ARG001` ignore covers the few node functions that accept catalog-wired inputs they don't directly reference (see `pyproject.toml`).
 - No unseeded randomness anywhere. Derive all seeds from the one root seed via `transfer_risk.lib.seeds`.
 
 ## 8. Kedro conventions
@@ -94,7 +94,7 @@ Standing rules distilled from a review; treat them at §7 weight.
 
 - **Keep docs current as you go.** Update `README.md`, `CHANGELOG.md`, `SPEC.md`, and this file in the same change that alters behaviour — not in a batch afterwards.
 - **One paragraph per line in Markdown.** `.mdformat.toml` sets `wrap = "no"`; never hand-wrap prose. `just fmt` and the pre-commit hook enforce it. `refs/` is the only exclusion.
-- **Everything goes through the catalog — data, models, and S3.** Raw HuggingFace *datasets* are `HFDataset` entries; Hub *models* (pretrained surrogates, fine-tune backbones, the target) are `HuggingFaceHubModelDataset` entries; every surrogate is persisted through the `surrogate__{name}` factory (`SurrogateModelDataset`) and its ONNX graph through `onnx__{name}` (`OnnxModelDataset`). No `from_pretrained(hub_id)` / `load_dataset` / `save_pretrained` / `aws s3 sync` inside nodes or scripts. Cloud data locations are catalog-owned via `${globals:...}` (local in base, `s3://` in the `cloud` env, from a scoped `tr.bucket` resolver). The models/similarity/attacks pipelines are generated dynamically (one node per surrogate, and per `(surrogate, recipe, shard)`); they run with `ParallelRunner` and resume with `--only-missing-outputs`. Dotted dataset names are reserved for namespacing, so factory names use `__` (e.g. `surrogate__{name}`).
+- **Everything goes through the catalog — data, models, and S3.** Raw HuggingFace *datasets* are `HFDataset` entries; Hub *models* (pretrained surrogates, fine-tune backbones, the target) are `HuggingFaceHubModelDataset` entries; every surrogate is persisted through the `surrogate__{name}` factory (`SurrogateModelDataset`) and its ONNX graph through `onnx__{name}` (`OnnxModelDataset`). No `from_pretrained(hub_id)` / `load_dataset` / `save_pretrained` / `aws s3 sync` inside nodes or scripts. Cloud data locations are catalog-owned via `${globals:...}` (local in base, `s3://` in the `cloud` env, from a scoped `tr.bucket` resolver). The models/similarity/attacks pipelines are generated dynamically (one node per surrogate, and per `(surrogate, recipe, shard)`); they run with a RAM-bounded `ParallelRunner` (caps workers to fit torch victims in memory) and resume with `--only-missing-outputs`. Dotted dataset names are reserved for namespacing, so factory names use `__` (e.g. `surrogate__{name}`).
 - **Docstrings on public AND private functions.** ruff `D` covers public APIs; `interrogate` (`fail-under = 100`, checks private/nested/magic/init) covers the rest. Both run in `just lint` and pre-commit.
 - **Logging, not print.** `conf/logging.yml` configures the rich console plus a rotating `logs/run.log`; nodes log meaningful progress via `logging.getLogger(__name__)`.
 - **Env vars live in `.env`** (loaded by `settings.py` and by `just` via `dotenv-load`), never typed ad-hoc on the command line. `.env.example` documents them; `.env` is gitignored.

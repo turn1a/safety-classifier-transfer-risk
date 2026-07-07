@@ -7,6 +7,5 @@ This is the security-relevant core: CKA representational similarity
 (:mod:`~transfer_risk.lib.thresholds`). These functions are unit-tested in
 isolation and reused by the Kedro pipeline nodes.
 
-Bodies are stubs (``raise NotImplementedError``) in this scaffold; see ``SPEC.md``
-§3 for the specifications and the reference CKA implementation.
+See ``SPEC.md`` §3 for the specifications and the reference CKA implementation.
 """

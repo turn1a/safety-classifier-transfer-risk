@@ -122,9 +122,9 @@ fixable = ["ALL"]
     "PLR2004",  # comparing against literal expected values is normal in tests
     "D",        # test functions are self-documenting; no docstring required
 ]
-# Stub pipeline nodes declare the real inputs the next phase will use, but their
-# bodies only `raise NotImplementedError`, so the arguments read as unused. Scoped to
-# the stub node files; drop an entry once that pipeline's nodes are implemented.
+# Some dynamically-wired node functions accept catalog inputs they don't directly
+# reference (e.g. an attack node's `name`/`kind`, which select the victim in the
+# surrounding wiring), so those arguments read as unused. Scoped to the node files.
 #
 # TC001/2/3: Kedro reflects on node signatures at runtime — `kedro.validation`'s
 # type_extractor calls `typing.get_type_hints` on every node function — so imports used
