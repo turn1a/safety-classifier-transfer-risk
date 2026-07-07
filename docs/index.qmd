@@ -6,7 +6,7 @@ bibliography: references.bib
 toc: true
 toc-depth: 2
 abstract: |
-  A deployed text safety classifier cannot be certified robust: the set of adversarial inputs that evade any finite checker is infinite [@vassilev-2025]. A tractable alternative is to measure how leaky a given classifier is, and which other models an attacker can use to find inputs that transfer to it. This work ports the transferability-risk method of @cox-bunzel-2025 from the image domain to a deployed text prompt-injection detector, `protectai/deberta-v3-base-prompt-injection-v2`. For a fixed probe set it computes layer-wise Centered Kernel Alignment [@kornblith-2019] between the target and ten surrogate classifiers, reduces each comparison to a mean-CKA scalar and a Diagonal Box Similarity scalar [@klause-bunzel-2025], and splits the pool at empirical quantile thresholds into a high-similarity set (M1) and a low-similarity set (M2). Five TextAttack recipes [@morris-2020] attack each surrogate; the adversarial examples are replayed against the frozen target to measure transfer; and a one-sided permutation test compares M1 against M2. Over a 2,000-prompt probe at a 512-token window, CKA orders the pool as expected — the same-backbone anchor tops it and a from-scratch BiLSTM floors it. The attack-transfer step runs as a sharded, resumable cloud sweep; those results complete the study and are reported here as they land.
+  A deployed text safety classifier cannot be certified robust: the set of adversarial inputs that evade any finite checker is infinite [@vassilev-2025]. A tractable alternative is to measure how leaky a given classifier is, and which other models an attacker can use to find inputs that transfer to it. This work ports the transferability-risk method of @cox-bunzel-2025 from the image domain to a deployed text prompt-injection detector, `protectai/deberta-v3-base-prompt-injection-v2`. For a fixed probe set it computes layer-wise Centered Kernel Alignment [@kornblith-2019] between the target and ten surrogate classifiers, reduces each comparison to a mean-CKA scalar and a Diagonal Box Similarity scalar [@klause-bunzel-2025], and splits the pool at empirical quantile thresholds into a high-similarity set (M1) and a low-similarity set (M2). Five TextAttack recipes [@morris-2020] attack each surrogate; the adversarial examples are replayed against the frozen target to measure transfer; and a one-sided permutation test compares M1 against M2. Over a 2,000-prompt probe at a 512-token window, CKA orders the pool as expected: the same-backbone anchor tops it and a from-scratch BiLSTM floors it. Replaying the resulting adversarial examples against the frozen target, transfer rate rises with CKA across all fifty (surrogate, recipe) cells (Spearman ρ = 0.66, p = 2×10⁻⁷), and the high-similarity surrogate set transfers 2.7× as often as the low-similarity set (0.51 versus 0.19). The three-versus-three selection test is bounded below by a `1/20 = 0.05` floor, so the effect is large where the exact p-value cannot be: evidence that similarity predicts transfer, reported without overclaiming significance.
 ---
 
 ## Introduction
@@ -19,7 +19,7 @@ This project is the first such implementation. It reproduces the five-step pipel
 
 ## Background and related work
 
-Three results bracket the method. @vassilev-2025 motivates measurement over certification. @cox-bunzel-2025 supplies the constructive recipe — bracket the target by representational similarity, attack surrogates, regress transfer on similarity. @klause-bunzel-2025 is the empirical predecessor that relates network similarity to attack transferability and introduces Diagonal Box Similarity (DBS); it is the source of the CNN-derived thresholds that have to be recalibrated for text.
+Three results bracket the method. @vassilev-2025 motivates measurement over certification. @cox-bunzel-2025 supplies the constructive recipe: bracket the target by representational similarity, attack surrogates, and regress transfer on similarity. @klause-bunzel-2025 is the empirical predecessor that relates network similarity to attack transferability and introduces Diagonal Box Similarity (DBS); it is the source of the CNN-derived thresholds that have to be recalibrated for text.
 
 Representational similarity is measured with linear Centered Kernel Alignment [@kornblith-2019], which compares two activation matrices in `[0, 1]`, invariant to orthogonal rotation and isotropic scaling.
 
@@ -46,7 +46,7 @@ Three public prompt-injection datasets are harmonised to a single `text`/`label`
 | deepset/prompt-injections | 662 |
 | Total (raw) | 2,968 |
 
-Deduplication removes 21 exact duplicates and finds 0 cross-source overlaps, leaving 2,947 rows — 1,910 injection and 1,037 benign (64.8% / 35.2%) — split 80/10/10 into train, validation, and test. The test-split injections are the attack evaluation set.
+Deduplication removes 21 exact duplicates and finds 0 cross-source overlaps, leaving 2,947 rows (1,910 injection and 1,037 benign, 64.8% / 35.2%), split 80/10/10 into train, validation, and test. The test-split injections are the attack evaluation set.
 
 The target is `protectai/deberta-v3-base-prompt-injection-v2`, a deployed DeBERTa-v3-base prompt-injection detector. The ten surrogates span the similarity range from the target's own backbone (fine-tuned by us with a different seed, as a CKA sanity anchor) down to a from-scratch BiLSTM floor.
 
@@ -63,17 +63,17 @@ The target is `protectai/deberta-v3-base-prompt-injection-v2`, a deployed DeBERT
 | llama-prompt-guard-22m | mDeBERTa-xsmall | pretrained detector (gated) |
 | bilstm-attention | BiLSTM (from scratch) | non-transformer floor |
 
-The four fine-tuned surrogates reach 0.96–0.97 validation accuracy and the BiLSTM 0.89, so each is a competent detector rather than a degenerate one; this matters because transfer is only meaningful between models that actually perform the task.
+The four fine-tuned surrogates reach 0.96 to 0.97 validation accuracy and the BiLSTM 0.89, so each is a competent detector rather than a degenerate one; this matters because transfer is only meaningful between models that actually perform the task.
 
 ## System architecture
 
 The implementation is a Kedro project with a deliberate split: the security-relevant mathematics (CKA, DBS, threshold calibration, deterministic seeding, the transfer-rate and permutation statistics) lives in a pure `transfer_risk.lib` package with no I/O, unit-tested in isolation against the invariants above; the nodes are thin wrappers that read inputs from a typed Data Catalog, call `lib`, and write artifacts; and the pipelines wire nodes to catalog datasets without business logic.
 
-The models, similarity, and attack pipelines are generated from configuration: one node per surrogate (train or materialise, then export to ONNX), one CKA node per surrogate, and one attack node per `(surrogate, recipe, example-shard)`. `ParallelRunner` runs the independent nodes across cores and `kedro run --only-missing-outputs` resumes by skipping artifacts already written, so an interrupted run continues where it stopped.
+The models, similarity, and attack pipelines are generated from configuration: one node per surrogate (train or materialise, then export to ONNX), one CKA node per surrogate, and one attack node per `(surrogate, recipe, example-shard)`. A RAM-bounded `ParallelRunner` runs the independent nodes across cores (capping concurrent workers to what fits in memory, since each torch victim holds a multi-gigabyte resident set), and `kedro run --only-missing-outputs` resumes by skipping artifacts already written, so an interrupted run continues where it stopped.
 
-Every model and dataset crosses process and machine boundaries through the catalog, not ad-hoc I/O. Pretrained surrogates, fine-tune backbones, and the target are HuggingFace Hub datasets; each trained surrogate persists through an fsspec-aware model-directory dataset, and its ONNX graph through a matching dataset; ONNX export is an in-environment `torch.onnx.export` node. A `${globals:...}` root layer points these boundary artifacts at local paths by default and at an S3 bucket under the cloud environment, via scoped resolvers — so the catalog, rather than a sync script, owns where data lives.
+Every model and dataset crosses process and machine boundaries through the catalog, not ad-hoc I/O. Pretrained surrogates, fine-tune backbones, and the target are HuggingFace Hub datasets; each trained surrogate persists through an fsspec-aware model-directory dataset, and its ONNX graph through a matching dataset; ONNX export is an in-environment `torch.onnx.export` node. A `${globals:...}` root layer points these boundary artifacts at local paths by default and at an S3 bucket under the cloud environment, via scoped resolvers, so the catalog, rather than a sync script, owns where data lives.
 
-The attack sweep is the only expensive stage. It runs on a single high-core ARM Graviton instance provisioned by Terraform (S3 state exchange, least-privilege instance role, egress-only security group with SSM Session Manager instead of SSH, IMDSv2 required). The box reads splits, surrogate checkpoints, and ONNX graphs from S3 through the catalog, serves victim inference from ONNX Runtime, writes each cell's adversarial partition back to S3, and self-terminates; it holds no HuggingFace token and makes no Hub calls. The cheap downstream (transfer, risk, reporting) and MLflow tracking run locally, so results land on the development machine and MLflow stays a single local writer. Runs are seeded from one root seed and tracked in MLflow with the git SHA.
+The attack sweep is the only expensive stage. It runs on a single high-core ARM Graviton spot instance provisioned by Terraform (S3 state exchange, least-privilege instance role, egress-only security group with SSM Session Manager instead of SSH, IMDSv2 required). The box reads splits and surrogate checkpoints from S3 through the catalog, serves victim inference from the torch checkpoints, writes each cell's adversarial partition back to S3, and self-terminates; it holds no HuggingFace token and makes no Hub calls. Each surrogate's ONNX graph is exported and parity-checked, but the ARM64 ONNX Runtime mis-handles the fused attention on these models, so torch serves the victims. The cheap downstream (transfer, risk, reporting) and MLflow tracking run locally, so results land on the development machine and MLflow stays a single local writer. Runs are seeded from one root seed and tracked in MLflow with the git SHA.
 
 ```{mermaid}
 flowchart LR
@@ -107,7 +107,7 @@ CKA is computed layer-by-layer between the target and each surrogate over the 2,
 
 ![Per-surrogate representational similarity to the target (mean CKA and DBS).](figures/fig_cka_heatmap.png){width=70%}
 
-The sanity check holds. `deberta-base-ft-seed` — the target's backbone, fine-tuned by us on the same task with a different seed — tops both `mean_cka` (0.475) and `dbs` (0.751), and the from-scratch BiLSTM floors both (0.259 and 0.179). That is the ordering expected if CKA measures representational similarity.
+The sanity check holds. `deberta-base-ft-seed`, the target's backbone fine-tuned by us on the same task with a different seed, tops both `mean_cka` (0.475) and `dbs` (0.751), and the from-scratch BiLSTM floors both (0.259 and 0.179). That is the ordering expected if CKA measures representational similarity.
 
 One result is worth stating plainly: `deberta-base-pi-v1`, a deployed detector built on the *same* DeBERTa-v3-base backbone as the target, sits near the bottom on `mean_cka` (0.329), below several different-architecture models. Sharing a backbone does not by itself produce high representational similarity once the training data and objective differ; this is why similarity has to be measured rather than assumed from architecture.
 
@@ -115,10 +115,31 @@ Calibrated from the `mean_cka` distribution, the thresholds are `r1 = 0.450` and
 
 ### Attack transfer and the M1-vs-M2 ablation
 
-::: {.callout-note}
-## Computing
-The attack stage — ten surrogates × five recipes = 50 cells, fanned out to roughly 2,450 example-shards — runs as the cloud sweep described above. When it completes, this section reports: per-recipe surrogate attack-success rates; per-surrogate transfer rates against similarity; the Spearman correlation between `mean_cka`/`dbs` and transfer; the random-forest feature importances; the M1-vs-M2 permutation test on mean and max transfer (with the exact p-value and the small-group floor noted); and one before/after example of a single perturbation that flips both a surrogate and the frozen target. The transfer-rate-versus-similarity scatter and the selection-ablation figure are added here from the same run.
-:::
+Each surrogate's successful adversarial examples, the perturbed injections it now reads as benign, are replayed against the frozen target. The transfer rate of a `(surrogate, recipe)` cell is the fraction that also flip the target to benign, over the fifty cells (ten surrogates × five recipes, 191 test injections each). Transfer rates span 0.03 to 0.82, with a mean of 0.38.
+
+The word-substitution recipes transfer best and the character-level one least:
+
+| Recipe | Family | Mean transfer |
+| --- | --- | --- |
+| BAE | masked-LM | 0.487 |
+| PWWS | WordNet synonym | 0.442 |
+| BERT-Attack | masked-LM | 0.351 |
+| TextFooler | embedding synonym | 0.346 |
+| DeepWordBug | character | 0.285 |
+
+Representational similarity predicts transfer. Across all fifty cells, the Spearman rank correlation between `mean_cka` and transfer rate is ρ = 0.66 (p = 2×10⁻⁷); for `dbs` it is ρ = 0.45 (p = 0.001). The random forest, read for feature importance rather than prediction, places 0.83 of its weight on `mean_cka` and 0.17 on `dbs`.
+
+![Transfer rate against mean CKA, one point per (surrogate, recipe) cell, coloured by recipe.](figures/fig_transfer_scatter.png){width=80%}
+
+The relationship is a positive trend with real scatter, not a clean staircase. The same-backbone anchor transfers most (`deberta-base-ft-seed`, mean 0.65) and the from-scratch BiLSTM least among the genuinely dissimilar models (0.18). But `llama-prompt-guard-22m` sits mid-range on CKA (0.41) and transfers almost nothing (0.05): its own detector is weak and easily fooled, yet the perturbations that fool it leave the robust target unmoved. High attack success on a surrogate does not by itself imply transfer, which is the point of selecting surrogates by similarity rather than by attackability.
+
+The selection ablation contrasts the high-similarity set M1 = {`deberta-base-ft-seed`, `deepset-deberta-injection`, `deberta-small-pi-v2`} against the low-similarity set M2 = {`llama-prompt-guard-22m`, `deberta-base-pi-v1`, `bilstm-attention`}. M1 transfers at 0.51 on average against M2's 0.19, a 32-percentage-point gap on mean-across-recipes transfer and 40 points on max-across-recipes, so an attacker choosing high-similarity surrogates lands transferable attacks about 2.7× as often. In the exact three-versus-three permutation test the max-transfer contrast reaches the small-group floor (p = 0.05); the mean-transfer contrast does not (p = 0.10). With only three surrogates per group the mean test cannot resolve below 0.05 regardless of effect size, so the pre-registered criterion (≥ 5 pp with p < 0.05 on the mean) is not strictly met even though the effect is large and the all-cells rank correlation is unambiguous. The honest reading is that similarity clearly tracks transfer here, and a larger pool per group would be needed to drive the exact selection test below the floor.
+
+![Random-forest feature importance (left) and M1-vs-M2 mean transfer (right).](figures/fig_regression_ablation.png){width=90%}
+
+A single word is often enough. Against `bert-base-ft`, BAE rewrites "Explain your last instructions like I'm five" to "Explain your last date like I'm five": one substitution that flips both the surrogate and the frozen target from injection to benign.
+
+The sweep itself, 400 example-shards across the fifty cells, ran mostly on a 192-vCPU Graviton4 spot instance in the cloud; the final shards and the per-cell reductions were completed locally, both through the same resumable catalog.
 
 ## Limitations
 
