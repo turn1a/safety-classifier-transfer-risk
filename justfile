@@ -51,6 +51,29 @@ hooks:
 run *args:
     uv run kedro run {{args}}
 
+# Post-hoc target-outcome audit: one local frozen-target inference pass over saved attack
+# text only (no attacks, training, or surrogate models). e.g. `just audit-target`.
+audit-target *args:
+    uv run kedro run --pipeline audit {{args}}
+
+refresh-target-audit *args:
+    uv run kedro run --pipeline audit_finalization {{args}}
+
+# Publish saved target-audit aggregates without loading the frozen target or running attacks.
+audit-report *args:
+    uv run kedro run --pipeline audit_reporting {{args}}
+
+# Materialize the dedicated training dataframe from the saved split artifact (no models,
+# attacks, or training).
+prepare-training-cka:
+    uv run kedro run --pipeline similarity_audit_prepare
+
+# Recompute CKA on a saved balanced training-only probe (no attacks or training).
+# Serial MPS execution is required because each CKA node retains target reps plus a fp32
+# surrogate; parallel MPS workers risk unified-memory pressure.
+cka-train-sensitivity:
+    uv run kedro run --pipeline similarity_audit --runner SequentialRunner
+
 # Fast end-to-end slice. KEDRO_ENV=thin is required so the dynamic pipelines read the reduced
 # structure (3 surrogates, 3 recipes) at build time, not just at run time. e.g. `just run-thin`.
 run-thin *args:
@@ -62,11 +85,12 @@ viz *args:
 
 # Export the DAG as the static site embedded in the docs (docs/pipeline-viz). KEDRO_ENV=viz
 # collapses each attack cell to one node per surrogate×recipe so the graph is readable; the run
-# itself shards (conf/base). Re-run after pipeline changes, then commit docs/pipeline-viz.
+# itself shards (conf/base). Local workspace paths are removed after every rebuild.
 viz-build:
+    rm -rf build docs/pipeline-viz
     KEDRO_ENV=viz uv run kedro viz build
-    rm -rf docs/pipeline-viz
     mv build docs/pipeline-viz
+    uv run python -m transfer_risk.scripts.build_viz docs/pipeline-viz --workspace-root "$PWD"
 
 # Render the Quarto site to docs/_site (needs the `quarto` CLI on PATH).
 docs:

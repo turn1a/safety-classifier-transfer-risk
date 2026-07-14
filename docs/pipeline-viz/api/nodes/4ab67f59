@@ -1,0 +1,8 @@
+{
+  "type": "pickle.pickle_dataset.PickleDataset",
+  "filepath": "<workspace>/data/04_feature/training_cka_matrices.pkl",
+  "run_command": "kedro run --to-outputs=training_cka_matrices",
+  "preview": null,
+  "preview_type": null,
+  "stats": null
+}

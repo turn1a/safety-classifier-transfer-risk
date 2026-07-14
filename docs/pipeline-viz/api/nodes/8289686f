@@ -1,6 +1,6 @@
 {
   "type": "pickle.pickle_dataset.PickleDataset",
-  "filepath": "/Users/aholszewska/dev/risk-transfer/data/05_model_input/task_splits.pkl",
+  "filepath": "<workspace>/data/05_model_input/task_splits.pkl",
   "run_command": "kedro run --to-outputs=task_splits",
   "preview": null,
   "preview_type": null,

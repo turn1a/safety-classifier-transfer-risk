@@ -8,12 +8,13 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
-from scipy.stats import spearmanr
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import cross_val_score
 from sklearn.tree import DecisionTreeRegressor
 
 from transfer_risk.lib.ablation import selection_ablation
+from transfer_risk.lib.association import spearman_association
+from transfer_risk.lib.public_bundle import apply_corrected_dbs
 from transfer_risk.lib.seeds import derive_seeds
 
 logger = logging.getLogger(__name__)
@@ -23,12 +24,35 @@ _MIN_CORR = 3
 _SUCCESS_EFFECT_PP = 5.0
 
 
+def recompute_risk_master_dbs(
+    master_results_table: pd.DataFrame,
+    cka_matrices: dict[str, Any],
+    params_similarity: dict[str, Any],
+) -> pd.DataFrame:
+    """Recompute DBS for the risk stage from saved CKA matrices.
+
+    Args:
+        master_results_table: Original saved transfer-stage master table.
+        cka_matrices: Saved target-vs-surrogate CKA matrices.
+        params_similarity: Similarity-stage parameters supplying ``dbs.box``.
+
+    Returns:
+        A separate corrected master table for regression, ablation, and run metrics.
+    """
+    box = int(params_similarity["dbs"]["box"])
+    corrected = apply_corrected_dbs(master_results_table, cka_matrices, box=box)
+    logger.info("Prepared corrected DBS risk input for %d rows (box=%d)", len(corrected), box)
+    return corrected
+
+
 def fit_regressors(master: pd.DataFrame, params: dict[str, Any], seed: int) -> dict[str, Any]:
-    """Fit shallow DecisionTree + RandomForest regressors and report correlations.
+    """Fit shallow tree regressors and report similarity-vs-transfer associations.
 
     With the small sample (n ~ surrogates x recipes) the trees are read for feature
-    importance, not prediction; Spearman(similarity, transfer) is the primary
-    correlation evidence. Cross-validated R2 is reported only when n is large enough.
+    importance as descriptive context, not primary inferential evidence. The primary
+    association evidence is Spearman(similarity, transfer) computed after aggregating
+    transfer rates by surrogate. Recipe-level associations are reported separately as a
+    sensitivity view. Cross-validated R2 is reported only when n is large enough.
 
     Rows whose similarity features are non-finite are dropped first: a surrogate that
     failed to yield valid representations (so CKA/DBS could not be computed) cannot inform
@@ -62,6 +86,8 @@ def fit_regressors(master: pd.DataFrame, params: dict[str, Any], seed: int) -> d
         "random_forest_importances": forest.feature_importances_.tolist(),
         "decision_tree_cv_r2": None,
         "random_forest_cv_r2": None,
+        "surrogate_association": {},
+        "recipe_association": {},
         "spearman": {},
         "models": {"decision_tree": tree, "random_forest": forest},
     }
@@ -70,12 +96,20 @@ def fit_regressors(master: pd.DataFrame, params: dict[str, Any], seed: int) -> d
         result["random_forest_cv_r2"] = float(
             cross_val_score(forest, features, target, cv=5).mean()
         )
-    if n >= _MIN_CORR:
-        for feature in _FEATURES:
-            rho, p_value = spearmanr(master[feature], master["transfer_rate"])
-            result["spearman"][feature] = {"rho": float(rho), "p": float(p_value)}
+    surrogate_means = _aggregate_surrogate_transfer(master)
+    result["surrogate_association"] = _association_by_feature(surrogate_means)
+    result["recipe_association"] = _association_by_feature(master)
+    # Compatibility alias: keep the historical key while pointing it at the new primary result.
+    result["spearman"] = result["surrogate_association"]
     logger.info(
-        "Regression fit on %d rows; RF importances %s", n, result["random_forest_importances"]
+        (
+            "Regression fit on %d rows (%d surrogate aggregates); RF importances %s; "
+            "primary surrogate association keys %s"
+        ),
+        n,
+        len(surrogate_means),
+        result["random_forest_importances"],
+        sorted(result["surrogate_association"]),
     )
     return result
 
@@ -155,16 +189,17 @@ def track_run_metrics(
 ) -> dict[str, float]:
     """Log the headline run scalars to MLflow and return them as a flat dict.
 
-    Gathers the cross-surrogate aggregates — mean/max transfer rate, the
-    similarity-vs-transfer Spearman correlations, random-forest feature importances, the
-    ablation effect/p-value, and the calibrated thresholds — and logs them as metrics on
-    the active MLflow run (opened by kedro-mlflow). The same dict is returned so it is
-    also persisted locally (``run_metrics``) for inspection.
+    Gathers the cross-surrogate aggregates — mean/max transfer rate, surrogate-level
+    primary similarity-vs-transfer associations, recipe-level sensitivity associations,
+    random-forest importances (descriptive only), the ablation effect/p-value, and the
+    calibrated thresholds — and logs them as metrics on the active MLflow run (opened
+    by kedro-mlflow). The same dict is returned so it is also persisted locally
+    (``run_metrics``) for inspection.
 
     Args:
         master: master results table (one row per surrogate x recipe).
         ablation: the ablation result dict.
-        regressors: the regression result dict (feature names, importances, spearman).
+        regressors: the regression result dict (feature names, importances, associations).
         thresholds: the calibrated ``{"r1", "r2"}`` thresholds.
 
     Returns:
@@ -188,12 +223,84 @@ def track_run_metrics(
         regressors["feature_names"], regressors["random_forest_importances"], strict=False
     ):
         metrics[f"rf_importance_{feature}"] = float(importance)
-    for feature, stats in regressors.get("spearman", {}).items():
-        metrics[f"spearman_{feature}_rho"] = float(stats["rho"])
-        metrics[f"spearman_{feature}_p"] = float(stats["p"])
+    primary_association = regressors.get("surrogate_association", regressors.get("spearman", {}))
+    recipe_association = regressors.get("recipe_association", {})
+    for feature, stats in primary_association.items():
+        rho, p_value, n_obs, exact = _association_scalars(stats)
+        metrics[f"surrogate_spearman_{feature}_rho"] = rho
+        metrics[f"surrogate_spearman_{feature}_p"] = p_value
+        metrics[f"surrogate_spearman_{feature}_n"] = n_obs
+        metrics[f"surrogate_spearman_{feature}_exact"] = exact
+        # Backward-compatible metric names now map to the primary surrogate-level result.
+        metrics[f"spearman_{feature}_rho"] = rho
+        metrics[f"spearman_{feature}_p"] = p_value
+    for feature, stats in recipe_association.items():
+        rho, p_value, n_obs, exact = _association_scalars(stats)
+        metrics[f"recipe_spearman_{feature}_rho"] = rho
+        metrics[f"recipe_spearman_{feature}_p"] = p_value
+        metrics[f"recipe_spearman_{feature}_n"] = n_obs
+        metrics[f"recipe_spearman_{feature}_exact"] = exact
     _log_mlflow_metrics(metrics)
     logger.info("Logged %d run metrics to MLflow", len(metrics))
     return metrics
+
+
+def _aggregate_surrogate_transfer(master: pd.DataFrame) -> pd.DataFrame:
+    """Aggregate recipe-level rows to one transfer/similarity row per surrogate.
+
+    Args:
+        master: Master results table (one row per surrogate x recipe).
+
+    Returns:
+        DataFrame with one row per surrogate and columns ``mean_cka``, ``dbs``,
+        and mean ``transfer_rate``.
+    """
+    return (
+        master.groupby("surrogate", as_index=False)
+        .agg(
+            mean_cka=("mean_cka", "mean"),
+            dbs=("dbs", "mean"),
+            transfer_rate=("transfer_rate", "mean"),
+        )
+        .reset_index(drop=True)
+    )
+
+
+def _association_by_feature(table: pd.DataFrame) -> dict[str, dict[str, float | int | bool]]:
+    """Compute per-feature Spearman association against ``transfer_rate``.
+
+    Args:
+        table: Input table with feature columns and ``transfer_rate``.
+
+    Returns:
+        Mapping ``feature -> {rho, two_sided_p, n, exact}``. Empty when the table
+        has fewer than ``_MIN_CORR`` rows.
+    """
+    if len(table) < _MIN_CORR:
+        return {}
+    association: dict[str, dict[str, float | int | bool]] = {}
+    for feature in _FEATURES:
+        association[feature] = spearman_association(
+            table[feature].tolist(),
+            table["transfer_rate"].tolist(),
+        )
+    return association
+
+
+def _association_scalars(stats: dict[str, Any]) -> tuple[float, float, float, float]:
+    """Extract metric-ready scalars from association stats.
+
+    Args:
+        stats: Association stats dict.
+
+    Returns:
+        Tuple ``(rho, p_value, n_obs, exact_flag)`` as floats.
+    """
+    rho = float(stats["rho"])
+    p_value = float(stats["two_sided_p"]) if "two_sided_p" in stats else float(stats["p"])
+    n_obs = float(stats.get("n", 0))
+    exact = float(bool(stats.get("exact", False)))
+    return rho, p_value, n_obs, exact
 
 
 def _log_mlflow_metrics(metrics: dict[str, float]) -> None:

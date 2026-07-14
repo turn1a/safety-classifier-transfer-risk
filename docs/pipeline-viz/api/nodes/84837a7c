@@ -1,0 +1,8 @@
+{
+  "type": "artifacts.mlflow_artifact_dataset.JSONDataset.MlflowJSONDataset",
+  "filepath": "<workspace>/docs/artifacts/model_validation_summary.json",
+  "run_command": "kedro run --to-outputs=pub_model_validation_summary",
+  "preview": null,
+  "preview_type": null,
+  "stats": null
+}

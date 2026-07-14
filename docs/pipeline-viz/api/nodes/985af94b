@@ -1,0 +1,20 @@
+{
+  "code": "def build_training_probe_set(\n    training_split: pd.DataFrame,\n    params: dict[str, Any],\n    seed: int,\n) -> pd.DataFrame:\n    \"\"\"Build the fixed balanced CKA probe from the dedicated training dataframe.\n\n    Args:\n        training_split: Persisted dataframe containing training rows only.\n        params: Similarity-audit parameters with fixed ``n_probe``.\n        seed: Root reproducibility seed.\n\n    Returns:\n        Deterministically shuffled training-only probe with 800 rows of each canonical label.\n\n    Raises:\n        ValueError: If ``n_probe`` is not the fixed sensitivity size.\n    \"\"\"\n    n_probe = int(params[\"n_probe\"])\n    if n_probe != _TRAINING_PROBE_SIZE:\n        msg = f\"similarity_audit.n_probe must be {_TRAINING_PROBE_SIZE}, got {n_probe}\"\n        raise ValueError(msg)\n    probe = sample_balanced_training_probe(\n        training_split,\n        n_per_label=n_probe // 2,\n        seed=seed,\n    )\n    logger.info(\n        \"Built training-only CKA probe with %d rows (%d label 1, %d label 0)\",\n        len(probe),\n        int((probe[\"label\"] == 1).sum()),\n        int((probe[\"label\"] == 0).sum()),\n    )\n    return probe\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/similarity_audit/nodes.py",
+  "parameters": {
+    "similarity_audit": {
+      "n_probe": 1600
+    },
+    "seed": 20260616
+  },
+  "run_command": "kedro run --to-nodes='build_training_probe_set'",
+  "inputs": [
+    "training_split",
+    "params:similarity_audit",
+    "params:seed"
+  ],
+  "outputs": [
+    "training_probe_set"
+  ],
+  "preview": null
+}

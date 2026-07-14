@@ -1,0 +1,166 @@
+{
+  "interpretation": {
+    "analysis_label": "post-hoc training-only CKA sensitivity analysis; not a replacement for the original CKA analysis or independent validation",
+    "probe_scope": "The representation probe uses only rows sampled from the existing local training split, which local fine-tuned surrogates already used.",
+    "attack_data_note": "The outcome comparison reuses final target_audit_summary aggregates; no new attack data was created.",
+    "inference_note": "No new surrogate models were added and no M1/M2 sample size increased."
+  },
+  "probe_metadata": {
+    "split": "train",
+    "n_rows": 1600,
+    "label_counts": {
+      "0": 800,
+      "1": 800
+    },
+    "source_counts": {
+      "Lakera/gandalf_ignore_instructions": 409,
+      "deepset/prompt-injections": 420,
+      "jackhhao/jailbreak-classification": 771
+    },
+    "source_metadata_preserved": true,
+    "sampling": "deterministic balanced sampling from saved task_splits['train'] only"
+  },
+  "similarity_settings": {
+    "pooling": "cls",
+    "max_seq_len": 512,
+    "cka_batch_size": 64,
+    "dbs_box": 1,
+    "r1_quantile": 0.75,
+    "r2_quantile": 0.25
+  },
+  "rank_stability": {
+    "original_vs_training_mean_cka": {
+      "designed_pool": {
+        "label": "original and training-probe CKA configured surrogate pool",
+        "unit": "one row per surrogate",
+        "n_surrogates": 10
+      },
+      "exchangeability_null": {
+        "status": "estimated",
+        "rho": 0.9878787878787879,
+        "two_sided_p": 5.5114638447971785e-06,
+        "n": 10,
+        "exact": true,
+        "p_value_label": "exact enumeration under the exchangeability null for the designed surrogate pool"
+      }
+    },
+    "original_vs_training_corrected_dbs": {
+      "designed_pool": {
+        "label": "original and training-probe corrected-DBS configured surrogate pool",
+        "unit": "one row per surrogate",
+        "n_surrogates": 10
+      },
+      "exchangeability_null": {
+        "status": "estimated",
+        "rho": 1.0,
+        "two_sided_p": 5.511463844797178e-07,
+        "n": 10,
+        "exact": true,
+        "p_value_label": "exact enumeration under the exchangeability null for the designed surrogate pool"
+      }
+    }
+  },
+  "selection_membership": {
+    "original": {
+      "M1": [
+        "deberta-base-ft-seed",
+        "deepset-deberta-injection",
+        "deberta-small-pi-v2"
+      ],
+      "M2": [
+        "llama-prompt-guard-22m",
+        "deberta-base-pi-v1",
+        "bilstm-attention"
+      ]
+    },
+    "training_probe": {
+      "M1": [
+        "deberta-base-ft-seed",
+        "deepset-deberta-injection",
+        "deberta-small-pi-v2"
+      ],
+      "M2": [
+        "llama-prompt-guard-22m",
+        "deberta-base-pi-v1",
+        "bilstm-attention"
+      ],
+      "r1": 0.4512952902632862,
+      "r2": 0.41578804972404454,
+      "signal": "mean_cka"
+    }
+  },
+  "membership_overlap": {
+    "M1": {
+      "intersection": [
+        "deberta-base-ft-seed",
+        "deepset-deberta-injection",
+        "deberta-small-pi-v2"
+      ],
+      "union": [
+        "deberta-base-ft-seed",
+        "deepset-deberta-injection",
+        "deberta-small-pi-v2"
+      ],
+      "intersection_count": 3,
+      "union_count": 3,
+      "jaccard": 1.0
+    },
+    "M2": {
+      "intersection": [
+        "llama-prompt-guard-22m",
+        "deberta-base-pi-v1",
+        "bilstm-attention"
+      ],
+      "union": [
+        "llama-prompt-guard-22m",
+        "deberta-base-pi-v1",
+        "bilstm-attention"
+      ],
+      "intersection_count": 3,
+      "union_count": 3,
+      "jaccard": 1.0
+    }
+  },
+  "true_target_flip_sensitivity": {
+    "analysis_label": "post-hoc full-cohort true-target-flip outcome sensitivity using training-probe CKA and training-probe M1/M2 membership",
+    "outcome_source": "final target_audit_summary full_cohort surrogate macro true-target-flip rates",
+    "training_probe_mean_cka_vs_full_cohort_macro_true_target_flip_rate": {
+      "designed_pool": {
+        "label": "surrogates with defined full-cohort macro true-target-flip rates",
+        "unit": "one row per surrogate",
+        "n_surrogates": 10
+      },
+      "exchangeability_null": {
+        "status": "estimated",
+        "rho": 0.8181818181818182,
+        "two_sided_p": 0.005818452380952381,
+        "n": 10,
+        "exact": true,
+        "p_value_label": "exact enumeration under the exchangeability null for the designed surrogate pool"
+      }
+    },
+    "training_probe_selection_ablation": {
+      "designed_pool": {
+        "label": "training-probe M1/M2 designed pool with defined full-cohort outcomes",
+        "unit": "one row per surrogate",
+        "n_m1": 3,
+        "n_m2": 3
+      },
+      "one_sided_exchangeability_null": {
+        "status": "estimated",
+        "m1_mean": 0.4733655391393379,
+        "m2_mean": 0.14285485389233976,
+        "mean_diff_pp": 33.051068524699815,
+        "mean_p_value": 0.05,
+        "m1_max_mean": 0.6378124308781243,
+        "m2_max_mean": 0.221792691783127,
+        "max_diff_pp": 41.60197390949973,
+        "max_p_value": 0.05,
+        "exact": true,
+        "n_m1": 3,
+        "n_m2": 3,
+        "p_value_label": "exact enumeration under the exchangeability null for the training-probe M1/M2 designed pool"
+      }
+    }
+  }
+}

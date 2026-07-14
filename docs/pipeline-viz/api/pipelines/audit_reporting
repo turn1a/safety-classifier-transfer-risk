@@ -1,0 +1,682 @@
+{
+  "nodes": [
+    {
+      "id": "533f7b78",
+      "name": "pub_qualitative_examples",
+      "tags": [
+        "audit_reporting"
+      ],
+      "pipelines": [
+        "audit_reporting",
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.JSONDataset.MlflowJSONDataset"
+    },
+    {
+      "id": "8bb4724c",
+      "name": "surrogate_selection",
+      "tags": [
+        "similarity_audit",
+        "audit_finalization",
+        "similarity",
+        "audit_reporting",
+        "audit"
+      ],
+      "pipelines": [
+        "risk",
+        "similarity_audit",
+        "downstream",
+        "stage",
+        "audit_reporting",
+        "audit_finalization",
+        "similarity",
+        "__default__",
+        "reporting",
+        "audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "85ca33e1",
+      "name": "pub_master_results_table",
+      "tags": [
+        "audit_reporting"
+      ],
+      "pipelines": [
+        "audit_reporting",
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": {
+        "stats": {
+          "rows": 50,
+          "columns": 8,
+          "file_size": 6884
+        },
+        "styles": null
+      },
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.CSVDataset.MlflowCSVDataset"
+    },
+    {
+      "id": "db2ca221",
+      "name": "fig_transfer_scatter",
+      "tags": [
+        "audit_reporting"
+      ],
+      "pipelines": [
+        "audit_reporting",
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.MatplotlibDataset.MlflowMatplotlibDataset"
+    },
+    {
+      "id": "d08090be",
+      "name": "target_audit_raw_sources",
+      "tags": [
+        "audit_finalization",
+        "audit",
+        "audit_reporting"
+      ],
+      "pipelines": [
+        "audit",
+        "audit_reporting",
+        "audit_finalization"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": {
+        "stats": {
+          "rows": 142,
+          "columns": 10,
+          "file_size": 10443
+        },
+        "styles": null
+      },
+      "layer": "reporting",
+      "dataset_type": "pandas.parquet_dataset.ParquetDataset"
+    },
+    {
+      "id": "51e72f0f",
+      "name": "target_audit_cells",
+      "tags": [
+        "audit_finalization",
+        "audit",
+        "audit_reporting"
+      ],
+      "pipelines": [
+        "audit",
+        "audit_reporting",
+        "audit_finalization"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": {
+        "stats": {
+          "rows": 50,
+          "columns": 11,
+          "file_size": 9977
+        },
+        "styles": null
+      },
+      "layer": "reporting",
+      "dataset_type": "pandas.parquet_dataset.ParquetDataset"
+    },
+    {
+      "id": "148d7559",
+      "name": "target_audit_summary",
+      "tags": [
+        "similarity_audit",
+        "audit_finalization",
+        "audit",
+        "audit_reporting"
+      ],
+      "pipelines": [
+        "audit",
+        "similarity_audit",
+        "audit_reporting",
+        "audit_finalization"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "reporting",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "7a47232b",
+      "name": "build_public_target_audit_cells",
+      "tags": [
+        "audit_reporting"
+      ],
+      "pipelines": [
+        "audit_reporting"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "build_public_target_audit_cells"
+    },
+    {
+      "id": "2daddf26",
+      "name": "pub_target_audit_cells",
+      "tags": [
+        "audit_reporting"
+      ],
+      "pipelines": [
+        "audit_reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": {
+        "stats": {
+          "rows": 50,
+          "columns": 11,
+          "file_size": 6050
+        },
+        "styles": null
+      },
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.CSVDataset.MlflowCSVDataset"
+    },
+    {
+      "id": "95878ab5",
+      "name": "build_public_target_audit_sources",
+      "tags": [
+        "audit_reporting"
+      ],
+      "pipelines": [
+        "audit_reporting"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "build_public_target_audit_sources"
+    },
+    {
+      "id": "93c61392",
+      "name": "pub_target_audit_sources",
+      "tags": [
+        "audit_reporting"
+      ],
+      "pipelines": [
+        "audit_reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": {
+        "stats": {
+          "rows": 142,
+          "columns": 10,
+          "file_size": 14366
+        },
+        "styles": null
+      },
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.CSVDataset.MlflowCSVDataset"
+    },
+    {
+      "id": "922ad991",
+      "name": "build_public_target_audit_summary",
+      "tags": [
+        "audit_reporting"
+      ],
+      "pipelines": [
+        "audit_reporting"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "build_public_target_audit_summary"
+    },
+    {
+      "id": "75d025c7",
+      "name": "pub_target_audit_summary",
+      "tags": [
+        "audit_reporting"
+      ],
+      "pipelines": [
+        "audit_reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.JSONDataset.MlflowJSONDataset"
+    },
+    {
+      "id": "a6770ee6",
+      "name": "build_redacted_qualitative_audit",
+      "tags": [
+        "audit_reporting"
+      ],
+      "pipelines": [
+        "audit_reporting"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "build_redacted_qualitative_audit"
+    },
+    {
+      "id": "52225615",
+      "name": "plot_historical_conditional_scatter",
+      "tags": [
+        "audit_reporting"
+      ],
+      "pipelines": [
+        "audit_reporting"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "plot_historical_conditional_scatter"
+    },
+    {
+      "id": "e3b6387b",
+      "name": "plot_true_flip_ablation",
+      "tags": [
+        "audit_reporting"
+      ],
+      "pipelines": [
+        "audit_reporting"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "plot_true_flip_ablation"
+    },
+    {
+      "id": "514400f2",
+      "name": "fig_true_flip_ablation",
+      "tags": [
+        "audit_reporting"
+      ],
+      "pipelines": [
+        "audit_reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.MatplotlibDataset.MlflowMatplotlibDataset"
+    },
+    {
+      "id": "9ffd855c",
+      "name": "plot_true_flip_scatter",
+      "tags": [
+        "audit_reporting"
+      ],
+      "pipelines": [
+        "audit_reporting"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "plot_true_flip_scatter"
+    },
+    {
+      "id": "57e7ad69",
+      "name": "fig_true_flip_scatter",
+      "tags": [
+        "audit_reporting"
+      ],
+      "pipelines": [
+        "audit_reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.MatplotlibDataset.MlflowMatplotlibDataset"
+    }
+  ],
+  "edges": [
+    {
+      "source": "7a47232b",
+      "target": "2daddf26"
+    },
+    {
+      "source": "85ca33e1",
+      "target": "52225615"
+    },
+    {
+      "source": "d08090be",
+      "target": "95878ab5"
+    },
+    {
+      "source": "51e72f0f",
+      "target": "9ffd855c"
+    },
+    {
+      "source": "52225615",
+      "target": "db2ca221"
+    },
+    {
+      "source": "148d7559",
+      "target": "9ffd855c"
+    },
+    {
+      "source": "51e72f0f",
+      "target": "7a47232b"
+    },
+    {
+      "source": "a6770ee6",
+      "target": "533f7b78"
+    },
+    {
+      "source": "148d7559",
+      "target": "e3b6387b"
+    },
+    {
+      "source": "9ffd855c",
+      "target": "57e7ad69"
+    },
+    {
+      "source": "95878ab5",
+      "target": "93c61392"
+    },
+    {
+      "source": "8bb4724c",
+      "target": "e3b6387b"
+    },
+    {
+      "source": "148d7559",
+      "target": "922ad991"
+    },
+    {
+      "source": "e3b6387b",
+      "target": "514400f2"
+    },
+    {
+      "source": "922ad991",
+      "target": "75d025c7"
+    }
+  ],
+  "layers": [
+    "feature",
+    "model_input",
+    "model_output",
+    "models",
+    "primary",
+    "raw",
+    "reporting"
+  ],
+  "tags": [
+    {
+      "id": "attacks",
+      "name": "attacks"
+    },
+    {
+      "id": "audit",
+      "name": "audit"
+    },
+    {
+      "id": "audit_finalization",
+      "name": "audit_finalization"
+    },
+    {
+      "id": "audit_reporting",
+      "name": "audit_reporting"
+    },
+    {
+      "id": "bae",
+      "name": "bae"
+    },
+    {
+      "id": "bert-attack",
+      "name": "bert-attack"
+    },
+    {
+      "id": "bert-base-ft",
+      "name": "bert-base-ft"
+    },
+    {
+      "id": "bilstm-attention",
+      "name": "bilstm-attention"
+    },
+    {
+      "id": "deberta-base-ft-seed",
+      "name": "deberta-base-ft-seed"
+    },
+    {
+      "id": "deberta-base-pi-v1",
+      "name": "deberta-base-pi-v1"
+    },
+    {
+      "id": "deberta-small-pi-v2",
+      "name": "deberta-small-pi-v2"
+    },
+    {
+      "id": "deepset-deberta-injection",
+      "name": "deepset-deberta-injection"
+    },
+    {
+      "id": "deepwordbug",
+      "name": "deepwordbug"
+    },
+    {
+      "id": "electra-small-ft",
+      "name": "electra-small-ft"
+    },
+    {
+      "id": "llama-prompt-guard-22m",
+      "name": "llama-prompt-guard-22m"
+    },
+    {
+      "id": "llama-prompt-guard-86m",
+      "name": "llama-prompt-guard-86m"
+    },
+    {
+      "id": "models",
+      "name": "models"
+    },
+    {
+      "id": "pwws",
+      "name": "pwws"
+    },
+    {
+      "id": "roberta-base-ft",
+      "name": "roberta-base-ft"
+    },
+    {
+      "id": "similarity",
+      "name": "similarity"
+    },
+    {
+      "id": "similarity_audit",
+      "name": "similarity_audit"
+    },
+    {
+      "id": "similarity_audit_prepare",
+      "name": "similarity_audit_prepare"
+    },
+    {
+      "id": "textfooler",
+      "name": "textfooler"
+    },
+    {
+      "id": "transfer",
+      "name": "transfer"
+    }
+  ],
+  "pipelines": [
+    {
+      "id": "__default__",
+      "name": "__default__"
+    },
+    {
+      "id": "smoke",
+      "name": "smoke"
+    },
+    {
+      "id": "reporting",
+      "name": "reporting"
+    },
+    {
+      "id": "similarity",
+      "name": "similarity"
+    },
+    {
+      "id": "transfer",
+      "name": "transfer"
+    },
+    {
+      "id": "models",
+      "name": "models"
+    },
+    {
+      "id": "audit",
+      "name": "audit"
+    },
+    {
+      "id": "similarity_audit_prepare",
+      "name": "similarity_audit_prepare"
+    },
+    {
+      "id": "data",
+      "name": "data"
+    },
+    {
+      "id": "risk",
+      "name": "risk"
+    },
+    {
+      "id": "similarity_audit",
+      "name": "similarity_audit"
+    },
+    {
+      "id": "attacks",
+      "name": "attacks"
+    },
+    {
+      "id": "audit_reporting",
+      "name": "audit_reporting"
+    },
+    {
+      "id": "audit_finalization",
+      "name": "audit_finalization"
+    },
+    {
+      "id": "stage",
+      "name": "stage"
+    },
+    {
+      "id": "downstream",
+      "name": "downstream"
+    }
+  ],
+  "modular_pipelines": {
+    "__root__": {
+      "id": "__root__",
+      "name": "__root__",
+      "inputs": [],
+      "outputs": [],
+      "children": [
+        {
+          "id": "2daddf26",
+          "type": "data"
+        },
+        {
+          "id": "8bb4724c",
+          "type": "data"
+        },
+        {
+          "id": "7a47232b",
+          "type": "task"
+        },
+        {
+          "id": "95878ab5",
+          "type": "task"
+        },
+        {
+          "id": "a6770ee6",
+          "type": "task"
+        },
+        {
+          "id": "75d025c7",
+          "type": "data"
+        },
+        {
+          "id": "9ffd855c",
+          "type": "task"
+        },
+        {
+          "id": "93c61392",
+          "type": "data"
+        },
+        {
+          "id": "148d7559",
+          "type": "data"
+        },
+        {
+          "id": "533f7b78",
+          "type": "data"
+        },
+        {
+          "id": "85ca33e1",
+          "type": "data"
+        },
+        {
+          "id": "52225615",
+          "type": "task"
+        },
+        {
+          "id": "51e72f0f",
+          "type": "data"
+        },
+        {
+          "id": "d08090be",
+          "type": "data"
+        },
+        {
+          "id": "57e7ad69",
+          "type": "data"
+        },
+        {
+          "id": "e3b6387b",
+          "type": "task"
+        },
+        {
+          "id": "514400f2",
+          "type": "data"
+        },
+        {
+          "id": "db2ca221",
+          "type": "data"
+        },
+        {
+          "id": "922ad991",
+          "type": "task"
+        }
+      ]
+    }
+  },
+  "selected_pipeline": "audit_reporting"
+}

@@ -1,84 +1,679 @@
 {
   "nodes": [
     {
-      "id": "3d21843d",
-      "name": "similarity_table",
-      "tags": [
-        "similarity",
-        "transfer"
-      ],
+      "id": "014ac4b5",
+      "name": "dataset_audit",
+      "tags": [],
       "pipelines": [
-        "reporting",
+        "downstream",
+        "data",
+        "stage",
         "__default__",
-        "similarity",
-        "transfer",
-        "downstream",
-        "stage"
-      ],
-      "type": "data",
-      "modular_pipelines": null,
-      "node_extras": null,
-      "layer": "model_output",
-      "dataset_type": "pandas.parquet_dataset.ParquetDataset"
-    },
-    {
-      "id": "a20940e6",
-      "name": "plot_cka_heatmap",
-      "tags": [],
-      "pipelines": [
-        "reporting",
-        "downstream",
-        "__default__"
-      ],
-      "type": "task",
-      "modular_pipelines": null,
-      "node_extras": null,
-      "parameters": {},
-      "full_name": "plot_cka_heatmap"
-    },
-    {
-      "id": "6bc5358c",
-      "name": "fig_cka_heatmap",
-      "tags": [],
-      "pipelines": [
-        "reporting",
-        "downstream",
-        "__default__"
+        "reporting"
       ],
       "type": "data",
       "modular_pipelines": null,
       "node_extras": null,
       "layer": "reporting",
-      "dataset_type": "artifacts.mlflow_artifact_dataset.MatplotlibDataset.MlflowMatplotlibDataset"
+      "dataset_type": "json.json_dataset.JSONDataset"
     },
     {
-      "id": "abc2021e",
-      "name": "master_results_table",
+      "id": "6d297261",
+      "name": "build_qualitative_examples",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "build_qualitative_examples"
+    },
+    {
+      "id": "533f7b78",
+      "name": "pub_qualitative_examples",
       "tags": [
-        "transfer"
+        "audit_reporting"
       ],
       "pipelines": [
-        "reporting",
+        "audit_reporting",
         "__default__",
-        "transfer",
-        "risk",
+        "reporting",
         "downstream"
       ],
       "type": "data",
       "modular_pipelines": null,
       "node_extras": null,
-      "layer": "model_output",
-      "dataset_type": "artifacts.mlflow_artifact_dataset.ParquetDataset.MlflowParquetDataset"
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.JSONDataset.MlflowJSONDataset"
     },
     {
-      "id": "02cdda9d",
-      "name": "regressors",
+      "id": "38aedcc3",
+      "name": "build_results_manifest",
       "tags": [],
       "pipelines": [
-        "reporting",
-        "risk",
         "__default__",
+        "reporting",
         "downstream"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "reporting": {
+          "manifest": {
+            "schema_version": "1.0",
+            "experiment_commit": "5af7330",
+            "uv_lock_sha256": "fed6bd35da2963e19ac5fe00ab14fff0937120bb2c92e132741256cfc1de8f36",
+            "hardware": {
+              "instance_type": "r8g.48xlarge",
+              "vcpus": 192,
+              "architecture": "Graviton4",
+              "pricing_model": "spot",
+              "victim_backend": "torch on ARM"
+            },
+            "completion_note": "Most attack shards ran on a 192-vCPU Graviton4 spot instance; final shard reductions and reporting completed locally."
+          }
+        },
+        "seed": 20260616,
+        "models": {
+          "target": "protectai/deberta-v3-base-prompt-injection-v2",
+          "surrogates": [
+            {
+              "name": "deberta-base-pi-v1",
+              "kind": "pretrained"
+            },
+            {
+              "name": "deberta-small-pi-v2",
+              "kind": "pretrained",
+              "gated": true
+            },
+            {
+              "name": "deepset-deberta-injection",
+              "kind": "pretrained"
+            },
+            {
+              "name": "llama-prompt-guard-86m",
+              "kind": "pretrained",
+              "gated": true
+            },
+            {
+              "name": "llama-prompt-guard-22m",
+              "kind": "pretrained",
+              "gated": true
+            },
+            {
+              "name": "bert-base-ft",
+              "kind": "finetune"
+            },
+            {
+              "name": "roberta-base-ft",
+              "kind": "finetune"
+            },
+            {
+              "name": "electra-small-ft",
+              "kind": "finetune"
+            },
+            {
+              "name": "deberta-base-ft-seed",
+              "kind": "finetune"
+            },
+            {
+              "name": "bilstm-attention",
+              "kind": "bilstm"
+            }
+          ],
+          "finetune": {
+            "lr": 0.00002,
+            "batch_size": 32,
+            "epochs": 3,
+            "max_seq_len": 512
+          },
+          "bilstm": {
+            "embed_dim": 128,
+            "hidden_dim": 256,
+            "num_layers": 2,
+            "dropout": 0.3,
+            "lr": 0.001,
+            "batch_size": 64,
+            "epochs": 5,
+            "max_vocab": 20000,
+            "max_seq_len": 512
+          }
+        },
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler",
+            "bae",
+            "bert-attack"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 191,
+          "max_seq_len": 512,
+          "max_prompt_chars": 3200,
+          "query_budget": 6000,
+          "shard_size": 100000
+        },
+        "similarity": {
+          "n_probe": 2000,
+          "max_seq_len": 512,
+          "pooling": "cls",
+          "cka": {
+            "mode": "minibatch",
+            "batch_size": 64
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        },
+        "transfer": {
+          "target": "protectai/deberta-v3-base-prompt-injection-v2",
+          "benign_label": 0,
+          "batch_size": 64,
+          "max_seq_len": 512,
+          "max_transferred_examples": 8
+        }
+      },
+      "full_name": "build_results_manifest"
+    },
+    {
+      "id": "961b6053",
+      "name": "params:reporting",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "85e11043",
+      "name": "params:seed",
+      "tags": [
+        "models",
+        "llama-prompt-guard-86m",
+        "similarity_audit",
+        "attacks",
+        "deberta-base-ft-seed",
+        "pwws",
+        "llama-prompt-guard-22m",
+        "bert-base-ft",
+        "bert-attack",
+        "audit",
+        "electra-small-ft",
+        "textfooler",
+        "deepwordbug",
+        "deberta-base-pi-v1",
+        "bae",
+        "roberta-base-ft",
+        "deepset-deberta-injection",
+        "bilstm-attention",
+        "audit_finalization",
+        "similarity",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "models",
+        "risk",
+        "similarity_audit",
+        "smoke",
+        "attacks",
+        "data",
+        "stage",
+        "downstream",
+        "audit_finalization",
+        "similarity",
+        "__default__",
+        "reporting",
+        "audit"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "d3e844b2",
+      "name": "params:models",
+      "tags": [
+        "models",
+        "deberta-base-pi-v1",
+        "llama-prompt-guard-86m",
+        "roberta-base-ft",
+        "deepset-deberta-injection",
+        "deberta-base-ft-seed",
+        "bilstm-attention",
+        "llama-prompt-guard-22m",
+        "bert-base-ft",
+        "electra-small-ft",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "models",
+        "downstream",
+        "stage",
+        "__default__",
+        "reporting"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "9d4defaf",
+      "name": "params:attacks",
+      "tags": [
+        "llama-prompt-guard-86m",
+        "attacks",
+        "deberta-base-ft-seed",
+        "pwws",
+        "llama-prompt-guard-22m",
+        "bert-base-ft",
+        "bert-attack",
+        "electra-small-ft",
+        "textfooler",
+        "deepwordbug",
+        "deberta-base-pi-v1",
+        "bae",
+        "roberta-base-ft",
+        "deepset-deberta-injection",
+        "bilstm-attention",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream",
+        "attacks"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "4734aa1f",
+      "name": "params:similarity",
+      "tags": [
+        "deberta-base-pi-v1",
+        "llama-prompt-guard-86m",
+        "similarity_audit",
+        "roberta-base-ft",
+        "deepset-deberta-injection",
+        "deberta-base-ft-seed",
+        "bilstm-attention",
+        "audit_finalization",
+        "llama-prompt-guard-22m",
+        "bert-base-ft",
+        "similarity",
+        "electra-small-ft",
+        "audit",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "risk",
+        "similarity_audit",
+        "downstream",
+        "stage",
+        "audit_finalization",
+        "similarity",
+        "__default__",
+        "reporting",
+        "audit"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "85fc07f1",
+      "name": "params:transfer",
+      "tags": [
+        "audit",
+        "transfer"
+      ],
+      "pipelines": [
+        "transfer",
+        "downstream",
+        "audit",
+        "__default__",
+        "reporting"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "e65a3713",
+      "name": "pub_results_manifest",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.JSONDataset.MlflowJSONDataset"
+    },
+    {
+      "id": "a526bcbb",
+      "name": "surrogate_registry",
+      "tags": [
+        "transfer",
+        "models"
+      ],
+      "pipelines": [
+        "models",
+        "transfer",
+        "downstream",
+        "stage",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "primary",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "02410b8f",
+      "name": "surrogate_meta__deberta-base-pi-v1",
+      "tags": [
+        "models",
+        "deberta-base-pi-v1"
+      ],
+      "pipelines": [
+        "models",
+        "downstream",
+        "stage",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "7e39a93a",
+      "name": "surrogate_meta__deberta-small-pi-v2",
+      "tags": [
+        "models",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "models",
+        "downstream",
+        "stage",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "c2bc5378",
+      "name": "surrogate_meta__deepset-deberta-injection",
+      "tags": [
+        "models",
+        "deepset-deberta-injection"
+      ],
+      "pipelines": [
+        "models",
+        "downstream",
+        "stage",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "3fa904ad",
+      "name": "surrogate_meta__llama-prompt-guard-22m",
+      "tags": [
+        "models",
+        "llama-prompt-guard-22m"
+      ],
+      "pipelines": [
+        "models",
+        "downstream",
+        "stage",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "e4531676",
+      "name": "surrogate_meta__llama-prompt-guard-86m",
+      "tags": [
+        "models",
+        "llama-prompt-guard-86m"
+      ],
+      "pipelines": [
+        "models",
+        "downstream",
+        "stage",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "17a3809e",
+      "name": "publish_public_dataset_audit",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "publish_public_dataset_audit"
+    },
+    {
+      "id": "662facac",
+      "name": "pub_dataset_audit",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.JSONDataset.MlflowJSONDataset"
+    },
+    {
+      "id": "75a1b589",
+      "name": "surrogate_meta__bert-base-ft",
+      "tags": [
+        "models",
+        "bert-base-ft"
+      ],
+      "pipelines": [
+        "models",
+        "downstream",
+        "stage",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "234f4a5a",
+      "name": "surrogate_meta__bilstm-attention",
+      "tags": [
+        "bilstm-attention",
+        "models"
+      ],
+      "pipelines": [
+        "models",
+        "downstream",
+        "stage",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "fcff5111",
+      "name": "surrogate_meta__deberta-base-ft-seed",
+      "tags": [
+        "models",
+        "deberta-base-ft-seed"
+      ],
+      "pipelines": [
+        "models",
+        "downstream",
+        "stage",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "1b570ad2",
+      "name": "surrogate_meta__electra-small-ft",
+      "tags": [
+        "electra-small-ft",
+        "models"
+      ],
+      "pipelines": [
+        "models",
+        "downstream",
+        "stage",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "83648b04",
+      "name": "surrogate_meta__roberta-base-ft",
+      "tags": [
+        "models",
+        "roberta-base-ft"
+      ],
+      "pipelines": [
+        "models",
+        "downstream",
+        "stage",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "9b3eafbe",
+      "name": "assemble_surrogate_metadata",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "assemble_surrogate_metadata"
+    },
+    {
+      "id": "e91264c2",
+      "name": "surrogate_metadata_bundle",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": "io.memory_dataset.MemoryDataset"
+    },
+    {
+      "id": "c0b3abcd",
+      "name": "adversarial_examples",
+      "tags": [
+        "audit",
+        "transfer"
+      ],
+      "pipelines": [
+        "transfer",
+        "downstream",
+        "audit",
+        "__default__",
+        "reporting"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -87,13 +682,287 @@
       "dataset_type": "pickle.pickle_dataset.PickleDataset"
     },
     {
-      "id": "11c8dd13",
+      "id": "d367bd23",
+      "name": "build_model_validation_summary",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "build_model_validation_summary"
+    },
+    {
+      "id": "84837a7c",
+      "name": "pub_model_validation_summary",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.JSONDataset.MlflowJSONDataset"
+    },
+    {
+      "id": "c992e96c",
+      "name": "cka_matrices",
+      "tags": [
+        "similarity_audit",
+        "audit_finalization",
+        "similarity",
+        "audit"
+      ],
+      "pipelines": [
+        "risk",
+        "similarity_audit",
+        "downstream",
+        "stage",
+        "audit_finalization",
+        "similarity",
+        "__default__",
+        "reporting",
+        "audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "feature",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "abc2021e",
+      "name": "master_results_table",
+      "tags": [
+        "audit_finalization",
+        "audit",
+        "transfer"
+      ],
+      "pipelines": [
+        "risk",
+        "transfer",
+        "downstream",
+        "audit_finalization",
+        "audit",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.ParquetDataset.MlflowParquetDataset"
+    },
+    {
+      "id": "df5b3cfe",
+      "name": "thresholds",
+      "tags": [
+        "similarity"
+      ],
+      "pipelines": [
+        "risk",
+        "downstream",
+        "stage",
+        "similarity",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "30e5f08e",
+      "name": "recompute_master_dbs",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity": {
+          "n_probe": 2000,
+          "max_seq_len": 512,
+          "pooling": "cls",
+          "cka": {
+            "mode": "minibatch",
+            "batch_size": 64
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        }
+      },
+      "full_name": "recompute_master_dbs"
+    },
+    {
+      "id": "795e7a0c",
+      "name": "master_results_corrected",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": "io.memory_dataset.MemoryDataset"
+    },
+    {
+      "id": "8bb4724c",
+      "name": "surrogate_selection",
+      "tags": [
+        "similarity_audit",
+        "audit_finalization",
+        "similarity",
+        "audit_reporting",
+        "audit"
+      ],
+      "pipelines": [
+        "risk",
+        "similarity_audit",
+        "downstream",
+        "stage",
+        "audit_reporting",
+        "audit_finalization",
+        "similarity",
+        "__default__",
+        "reporting",
+        "audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "847f9baa",
+      "name": "build_public_master_results_table",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "build_public_master_results_table"
+    },
+    {
+      "id": "85ca33e1",
+      "name": "pub_master_results_table",
+      "tags": [
+        "audit_reporting"
+      ],
+      "pipelines": [
+        "audit_reporting",
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": {
+        "stats": {
+          "rows": 50,
+          "columns": 8,
+          "file_size": 6884
+        },
+        "styles": null
+      },
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.CSVDataset.MlflowCSVDataset"
+    },
+    {
+      "id": "c03b4a88",
+      "name": "build_surrogate_summary_table",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "build_surrogate_summary_table"
+    },
+    {
+      "id": "974f6c71",
+      "name": "pub_surrogate_summary",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.CSVDataset.MlflowCSVDataset"
+    },
+    {
+      "id": "6166a2a0",
+      "name": "plot_cka_ranked",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "plot_cka_ranked"
+    },
+    {
+      "id": "88893e42",
+      "name": "fig_cka_ranked",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.MatplotlibDataset.MlflowMatplotlibDataset"
+    },
+    {
+      "id": "8dae4e13",
       "name": "plot_transfer_scatter",
       "tags": [],
       "pipelines": [
+        "__default__",
         "reporting",
-        "downstream",
-        "__default__"
+        "downstream"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -104,11 +973,14 @@
     {
       "id": "db2ca221",
       "name": "fig_transfer_scatter",
-      "tags": [],
+      "tags": [
+        "audit_reporting"
+      ],
       "pipelines": [
+        "audit_reporting",
+        "__default__",
         "reporting",
-        "downstream",
-        "__default__"
+        "downstream"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -121,9 +993,9 @@
       "name": "ablation_results",
       "tags": [],
       "pipelines": [
+        "__default__",
         "reporting",
         "risk",
-        "__default__",
         "downstream"
       ],
       "type": "data",
@@ -133,64 +1005,232 @@
       "dataset_type": "artifacts.mlflow_artifact_dataset.JSONDataset.MlflowJSONDataset"
     },
     {
-      "id": "a73769e9",
-      "name": "plot_regression_ablation",
+      "id": "509c1814",
+      "name": "build_public_run_metrics",
       "tags": [],
       "pipelines": [
+        "__default__",
         "reporting",
-        "downstream",
-        "__default__"
+        "downstream"
       ],
       "type": "task",
       "modular_pipelines": null,
       "node_extras": null,
-      "parameters": {},
-      "full_name": "plot_regression_ablation"
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler",
+            "bae",
+            "bert-attack"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 191,
+          "max_seq_len": 512,
+          "max_prompt_chars": 3200,
+          "query_budget": 6000,
+          "shard_size": 100000
+        }
+      },
+      "full_name": "build_public_run_metrics"
     },
     {
-      "id": "844e1a3b",
-      "name": "fig_regression_ablation",
+      "id": "e50324d5",
+      "name": "pub_run_metrics",
       "tags": [],
       "pipelines": [
+        "__default__",
         "reporting",
-        "downstream",
-        "__default__"
+        "downstream"
       ],
       "type": "data",
       "modular_pipelines": null,
       "node_extras": null,
       "layer": "reporting",
-      "dataset_type": "artifacts.mlflow_artifact_dataset.MatplotlibDataset.MlflowMatplotlibDataset"
+      "dataset_type": "artifacts.mlflow_artifact_dataset.JSONDataset.MlflowJSONDataset"
     }
   ],
   "edges": [
     {
-      "source": "11c8dd13",
+      "source": "83648b04",
+      "target": "9b3eafbe"
+    },
+    {
+      "source": "795e7a0c",
+      "target": "8dae4e13"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "509c1814"
+    },
+    {
+      "source": "df5b3cfe",
+      "target": "6166a2a0"
+    },
+    {
+      "source": "fcff5111",
+      "target": "9b3eafbe"
+    },
+    {
+      "source": "30e5f08e",
+      "target": "795e7a0c"
+    },
+    {
+      "source": "8bb4724c",
+      "target": "c03b4a88"
+    },
+    {
+      "source": "e4531676",
+      "target": "9b3eafbe"
+    },
+    {
+      "source": "847f9baa",
+      "target": "85ca33e1"
+    },
+    {
+      "source": "c2bc5378",
+      "target": "9b3eafbe"
+    },
+    {
+      "source": "d367bd23",
+      "target": "84837a7c"
+    },
+    {
+      "source": "e91264c2",
+      "target": "d367bd23"
+    },
+    {
+      "source": "6166a2a0",
+      "target": "88893e42"
+    },
+    {
+      "source": "6d297261",
+      "target": "533f7b78"
+    },
+    {
+      "source": "c0b3abcd",
+      "target": "509c1814"
+    },
+    {
+      "source": "795e7a0c",
+      "target": "847f9baa"
+    },
+    {
+      "source": "795e7a0c",
+      "target": "509c1814"
+    },
+    {
+      "source": "02410b8f",
+      "target": "9b3eafbe"
+    },
+    {
+      "source": "8bb4724c",
+      "target": "6166a2a0"
+    },
+    {
+      "source": "1b570ad2",
+      "target": "9b3eafbe"
+    },
+    {
+      "source": "17a3809e",
+      "target": "662facac"
+    },
+    {
+      "source": "961b6053",
+      "target": "38aedcc3"
+    },
+    {
+      "source": "014ac4b5",
+      "target": "17a3809e"
+    },
+    {
+      "source": "8dae4e13",
       "target": "db2ca221"
     },
     {
-      "source": "ba4b2fe1",
-      "target": "a73769e9"
+      "source": "df5b3cfe",
+      "target": "509c1814"
     },
     {
       "source": "abc2021e",
-      "target": "11c8dd13"
+      "target": "30e5f08e"
     },
     {
-      "source": "a73769e9",
-      "target": "844e1a3b"
+      "source": "509c1814",
+      "target": "e50324d5"
     },
     {
-      "source": "3d21843d",
-      "target": "a20940e6"
+      "source": "4734aa1f",
+      "target": "30e5f08e"
     },
     {
-      "source": "02cdda9d",
-      "target": "a73769e9"
+      "source": "7e39a93a",
+      "target": "9b3eafbe"
     },
     {
-      "source": "a20940e6",
-      "target": "6bc5358c"
+      "source": "4734aa1f",
+      "target": "38aedcc3"
+    },
+    {
+      "source": "9b3eafbe",
+      "target": "e91264c2"
+    },
+    {
+      "source": "d3e844b2",
+      "target": "38aedcc3"
+    },
+    {
+      "source": "c992e96c",
+      "target": "30e5f08e"
+    },
+    {
+      "source": "234f4a5a",
+      "target": "9b3eafbe"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "38aedcc3"
+    },
+    {
+      "source": "75a1b589",
+      "target": "9b3eafbe"
+    },
+    {
+      "source": "795e7a0c",
+      "target": "c03b4a88"
+    },
+    {
+      "source": "85e11043",
+      "target": "38aedcc3"
+    },
+    {
+      "source": "a526bcbb",
+      "target": "d367bd23"
+    },
+    {
+      "source": "ba4b2fe1",
+      "target": "509c1814"
+    },
+    {
+      "source": "3fa904ad",
+      "target": "9b3eafbe"
+    },
+    {
+      "source": "38aedcc3",
+      "target": "e65a3713"
+    },
+    {
+      "source": "c03b4a88",
+      "target": "974f6c71"
+    },
+    {
+      "source": "795e7a0c",
+      "target": "6166a2a0"
+    },
+    {
+      "source": "85fc07f1",
+      "target": "38aedcc3"
     }
   ],
   "layers": [
@@ -206,6 +1246,18 @@
     {
       "id": "attacks",
       "name": "attacks"
+    },
+    {
+      "id": "audit",
+      "name": "audit"
+    },
+    {
+      "id": "audit_finalization",
+      "name": "audit_finalization"
+    },
+    {
+      "id": "audit_reporting",
+      "name": "audit_reporting"
     },
     {
       "id": "bae",
@@ -272,6 +1324,14 @@
       "name": "similarity"
     },
     {
+      "id": "similarity_audit",
+      "name": "similarity_audit"
+    },
+    {
+      "id": "similarity_audit_prepare",
+      "name": "similarity_audit_prepare"
+    },
+    {
       "id": "textfooler",
       "name": "textfooler"
     },
@@ -306,6 +1366,14 @@
       "name": "models"
     },
     {
+      "id": "audit",
+      "name": "audit"
+    },
+    {
+      "id": "similarity_audit_prepare",
+      "name": "similarity_audit_prepare"
+    },
+    {
       "id": "data",
       "name": "data"
     },
@@ -314,8 +1382,20 @@
       "name": "risk"
     },
     {
+      "id": "similarity_audit",
+      "name": "similarity_audit"
+    },
+    {
       "id": "attacks",
       "name": "attacks"
+    },
+    {
+      "id": "audit_reporting",
+      "name": "audit_reporting"
+    },
+    {
+      "id": "audit_finalization",
+      "name": "audit_finalization"
     },
     {
       "id": "stage",
@@ -334,23 +1414,23 @@
       "outputs": [],
       "children": [
         {
-          "id": "6bc5358c",
-          "type": "data"
-        },
-        {
-          "id": "abc2021e",
-          "type": "data"
-        },
-        {
-          "id": "11c8dd13",
+          "id": "6d297261",
           "type": "task"
         },
         {
-          "id": "db2ca221",
+          "id": "7e39a93a",
           "type": "data"
         },
         {
-          "id": "a73769e9",
+          "id": "961b6053",
+          "type": "data"
+        },
+        {
+          "id": "17a3809e",
+          "type": "task"
+        },
+        {
+          "id": "8dae4e13",
           "type": "task"
         },
         {
@@ -358,19 +1438,187 @@
           "type": "data"
         },
         {
-          "id": "02cdda9d",
+          "id": "8bb4724c",
           "type": "data"
         },
         {
-          "id": "844e1a3b",
+          "id": "38aedcc3",
+          "type": "task"
+        },
+        {
+          "id": "abc2021e",
           "type": "data"
         },
         {
-          "id": "3d21843d",
+          "id": "4734aa1f",
           "type": "data"
         },
         {
-          "id": "a20940e6",
+          "id": "234f4a5a",
+          "type": "data"
+        },
+        {
+          "id": "961b6053",
+          "type": "parameters"
+        },
+        {
+          "id": "d3e844b2",
+          "type": "data"
+        },
+        {
+          "id": "e65a3713",
+          "type": "data"
+        },
+        {
+          "id": "c992e96c",
+          "type": "data"
+        },
+        {
+          "id": "c0b3abcd",
+          "type": "data"
+        },
+        {
+          "id": "75a1b589",
+          "type": "data"
+        },
+        {
+          "id": "4734aa1f",
+          "type": "parameters"
+        },
+        {
+          "id": "d3e844b2",
+          "type": "parameters"
+        },
+        {
+          "id": "9d4defaf",
+          "type": "data"
+        },
+        {
+          "id": "85e11043",
+          "type": "data"
+        },
+        {
+          "id": "974f6c71",
+          "type": "data"
+        },
+        {
+          "id": "88893e42",
+          "type": "data"
+        },
+        {
+          "id": "3fa904ad",
+          "type": "data"
+        },
+        {
+          "id": "c03b4a88",
+          "type": "task"
+        },
+        {
+          "id": "9d4defaf",
+          "type": "parameters"
+        },
+        {
+          "id": "83648b04",
+          "type": "data"
+        },
+        {
+          "id": "662facac",
+          "type": "data"
+        },
+        {
+          "id": "85e11043",
+          "type": "parameters"
+        },
+        {
+          "id": "85fc07f1",
+          "type": "data"
+        },
+        {
+          "id": "a526bcbb",
+          "type": "data"
+        },
+        {
+          "id": "533f7b78",
+          "type": "data"
+        },
+        {
+          "id": "795e7a0c",
+          "type": "data"
+        },
+        {
+          "id": "fcff5111",
+          "type": "data"
+        },
+        {
+          "id": "85ca33e1",
+          "type": "data"
+        },
+        {
+          "id": "509c1814",
+          "type": "task"
+        },
+        {
+          "id": "e50324d5",
+          "type": "data"
+        },
+        {
+          "id": "e91264c2",
+          "type": "data"
+        },
+        {
+          "id": "e4531676",
+          "type": "data"
+        },
+        {
+          "id": "85fc07f1",
+          "type": "parameters"
+        },
+        {
+          "id": "c2bc5378",
+          "type": "data"
+        },
+        {
+          "id": "df5b3cfe",
+          "type": "data"
+        },
+        {
+          "id": "847f9baa",
+          "type": "task"
+        },
+        {
+          "id": "9b3eafbe",
+          "type": "task"
+        },
+        {
+          "id": "d367bd23",
+          "type": "task"
+        },
+        {
+          "id": "30e5f08e",
+          "type": "task"
+        },
+        {
+          "id": "84837a7c",
+          "type": "data"
+        },
+        {
+          "id": "014ac4b5",
+          "type": "data"
+        },
+        {
+          "id": "db2ca221",
+          "type": "data"
+        },
+        {
+          "id": "02410b8f",
+          "type": "data"
+        },
+        {
+          "id": "1b570ad2",
+          "type": "data"
+        },
+        {
+          "id": "6166a2a0",
           "type": "task"
         }
       ]

@@ -1,0 +1,22 @@
+{
+  "code": null,
+  "filepath": null,
+  "parameters": {},
+  "run_command": "kedro run --to-nodes='reduce_training_cka'",
+  "inputs": [
+    "training_cka__deberta-base-pi-v1",
+    "training_cka__deberta-small-pi-v2",
+    "training_cka__deepset-deberta-injection",
+    "training_cka__llama-prompt-guard-86m",
+    "training_cka__llama-prompt-guard-22m",
+    "training_cka__bert-base-ft",
+    "training_cka__roberta-base-ft",
+    "training_cka__electra-small-ft",
+    "training_cka__deberta-base-ft-seed",
+    "training_cka__bilstm-attention"
+  ],
+  "outputs": [
+    "training_cka_matrices"
+  ],
+  "preview": null
+}

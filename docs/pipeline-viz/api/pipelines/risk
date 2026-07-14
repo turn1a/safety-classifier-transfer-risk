@@ -4,35 +4,42 @@
       "id": "85e11043",
       "name": "params:seed",
       "tags": [
-        "deepwordbug",
-        "bert-attack",
-        "bae",
-        "pwws",
-        "deberta-small-pi-v2",
-        "deberta-base-ft-seed",
-        "electra-small-ft",
-        "deberta-base-pi-v1",
-        "deepset-deberta-injection",
         "models",
-        "textfooler",
-        "roberta-base-ft",
-        "bilstm-attention",
-        "llama-prompt-guard-22m",
         "llama-prompt-guard-86m",
-        "similarity",
+        "similarity_audit",
         "attacks",
-        "bert-base-ft"
+        "deberta-base-ft-seed",
+        "pwws",
+        "llama-prompt-guard-22m",
+        "bert-base-ft",
+        "bert-attack",
+        "audit",
+        "electra-small-ft",
+        "textfooler",
+        "deepwordbug",
+        "deberta-base-pi-v1",
+        "bae",
+        "roberta-base-ft",
+        "deepset-deberta-injection",
+        "bilstm-attention",
+        "audit_finalization",
+        "similarity",
+        "deberta-small-pi-v2"
       ],
       "pipelines": [
-        "data",
-        "__default__",
-        "similarity",
-        "risk",
-        "downstream",
         "models",
+        "risk",
+        "similarity_audit",
+        "smoke",
         "attacks",
+        "data",
         "stage",
-        "smoke"
+        "downstream",
+        "audit_finalization",
+        "similarity",
+        "__default__",
+        "reporting",
+        "audit"
       ],
       "type": "parameters",
       "modular_pipelines": null,
@@ -41,17 +48,103 @@
       "dataset_type": null
     },
     {
+      "id": "4734aa1f",
+      "name": "params:similarity",
+      "tags": [
+        "deberta-base-pi-v1",
+        "llama-prompt-guard-86m",
+        "similarity_audit",
+        "roberta-base-ft",
+        "deepset-deberta-injection",
+        "deberta-base-ft-seed",
+        "bilstm-attention",
+        "audit_finalization",
+        "llama-prompt-guard-22m",
+        "bert-base-ft",
+        "similarity",
+        "electra-small-ft",
+        "audit",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "risk",
+        "similarity_audit",
+        "downstream",
+        "stage",
+        "audit_finalization",
+        "similarity",
+        "__default__",
+        "reporting",
+        "audit"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "c992e96c",
+      "name": "cka_matrices",
+      "tags": [
+        "similarity_audit",
+        "audit_finalization",
+        "similarity",
+        "audit"
+      ],
+      "pipelines": [
+        "risk",
+        "similarity_audit",
+        "downstream",
+        "stage",
+        "audit_finalization",
+        "similarity",
+        "__default__",
+        "reporting",
+        "audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "feature",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "abc2021e",
+      "name": "master_results_table",
+      "tags": [
+        "audit_finalization",
+        "audit",
+        "transfer"
+      ],
+      "pipelines": [
+        "risk",
+        "transfer",
+        "downstream",
+        "audit_finalization",
+        "audit",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.ParquetDataset.MlflowParquetDataset"
+    },
+    {
       "id": "df5b3cfe",
       "name": "thresholds",
       "tags": [
         "similarity"
       ],
       "pipelines": [
-        "__default__",
-        "similarity",
         "risk",
         "downstream",
-        "stage"
+        "stage",
+        "similarity",
+        "__default__",
+        "reporting"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -60,15 +153,43 @@
       "dataset_type": "json.json_dataset.JSONDataset"
     },
     {
-      "id": "abc2021e",
-      "name": "master_results_table",
-      "tags": [
-        "transfer"
-      ],
+      "id": "ac89242d",
+      "name": "recompute_risk_master_dbs",
+      "tags": [],
       "pipelines": [
-        "reporting",
         "__default__",
-        "transfer",
+        "risk",
+        "downstream"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity": {
+          "n_probe": 2000,
+          "max_seq_len": 512,
+          "pooling": "cls",
+          "cka": {
+            "mode": "minibatch",
+            "batch_size": 64
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        }
+      },
+      "full_name": "recompute_risk_master_dbs"
+    },
+    {
+      "id": "bb4af350",
+      "name": "risk_master_results_corrected",
+      "tags": [],
+      "pipelines": [
+        "__default__",
         "risk",
         "downstream"
       ],
@@ -82,14 +203,23 @@
       "id": "8bb4724c",
       "name": "surrogate_selection",
       "tags": [
-        "similarity"
+        "similarity_audit",
+        "audit_finalization",
+        "similarity",
+        "audit_reporting",
+        "audit"
       ],
       "pipelines": [
-        "__default__",
-        "similarity",
         "risk",
+        "similarity_audit",
         "downstream",
-        "stage"
+        "stage",
+        "audit_reporting",
+        "audit_finalization",
+        "similarity",
+        "__default__",
+        "reporting",
+        "audit"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -98,12 +228,12 @@
       "dataset_type": "json.json_dataset.JSONDataset"
     },
     {
-      "id": "667c3bb1",
+      "id": "111bcb04",
       "name": "fit_regressors",
       "tags": [],
       "pipelines": [
-        "risk",
         "__default__",
+        "risk",
         "downstream"
       ],
       "type": "task",
@@ -130,11 +260,18 @@
     {
       "id": "dbb3b583",
       "name": "params:risk",
-      "tags": [],
+      "tags": [
+        "similarity_audit",
+        "audit_finalization",
+        "audit"
+      ],
       "pipelines": [
         "risk",
-        "__default__",
-        "downstream"
+        "similarity_audit",
+        "downstream",
+        "audit_finalization",
+        "audit",
+        "__default__"
       ],
       "type": "parameters",
       "modular_pipelines": null,
@@ -147,9 +284,8 @@
       "name": "regressors",
       "tags": [],
       "pipelines": [
-        "reporting",
-        "risk",
         "__default__",
+        "risk",
         "downstream"
       ],
       "type": "data",
@@ -159,12 +295,12 @@
       "dataset_type": "pickle.pickle_dataset.PickleDataset"
     },
     {
-      "id": "bed892e9",
+      "id": "4f9c7e7e",
       "name": "run_ablation",
       "tags": [],
       "pipelines": [
-        "risk",
         "__default__",
+        "risk",
         "downstream"
       ],
       "type": "task",
@@ -193,9 +329,9 @@
       "name": "ablation_results",
       "tags": [],
       "pipelines": [
+        "__default__",
         "reporting",
         "risk",
-        "__default__",
         "downstream"
       ],
       "type": "data",
@@ -205,12 +341,12 @@
       "dataset_type": "artifacts.mlflow_artifact_dataset.JSONDataset.MlflowJSONDataset"
     },
     {
-      "id": "fce6af18",
+      "id": "95be5940",
       "name": "track_run_metrics",
       "tags": [],
       "pipelines": [
-        "risk",
         "__default__",
+        "risk",
         "downstream"
       ],
       "type": "task",
@@ -224,8 +360,8 @@
       "name": "run_metrics",
       "tags": [],
       "pipelines": [
-        "risk",
         "__default__",
+        "risk",
         "downstream"
       ],
       "type": "data",
@@ -237,75 +373,103 @@
   ],
   "edges": [
     {
-      "source": "8bb4724c",
-      "target": "bed892e9"
+      "source": "c992e96c",
+      "target": "ac89242d"
     },
     {
-      "source": "667c3bb1",
-      "target": "02cdda9d"
-    },
-    {
-      "source": "fce6af18",
-      "target": "006ae743"
-    },
-    {
-      "source": "abc2021e",
-      "target": "fce6af18"
-    },
-    {
-      "source": "02cdda9d",
-      "target": "fce6af18"
+      "source": "ac89242d",
+      "target": "bb4af350"
     },
     {
       "source": "85e11043",
-      "target": "667c3bb1"
+      "target": "4f9c7e7e"
     },
     {
-      "source": "bed892e9",
-      "target": "ba4b2fe1"
+      "source": "bb4af350",
+      "target": "4f9c7e7e"
+    },
+    {
+      "source": "dbb3b583",
+      "target": "4f9c7e7e"
+    },
+    {
+      "source": "bb4af350",
+      "target": "95be5940"
     },
     {
       "source": "ba4b2fe1",
-      "target": "fce6af18"
+      "target": "95be5940"
+    },
+    {
+      "source": "02cdda9d",
+      "target": "95be5940"
+    },
+    {
+      "source": "8bb4724c",
+      "target": "4f9c7e7e"
+    },
+    {
+      "source": "95be5940",
+      "target": "006ae743"
+    },
+    {
+      "source": "bb4af350",
+      "target": "111bcb04"
     },
     {
       "source": "dbb3b583",
-      "target": "667c3bb1"
+      "target": "111bcb04"
     },
     {
-      "source": "df5b3cfe",
-      "target": "fce6af18"
+      "source": "4f9c7e7e",
+      "target": "ba4b2fe1"
     },
     {
       "source": "85e11043",
-      "target": "bed892e9"
+      "target": "111bcb04"
+    },
+    {
+      "source": "111bcb04",
+      "target": "02cdda9d"
     },
     {
       "source": "abc2021e",
-      "target": "667c3bb1"
+      "target": "ac89242d"
     },
     {
-      "source": "dbb3b583",
-      "target": "bed892e9"
+      "source": "4734aa1f",
+      "target": "ac89242d"
     },
     {
-      "source": "abc2021e",
-      "target": "bed892e9"
+      "source": "df5b3cfe",
+      "target": "95be5940"
     }
   ],
   "layers": [
     "feature",
     "model_input",
-    "model_output",
     "models",
     "primary",
     "raw",
-    "reporting"
+    "reporting",
+    "model_output"
   ],
   "tags": [
     {
       "id": "attacks",
       "name": "attacks"
+    },
+    {
+      "id": "audit",
+      "name": "audit"
+    },
+    {
+      "id": "audit_finalization",
+      "name": "audit_finalization"
+    },
+    {
+      "id": "audit_reporting",
+      "name": "audit_reporting"
     },
     {
       "id": "bae",
@@ -372,6 +536,14 @@
       "name": "similarity"
     },
     {
+      "id": "similarity_audit",
+      "name": "similarity_audit"
+    },
+    {
+      "id": "similarity_audit_prepare",
+      "name": "similarity_audit_prepare"
+    },
+    {
       "id": "textfooler",
       "name": "textfooler"
     },
@@ -406,6 +578,14 @@
       "name": "models"
     },
     {
+      "id": "audit",
+      "name": "audit"
+    },
+    {
+      "id": "similarity_audit_prepare",
+      "name": "similarity_audit_prepare"
+    },
+    {
       "id": "data",
       "name": "data"
     },
@@ -414,8 +594,20 @@
       "name": "risk"
     },
     {
+      "id": "similarity_audit",
+      "name": "similarity_audit"
+    },
+    {
       "id": "attacks",
       "name": "attacks"
+    },
+    {
+      "id": "audit_reporting",
+      "name": "audit_reporting"
+    },
+    {
+      "id": "audit_finalization",
+      "name": "audit_finalization"
     },
     {
       "id": "stage",
@@ -434,11 +626,11 @@
       "outputs": [],
       "children": [
         {
-          "id": "85e11043",
+          "id": "4734aa1f",
           "type": "parameters"
         },
         {
-          "id": "85e11043",
+          "id": "df5b3cfe",
           "type": "data"
         },
         {
@@ -446,23 +638,23 @@
           "type": "parameters"
         },
         {
-          "id": "667c3bb1",
-          "type": "task"
-        },
-        {
-          "id": "dbb3b583",
+          "id": "85e11043",
           "type": "data"
         },
         {
-          "id": "fce6af18",
-          "type": "task"
-        },
-        {
-          "id": "abc2021e",
+          "id": "ba4b2fe1",
           "type": "data"
         },
         {
           "id": "8bb4724c",
+          "type": "data"
+        },
+        {
+          "id": "bb4af350",
+          "type": "data"
+        },
+        {
+          "id": "dbb3b583",
           "type": "data"
         },
         {
@@ -474,16 +666,36 @@
           "type": "data"
         },
         {
-          "id": "ba4b2fe1",
+          "id": "abc2021e",
           "type": "data"
         },
         {
-          "id": "bed892e9",
+          "id": "ac89242d",
           "type": "task"
         },
         {
-          "id": "df5b3cfe",
+          "id": "4734aa1f",
           "type": "data"
+        },
+        {
+          "id": "111bcb04",
+          "type": "task"
+        },
+        {
+          "id": "4f9c7e7e",
+          "type": "task"
+        },
+        {
+          "id": "95be5940",
+          "type": "task"
+        },
+        {
+          "id": "c992e96c",
+          "type": "data"
+        },
+        {
+          "id": "85e11043",
+          "type": "parameters"
         }
       ]
     }

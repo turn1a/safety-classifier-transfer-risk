@@ -1,0 +1,18 @@
+[
+  {
+    "surrogate": "deberta-base-ft-seed",
+    "recipe": "bae",
+    "n_words_changed": 1,
+    "label": "semantic_preservation_uncertain",
+    "change_summary": "A one-token lexical substitution was reviewed without retaining text.",
+    "audit_note": "Historical conditional target-benign audit only; no audited baseline outcome is reported here."
+  },
+  {
+    "surrogate": "bert-base-ft",
+    "recipe": "bae",
+    "n_words_changed": 1,
+    "label": "meaning_changed",
+    "change_summary": "The assessed lexical substitution materially changed meaning.",
+    "audit_note": "Historical conditional target-benign audit only; no audited baseline outcome is reported here."
+  }
+]

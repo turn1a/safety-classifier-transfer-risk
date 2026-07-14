@@ -1,0 +1,13 @@
+{
+  "code": "def build_public_target_audit_sources(target_audit_raw_sources: pd.DataFrame) -> pd.DataFrame:\n    \"\"\"Build the aggregate-only public target-audit source CSV.\n\n    Args:\n        target_audit_raw_sources: Stable source-level audit aggregates from the catalog.\n\n    Returns:\n        Public source aggregates without prompt text.\n    \"\"\"\n    sources = export_public_target_audit_sources(target_audit_raw_sources)\n    logger.info(\"Prepared %d public target-audit source aggregate rows\", len(sources))\n    return sources\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/audit_reporting/nodes.py",
+  "parameters": {},
+  "run_command": "kedro run --to-nodes='build_public_target_audit_sources'",
+  "inputs": [
+    "target_audit_raw_sources"
+  ],
+  "outputs": [
+    "pub_target_audit_sources"
+  ],
+  "preview": null
+}

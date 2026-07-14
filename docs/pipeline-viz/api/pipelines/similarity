@@ -8,36 +8,121 @@
       ],
       "pipelines": [
         "similarity",
-        "stage",
         "__default__",
+        "stage",
         "data"
       ],
       "type": "data",
       "modular_pipelines": null,
-      "node_extras": {
-        "stats": {
-          "rows": 2947,
-          "columns": 3,
-          "file_size": 986532
-        },
-        "styles": null
-      },
+      "node_extras": null,
       "layer": "primary",
       "dataset_type": "pandas.parquet_dataset.ParquetDataset"
+    },
+    {
+      "id": "85e11043",
+      "name": "params:seed",
+      "tags": [
+        "models",
+        "llama-prompt-guard-86m",
+        "similarity_audit",
+        "attacks",
+        "deberta-base-ft-seed",
+        "pwws",
+        "llama-prompt-guard-22m",
+        "bert-base-ft",
+        "bert-attack",
+        "audit",
+        "electra-small-ft",
+        "textfooler",
+        "deepwordbug",
+        "deberta-base-pi-v1",
+        "bae",
+        "roberta-base-ft",
+        "deepset-deberta-injection",
+        "bilstm-attention",
+        "audit_finalization",
+        "similarity",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "models",
+        "risk",
+        "similarity_audit",
+        "smoke",
+        "attacks",
+        "data",
+        "stage",
+        "downstream",
+        "audit_finalization",
+        "similarity",
+        "__default__",
+        "reporting",
+        "audit"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "4734aa1f",
+      "name": "params:similarity",
+      "tags": [
+        "deberta-base-pi-v1",
+        "llama-prompt-guard-86m",
+        "similarity_audit",
+        "roberta-base-ft",
+        "deepset-deberta-injection",
+        "deberta-base-ft-seed",
+        "bilstm-attention",
+        "audit_finalization",
+        "llama-prompt-guard-22m",
+        "bert-base-ft",
+        "similarity",
+        "electra-small-ft",
+        "audit",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "risk",
+        "similarity_audit",
+        "downstream",
+        "stage",
+        "audit_finalization",
+        "similarity",
+        "__default__",
+        "reporting",
+        "audit"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
     },
     {
       "id": "a031ce89",
       "name": "surrogate__deberta-base-pi-v1",
       "tags": [
-        "similarity",
+        "deepwordbug",
         "models",
-        "deberta-base-pi-v1"
+        "deberta-base-pi-v1",
+        "similarity",
+        "similarity_audit",
+        "bae",
+        "attacks",
+        "pwws",
+        "bert-attack",
+        "textfooler"
       ],
       "pipelines": [
-        "similarity",
+        "models",
+        "similarity_audit",
+        "attacks",
         "stage",
-        "__default__",
-        "models"
+        "similarity",
+        "__default__"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -49,15 +134,24 @@
       "id": "d46a082c",
       "name": "surrogate__deberta-small-pi-v2",
       "tags": [
+        "deepwordbug",
+        "models",
         "similarity",
+        "similarity_audit",
+        "bae",
+        "attacks",
+        "pwws",
+        "bert-attack",
         "deberta-small-pi-v2",
-        "models"
+        "textfooler"
       ],
       "pipelines": [
-        "similarity",
+        "models",
+        "similarity_audit",
+        "attacks",
         "stage",
-        "__default__",
-        "models"
+        "similarity",
+        "__default__"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -69,15 +163,24 @@
       "id": "d5633110",
       "name": "surrogate__deepset-deberta-injection",
       "tags": [
-        "similarity",
+        "deepwordbug",
         "models",
-        "deepset-deberta-injection"
+        "similarity",
+        "similarity_audit",
+        "bae",
+        "deepset-deberta-injection",
+        "attacks",
+        "pwws",
+        "bert-attack",
+        "textfooler"
       ],
       "pipelines": [
-        "similarity",
+        "models",
+        "similarity_audit",
+        "attacks",
         "stage",
-        "__default__",
-        "models"
+        "similarity",
+        "__default__"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -89,15 +192,24 @@
       "id": "9e1f5dd4",
       "name": "surrogate__llama-prompt-guard-22m",
       "tags": [
-        "similarity",
+        "deepwordbug",
         "models",
-        "llama-prompt-guard-22m"
+        "similarity",
+        "similarity_audit",
+        "bae",
+        "attacks",
+        "pwws",
+        "llama-prompt-guard-22m",
+        "bert-attack",
+        "textfooler"
       ],
       "pipelines": [
-        "similarity",
+        "models",
+        "similarity_audit",
+        "attacks",
         "stage",
-        "__default__",
-        "models"
+        "similarity",
+        "__default__"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -109,15 +221,24 @@
       "id": "be9af28a",
       "name": "surrogate__llama-prompt-guard-86m",
       "tags": [
-        "similarity",
+        "deepwordbug",
         "models",
-        "llama-prompt-guard-86m"
+        "similarity",
+        "llama-prompt-guard-86m",
+        "similarity_audit",
+        "bae",
+        "attacks",
+        "pwws",
+        "bert-attack",
+        "textfooler"
       ],
       "pipelines": [
-        "similarity",
+        "models",
+        "similarity_audit",
+        "attacks",
         "stage",
-        "__default__",
-        "models"
+        "similarity",
+        "__default__"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -133,8 +254,8 @@
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -161,92 +282,25 @@
       "full_name": "build_probe_set"
     },
     {
-      "id": "4734aa1f",
-      "name": "params:similarity",
-      "tags": [
-        "deberta-small-pi-v2",
-        "roberta-base-ft",
-        "bilstm-attention",
-        "deberta-base-ft-seed",
-        "electra-small-ft",
-        "llama-prompt-guard-22m",
-        "llama-prompt-guard-86m",
-        "similarity",
-        "deberta-base-pi-v1",
-        "bert-base-ft",
-        "deepset-deberta-injection"
-      ],
-      "pipelines": [
-        "similarity",
-        "stage",
-        "__default__"
-      ],
-      "type": "parameters",
-      "modular_pipelines": null,
-      "node_extras": null,
-      "layer": null,
-      "dataset_type": null
-    },
-    {
-      "id": "85e11043",
-      "name": "params:seed",
-      "tags": [
-        "deepwordbug",
-        "bert-attack",
-        "bae",
-        "pwws",
-        "deberta-small-pi-v2",
-        "deberta-base-ft-seed",
-        "electra-small-ft",
-        "deberta-base-pi-v1",
-        "deepset-deberta-injection",
-        "models",
-        "textfooler",
-        "roberta-base-ft",
-        "bilstm-attention",
-        "llama-prompt-guard-22m",
-        "llama-prompt-guard-86m",
-        "similarity",
-        "attacks",
-        "bert-base-ft"
-      ],
-      "pipelines": [
-        "data",
-        "__default__",
-        "similarity",
-        "risk",
-        "downstream",
-        "models",
-        "attacks",
-        "stage",
-        "smoke"
-      ],
-      "type": "parameters",
-      "modular_pipelines": null,
-      "node_extras": null,
-      "layer": null,
-      "dataset_type": null
-    },
-    {
       "id": "a8404e80",
       "name": "probe_set",
       "tags": [
-        "deberta-small-pi-v2",
-        "roberta-base-ft",
-        "bilstm-attention",
-        "deberta-base-ft-seed",
-        "electra-small-ft",
-        "llama-prompt-guard-22m",
-        "llama-prompt-guard-86m",
-        "similarity",
         "deberta-base-pi-v1",
+        "llama-prompt-guard-86m",
+        "roberta-base-ft",
+        "deepset-deberta-injection",
+        "deberta-base-ft-seed",
+        "bilstm-attention",
+        "llama-prompt-guard-22m",
         "bert-base-ft",
-        "deepset-deberta-injection"
+        "similarity",
+        "electra-small-ft",
+        "deberta-small-pi-v2"
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -262,8 +316,8 @@
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -296,47 +350,55 @@
       "id": "7e09f027",
       "name": "target_model",
       "tags": [
-        "similarity",
-        "transfer"
-      ],
-      "pipelines": [
-        "__default__",
+        "similarity_audit",
         "similarity",
         "transfer",
+        "audit"
+      ],
+      "pipelines": [
+        "similarity_audit",
+        "transfer",
         "downstream",
-        "stage"
+        "stage",
+        "similarity",
+        "__default__",
+        "audit"
       ],
       "type": "data",
       "modular_pipelines": null,
       "node_extras": null,
       "layer": "raw",
-      "dataset_type": "datasets.hub_model_dataset.HuggingFaceHubModelDataset"
+      "dataset_type": "io.memory_dataset.MemoryDataset"
     },
     {
       "id": "a4a96eb9",
       "name": "params:device",
       "tags": [
-        "roberta-base-ft",
-        "deberta-small-pi-v2",
-        "bilstm-attention",
-        "deberta-base-ft-seed",
-        "electra-small-ft",
-        "llama-prompt-guard-22m",
+        "models",
+        "deberta-base-pi-v1",
         "llama-prompt-guard-86m",
+        "similarity_audit",
+        "roberta-base-ft",
+        "deepset-deberta-injection",
+        "deberta-base-ft-seed",
+        "bilstm-attention",
+        "llama-prompt-guard-22m",
+        "bert-base-ft",
         "similarity",
         "transfer",
-        "models",
-        "bert-base-ft",
-        "deberta-base-pi-v1",
-        "deepset-deberta-injection"
+        "electra-small-ft",
+        "audit",
+        "deberta-small-pi-v2"
       ],
       "pipelines": [
-        "__default__",
-        "similarity",
+        "models",
+        "similarity_audit",
         "transfer",
         "downstream",
-        "models",
-        "stage"
+        "stage",
+        "similarity",
+        "__default__",
+        "audit"
       ],
       "type": "parameters",
       "modular_pipelines": null,
@@ -348,22 +410,22 @@
       "id": "941617db",
       "name": "target_reps",
       "tags": [
-        "deberta-small-pi-v2",
-        "roberta-base-ft",
-        "bilstm-attention",
-        "deberta-base-ft-seed",
-        "electra-small-ft",
-        "llama-prompt-guard-22m",
-        "llama-prompt-guard-86m",
-        "similarity",
         "deberta-base-pi-v1",
+        "llama-prompt-guard-86m",
+        "roberta-base-ft",
+        "deepset-deberta-injection",
+        "deberta-base-ft-seed",
+        "bilstm-attention",
+        "llama-prompt-guard-22m",
         "bert-base-ft",
-        "deepset-deberta-injection"
+        "similarity",
+        "electra-small-ft",
+        "deberta-small-pi-v2"
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -375,15 +437,24 @@
       "id": "32eff9bc",
       "name": "surrogate__bert-base-ft",
       "tags": [
-        "similarity",
+        "deepwordbug",
         "models",
-        "bert-base-ft"
+        "similarity",
+        "similarity_audit",
+        "bae",
+        "attacks",
+        "pwws",
+        "bert-base-ft",
+        "bert-attack",
+        "textfooler"
       ],
       "pipelines": [
-        "similarity",
+        "models",
+        "similarity_audit",
+        "attacks",
         "stage",
-        "__default__",
-        "models"
+        "similarity",
+        "__default__"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -396,21 +467,23 @@
       "name": "surrogate__bilstm-attention",
       "tags": [
         "deepwordbug",
-        "bert-attack",
-        "bae",
-        "pwws",
-        "bilstm-attention",
-        "similarity",
         "models",
+        "similarity",
+        "similarity_audit",
+        "bae",
         "attacks",
+        "bilstm-attention",
+        "pwws",
+        "bert-attack",
         "textfooler"
       ],
       "pipelines": [
-        "__default__",
-        "similarity",
         "models",
+        "similarity_audit",
         "attacks",
-        "stage"
+        "stage",
+        "similarity",
+        "__default__"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -422,15 +495,24 @@
       "id": "012371fe",
       "name": "surrogate__deberta-base-ft-seed",
       "tags": [
-        "similarity",
+        "deepwordbug",
         "models",
-        "deberta-base-ft-seed"
+        "similarity",
+        "similarity_audit",
+        "bae",
+        "attacks",
+        "deberta-base-ft-seed",
+        "pwws",
+        "bert-attack",
+        "textfooler"
       ],
       "pipelines": [
-        "similarity",
+        "models",
+        "similarity_audit",
+        "attacks",
         "stage",
-        "__default__",
-        "models"
+        "similarity",
+        "__default__"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -442,15 +524,24 @@
       "id": "a7b70e72",
       "name": "surrogate__electra-small-ft",
       "tags": [
-        "similarity",
+        "deepwordbug",
         "models",
-        "electra-small-ft"
+        "similarity",
+        "similarity_audit",
+        "bae",
+        "attacks",
+        "pwws",
+        "bert-attack",
+        "electra-small-ft",
+        "textfooler"
       ],
       "pipelines": [
-        "similarity",
+        "models",
+        "similarity_audit",
+        "attacks",
         "stage",
-        "__default__",
-        "models"
+        "similarity",
+        "__default__"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -462,15 +553,24 @@
       "id": "7e03cea7",
       "name": "surrogate__roberta-base-ft",
       "tags": [
+        "deepwordbug",
+        "models",
         "similarity",
+        "similarity_audit",
+        "bae",
         "roberta-base-ft",
-        "models"
+        "attacks",
+        "pwws",
+        "bert-attack",
+        "textfooler"
       ],
       "pipelines": [
-        "similarity",
+        "models",
+        "similarity_audit",
+        "attacks",
         "stage",
-        "__default__",
-        "models"
+        "similarity",
+        "__default__"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -487,8 +587,8 @@
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -526,8 +626,8 @@
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -539,13 +639,13 @@
       "id": "5e603373",
       "name": "cka_bilstm-attention",
       "tags": [
-        "similarity",
-        "bilstm-attention"
+        "bilstm-attention",
+        "similarity"
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -578,13 +678,13 @@
       "id": "704dd573",
       "name": "cka__bilstm-attention",
       "tags": [
-        "similarity",
-        "bilstm-attention"
+        "bilstm-attention",
+        "similarity"
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -601,8 +701,8 @@
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -640,8 +740,8 @@
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -658,8 +758,8 @@
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -697,8 +797,8 @@
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -715,8 +815,8 @@
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -754,8 +854,8 @@
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -772,8 +872,8 @@
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -811,8 +911,8 @@
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -824,13 +924,13 @@
       "id": "27fb4337",
       "name": "cka_electra-small-ft",
       "tags": [
-        "electra-small-ft",
-        "similarity"
+        "similarity",
+        "electra-small-ft"
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -863,13 +963,13 @@
       "id": "203a7a78",
       "name": "cka__electra-small-ft",
       "tags": [
-        "electra-small-ft",
-        "similarity"
+        "similarity",
+        "electra-small-ft"
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -881,13 +981,13 @@
       "id": "4ed40ef0",
       "name": "cka_llama-prompt-guard-22m",
       "tags": [
-        "llama-prompt-guard-22m",
-        "similarity"
+        "similarity",
+        "llama-prompt-guard-22m"
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -920,13 +1020,13 @@
       "id": "cc8f3e46",
       "name": "cka__llama-prompt-guard-22m",
       "tags": [
-        "llama-prompt-guard-22m",
-        "similarity"
+        "similarity",
+        "llama-prompt-guard-22m"
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -943,8 +1043,8 @@
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -982,8 +1082,8 @@
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -1000,8 +1100,8 @@
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -1039,8 +1139,8 @@
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -1056,8 +1156,8 @@
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -1069,12 +1169,21 @@
       "id": "c992e96c",
       "name": "cka_matrices",
       "tags": [
-        "similarity"
+        "similarity_audit",
+        "audit_finalization",
+        "similarity",
+        "audit"
       ],
       "pipelines": [
-        "similarity",
+        "risk",
+        "similarity_audit",
+        "downstream",
         "stage",
-        "__default__"
+        "audit_finalization",
+        "similarity",
+        "__default__",
+        "reporting",
+        "audit"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -1090,8 +1199,8 @@
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -1121,15 +1230,16 @@
       "name": "similarity_table",
       "tags": [
         "similarity",
-        "transfer"
+        "transfer",
+        "similarity_audit"
       ],
       "pipelines": [
-        "reporting",
-        "__default__",
-        "similarity",
+        "similarity_audit",
         "transfer",
         "downstream",
-        "stage"
+        "stage",
+        "similarity",
+        "__default__"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -1145,8 +1255,8 @@
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -1178,11 +1288,12 @@
         "similarity"
       ],
       "pipelines": [
-        "__default__",
-        "similarity",
         "risk",
         "downstream",
-        "stage"
+        "stage",
+        "similarity",
+        "__default__",
+        "reporting"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -1198,8 +1309,8 @@
       ],
       "pipelines": [
         "similarity",
-        "stage",
-        "__default__"
+        "__default__",
+        "stage"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -1211,14 +1322,23 @@
       "id": "8bb4724c",
       "name": "surrogate_selection",
       "tags": [
-        "similarity"
+        "similarity_audit",
+        "audit_finalization",
+        "similarity",
+        "audit_reporting",
+        "audit"
       ],
       "pipelines": [
-        "__default__",
-        "similarity",
         "risk",
+        "similarity_audit",
         "downstream",
-        "stage"
+        "stage",
+        "audit_reporting",
+        "audit_finalization",
+        "similarity",
+        "__default__",
+        "reporting",
+        "audit"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -1229,155 +1349,79 @@
   ],
   "edges": [
     {
-      "source": "a8404e80",
-      "target": "fe10854d"
-    },
-    {
-      "source": "c2af6c30",
-      "target": "2f18fe5e"
-    },
-    {
-      "source": "65dcfdd5",
-      "target": "3d21843d"
-    },
-    {
-      "source": "df5b3cfe",
-      "target": "ea493d3e"
-    },
-    {
-      "source": "a8404e80",
-      "target": "2aaa626e"
-    },
-    {
-      "source": "d45c000e",
-      "target": "1fbeeb62"
-    },
-    {
-      "source": "ea493d3e",
-      "target": "8bb4724c"
-    },
-    {
-      "source": "4734aa1f",
-      "target": "5e603373"
-    },
-    {
-      "source": "be9af28a",
-      "target": "d45c000e"
-    },
-    {
-      "source": "21d22ec4",
-      "target": "32f45e43"
-    },
-    {
-      "source": "4734aa1f",
-      "target": "566e415b"
-    },
-    {
-      "source": "a7b70e72",
-      "target": "27fb4337"
-    },
-    {
-      "source": "a8404e80",
-      "target": "27fb4337"
-    },
-    {
-      "source": "bae5e3d2",
-      "target": "df5b3cfe"
-    },
-    {
-      "source": "4734aa1f",
-      "target": "fe10854d"
-    },
-    {
-      "source": "a8404e80",
-      "target": "fc770019"
-    },
-    {
-      "source": "fc770019",
-      "target": "a16ff476"
-    },
-    {
-      "source": "47492b56",
-      "target": "2f18fe5e"
-    },
-    {
-      "source": "4734aa1f",
-      "target": "2aaa626e"
-    },
-    {
-      "source": "7e03cea7",
-      "target": "fc770019"
-    },
-    {
       "source": "a4a96eb9",
-      "target": "29ffdc13"
-    },
-    {
-      "source": "203a7a78",
-      "target": "2f18fe5e"
-    },
-    {
-      "source": "fe10854d",
-      "target": "c2af6c30"
-    },
-    {
-      "source": "a4a96eb9",
-      "target": "bdb4add2"
-    },
-    {
-      "source": "a8404e80",
-      "target": "4ed40ef0"
-    },
-    {
-      "source": "4734aa1f",
-      "target": "d45c000e"
-    },
-    {
-      "source": "a8404e80",
       "target": "bffffd40"
-    },
-    {
-      "source": "4734aa1f",
-      "target": "27fb4337"
-    },
-    {
-      "source": "c992e96c",
-      "target": "65dcfdd5"
-    },
-    {
-      "source": "4734aa1f",
-      "target": "32f45e43"
-    },
-    {
-      "source": "012371fe",
-      "target": "566e415b"
-    },
-    {
-      "source": "941617db",
-      "target": "29ffdc13"
-    },
-    {
-      "source": "29ffdc13",
-      "target": "a834110d"
-    },
-    {
-      "source": "a031ce89",
-      "target": "2aaa626e"
     },
     {
       "source": "3d21843d",
       "target": "ea493d3e"
     },
     {
-      "source": "4734aa1f",
-      "target": "bae5e3d2"
+      "source": "21d22ec4",
+      "target": "32f45e43"
     },
     {
-      "source": "a16ff476",
+      "source": "941617db",
+      "target": "bffffd40"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "fe10854d"
+    },
+    {
+      "source": "fc770019",
+      "target": "a16ff476"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "2aaa626e"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "65dcfdd5"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "566e415b"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "fc770019"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "27fb4337"
+    },
+    {
+      "source": "941617db",
+      "target": "27fb4337"
+    },
+    {
+      "source": "a8404e80",
+      "target": "d45c000e"
+    },
+    {
+      "source": "df5b3cfe",
+      "target": "ea493d3e"
+    },
+    {
+      "source": "203a7a78",
       "target": "2f18fe5e"
     },
     {
-      "source": "704dd573",
+      "source": "39210080",
+      "target": "2f18fe5e"
+    },
+    {
+      "source": "012371fe",
+      "target": "566e415b"
+    },
+    {
+      "source": "fe10854d",
+      "target": "c2af6c30"
+    },
+    {
+      "source": "c2af6c30",
       "target": "2f18fe5e"
     },
     {
@@ -1386,87 +1430,211 @@
     },
     {
       "source": "a4a96eb9",
-      "target": "5e603373"
+      "target": "fe10854d"
+    },
+    {
+      "source": "941617db",
+      "target": "fe10854d"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "2aaa626e"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "566e415b"
+    },
+    {
+      "source": "941617db",
+      "target": "2aaa626e"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "fc770019"
     },
     {
       "source": "4734aa1f",
       "target": "4ed40ef0"
     },
     {
-      "source": "4734aa1f",
-      "target": "bffffd40"
-    },
-    {
-      "source": "4734aa1f",
-      "target": "65dcfdd5"
+      "source": "941617db",
+      "target": "fc770019"
     },
     {
       "source": "a4a96eb9",
-      "target": "566e415b"
-    },
-    {
-      "source": "b97b6ffe",
-      "target": "5e603373"
+      "target": "29ffdc13"
     },
     {
       "source": "941617db",
+      "target": "29ffdc13"
+    },
+    {
+      "source": "d45c000e",
+      "target": "1fbeeb62"
+    },
+    {
+      "source": "4734aa1f",
       "target": "5e603373"
     },
     {
-      "source": "a4a96eb9",
-      "target": "fe10854d"
-    },
-    {
-      "source": "2f18fe5e",
-      "target": "c992e96c"
-    },
-    {
-      "source": "941617db",
-      "target": "566e415b"
-    },
-    {
-      "source": "39210080",
+      "source": "cc8f3e46",
       "target": "2f18fe5e"
     },
     {
-      "source": "a4a96eb9",
-      "target": "2aaa626e"
+      "source": "c992e96c",
+      "target": "65dcfdd5"
     },
     {
-      "source": "941617db",
+      "source": "a8404e80",
+      "target": "27fb4337"
+    },
+    {
+      "source": "a16ff476",
+      "target": "2f18fe5e"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "32f45e43"
+    },
+    {
+      "source": "5e603373",
+      "target": "704dd573"
+    },
+    {
+      "source": "d5633110",
       "target": "fe10854d"
     },
     {
-      "source": "7e09f027",
-      "target": "bdb4add2"
+      "source": "1fbeeb62",
+      "target": "2f18fe5e"
     },
     {
       "source": "d46a082c",
       "target": "bffffd40"
     },
     {
-      "source": "4734aa1f",
-      "target": "fc770019"
+      "source": "a7b70e72",
+      "target": "27fb4337"
     },
     {
-      "source": "a4a96eb9",
-      "target": "d45c000e"
+      "source": "0a6ff107",
+      "target": "2f18fe5e"
     },
     {
-      "source": "941617db",
+      "source": "bdb4add2",
+      "target": "941617db"
+    },
+    {
+      "source": "a8404e80",
+      "target": "fe10854d"
+    },
+    {
+      "source": "2aaa626e",
+      "target": "47492b56"
+    },
+    {
+      "source": "a8404e80",
       "target": "2aaa626e"
     },
     {
+      "source": "a8404e80",
+      "target": "566e415b"
+    },
+    {
       "source": "a4a96eb9",
-      "target": "27fb4337"
+      "target": "5e603373"
+    },
+    {
+      "source": "a8404e80",
+      "target": "fc770019"
+    },
+    {
+      "source": "7e09f027",
+      "target": "bdb4add2"
+    },
+    {
+      "source": "941617db",
+      "target": "566e415b"
     },
     {
       "source": "a8404e80",
       "target": "29ffdc13"
     },
     {
-      "source": "bdb4add2",
-      "target": "941617db"
+      "source": "27fb4337",
+      "target": "203a7a78"
+    },
+    {
+      "source": "65dcfdd5",
+      "target": "3d21843d"
+    },
+    {
+      "source": "47492b56",
+      "target": "2f18fe5e"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "bffffd40"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "bdb4add2"
+    },
+    {
+      "source": "a031ce89",
+      "target": "2aaa626e"
+    },
+    {
+      "source": "a8404e80",
+      "target": "4ed40ef0"
+    },
+    {
+      "source": "a834110d",
+      "target": "2f18fe5e"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "4ed40ef0"
+    },
+    {
+      "source": "941617db",
+      "target": "4ed40ef0"
+    },
+    {
+      "source": "3d21843d",
+      "target": "bae5e3d2"
+    },
+    {
+      "source": "ea493d3e",
+      "target": "8bb4724c"
+    },
+    {
+      "source": "a8404e80",
+      "target": "5e603373"
+    },
+    {
+      "source": "4ed40ef0",
+      "target": "cc8f3e46"
+    },
+    {
+      "source": "704dd573",
+      "target": "2f18fe5e"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "d45c000e"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "bdb4add2"
+    },
+    {
+      "source": "941617db",
+      "target": "5e603373"
+    },
+    {
+      "source": "2f18fe5e",
+      "target": "c992e96c"
     },
     {
       "source": "32eff9bc",
@@ -1477,118 +1645,70 @@
       "target": "0a6ff107"
     },
     {
-      "source": "a8404e80",
-      "target": "bdb4add2"
-    },
-    {
-      "source": "941617db",
-      "target": "d45c000e"
-    },
-    {
-      "source": "941617db",
-      "target": "27fb4337"
-    },
-    {
-      "source": "a4a96eb9",
+      "source": "7e03cea7",
       "target": "fc770019"
-    },
-    {
-      "source": "27fb4337",
-      "target": "203a7a78"
-    },
-    {
-      "source": "5e603373",
-      "target": "704dd573"
-    },
-    {
-      "source": "cc8f3e46",
-      "target": "2f18fe5e"
-    },
-    {
-      "source": "9e1f5dd4",
-      "target": "4ed40ef0"
-    },
-    {
-      "source": "1fbeeb62",
-      "target": "2f18fe5e"
-    },
-    {
-      "source": "941617db",
-      "target": "fc770019"
-    },
-    {
-      "source": "2aaa626e",
-      "target": "47492b56"
-    },
-    {
-      "source": "a4a96eb9",
-      "target": "4ed40ef0"
-    },
-    {
-      "source": "a4a96eb9",
-      "target": "bffffd40"
-    },
-    {
-      "source": "4ed40ef0",
-      "target": "cc8f3e46"
-    },
-    {
-      "source": "a8404e80",
-      "target": "d45c000e"
-    },
-    {
-      "source": "4734aa1f",
-      "target": "29ffdc13"
-    },
-    {
-      "source": "a834110d",
-      "target": "2f18fe5e"
-    },
-    {
-      "source": "941617db",
-      "target": "4ed40ef0"
-    },
-    {
-      "source": "4734aa1f",
-      "target": "bdb4add2"
-    },
-    {
-      "source": "a8404e80",
-      "target": "5e603373"
-    },
-    {
-      "source": "941617db",
-      "target": "bffffd40"
-    },
-    {
-      "source": "85e11043",
-      "target": "32f45e43"
-    },
-    {
-      "source": "3d21843d",
-      "target": "bae5e3d2"
-    },
-    {
-      "source": "a8404e80",
-      "target": "566e415b"
-    },
-    {
-      "source": "d5633110",
-      "target": "fe10854d"
     },
     {
       "source": "32f45e43",
       "target": "a8404e80"
     },
     {
-      "source": "0a6ff107",
-      "target": "2f18fe5e"
+      "source": "4734aa1f",
+      "target": "29ffdc13"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "d45c000e"
+    },
+    {
+      "source": "9e1f5dd4",
+      "target": "4ed40ef0"
+    },
+    {
+      "source": "941617db",
+      "target": "d45c000e"
+    },
+    {
+      "source": "29ffdc13",
+      "target": "a834110d"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "bae5e3d2"
+    },
+    {
+      "source": "85e11043",
+      "target": "32f45e43"
+    },
+    {
+      "source": "bae5e3d2",
+      "target": "df5b3cfe"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "27fb4337"
+    },
+    {
+      "source": "be9af28a",
+      "target": "d45c000e"
+    },
+    {
+      "source": "b97b6ffe",
+      "target": "5e603373"
+    },
+    {
+      "source": "a8404e80",
+      "target": "bffffd40"
+    },
+    {
+      "source": "a8404e80",
+      "target": "bdb4add2"
     }
   ],
   "layers": [
+    "models",
     "primary",
     "raw",
-    "models",
     "reporting",
     "model_input",
     "feature",
@@ -1598,6 +1718,18 @@
     {
       "id": "attacks",
       "name": "attacks"
+    },
+    {
+      "id": "audit",
+      "name": "audit"
+    },
+    {
+      "id": "audit_finalization",
+      "name": "audit_finalization"
+    },
+    {
+      "id": "audit_reporting",
+      "name": "audit_reporting"
     },
     {
       "id": "bae",
@@ -1664,6 +1796,14 @@
       "name": "similarity"
     },
     {
+      "id": "similarity_audit",
+      "name": "similarity_audit"
+    },
+    {
+      "id": "similarity_audit_prepare",
+      "name": "similarity_audit_prepare"
+    },
+    {
       "id": "textfooler",
       "name": "textfooler"
     },
@@ -1698,6 +1838,14 @@
       "name": "models"
     },
     {
+      "id": "audit",
+      "name": "audit"
+    },
+    {
+      "id": "similarity_audit_prepare",
+      "name": "similarity_audit_prepare"
+    },
+    {
       "id": "data",
       "name": "data"
     },
@@ -1706,8 +1854,20 @@
       "name": "risk"
     },
     {
+      "id": "similarity_audit",
+      "name": "similarity_audit"
+    },
+    {
       "id": "attacks",
       "name": "attacks"
+    },
+    {
+      "id": "audit_reporting",
+      "name": "audit_reporting"
+    },
+    {
+      "id": "audit_finalization",
+      "name": "audit_finalization"
     },
     {
       "id": "stage",
@@ -1726,179 +1886,19 @@
       "outputs": [],
       "children": [
         {
-          "id": "a16ff476",
+          "id": "a7b70e72",
           "type": "data"
-        },
-        {
-          "id": "704dd573",
-          "type": "data"
-        },
-        {
-          "id": "941617db",
-          "type": "data"
-        },
-        {
-          "id": "5e603373",
-          "type": "task"
-        },
-        {
-          "id": "fe10854d",
-          "type": "task"
-        },
-        {
-          "id": "d45c000e",
-          "type": "task"
-        },
-        {
-          "id": "012371fe",
-          "type": "data"
-        },
-        {
-          "id": "566e415b",
-          "type": "task"
-        },
-        {
-          "id": "47492b56",
-          "type": "data"
-        },
-        {
-          "id": "8bb4724c",
-          "type": "data"
-        },
-        {
-          "id": "0a6ff107",
-          "type": "data"
-        },
-        {
-          "id": "7e09f027",
-          "type": "data"
-        },
-        {
-          "id": "27fb4337",
-          "type": "task"
-        },
-        {
-          "id": "203a7a78",
-          "type": "data"
-        },
-        {
-          "id": "32f45e43",
-          "type": "task"
-        },
-        {
-          "id": "65dcfdd5",
-          "type": "task"
-        },
-        {
-          "id": "29ffdc13",
-          "type": "task"
-        },
-        {
-          "id": "4734aa1f",
-          "type": "parameters"
         },
         {
           "id": "bae5e3d2",
           "type": "task"
         },
         {
-          "id": "cc8f3e46",
-          "type": "data"
-        },
-        {
-          "id": "4734aa1f",
-          "type": "data"
-        },
-        {
-          "id": "c2af6c30",
-          "type": "data"
-        },
-        {
-          "id": "d5633110",
-          "type": "data"
-        },
-        {
-          "id": "bdb4add2",
-          "type": "task"
-        },
-        {
-          "id": "fc770019",
-          "type": "task"
-        },
-        {
-          "id": "3d21843d",
-          "type": "data"
-        },
-        {
-          "id": "1fbeeb62",
-          "type": "data"
-        },
-        {
-          "id": "2f18fe5e",
-          "type": "task"
-        },
-        {
-          "id": "9e1f5dd4",
-          "type": "data"
-        },
-        {
-          "id": "21d22ec4",
-          "type": "data"
-        },
-        {
-          "id": "39210080",
-          "type": "data"
-        },
-        {
           "id": "be9af28a",
           "type": "data"
         },
         {
-          "id": "a7b70e72",
-          "type": "data"
-        },
-        {
-          "id": "a8404e80",
-          "type": "data"
-        },
-        {
-          "id": "c992e96c",
-          "type": "data"
-        },
-        {
-          "id": "bffffd40",
-          "type": "task"
-        },
-        {
           "id": "7e03cea7",
-          "type": "data"
-        },
-        {
-          "id": "32eff9bc",
-          "type": "data"
-        },
-        {
-          "id": "a4a96eb9",
-          "type": "parameters"
-        },
-        {
-          "id": "2aaa626e",
-          "type": "task"
-        },
-        {
-          "id": "a834110d",
-          "type": "data"
-        },
-        {
-          "id": "a4a96eb9",
-          "type": "data"
-        },
-        {
-          "id": "85e11043",
-          "type": "parameters"
-        },
-        {
-          "id": "85e11043",
           "type": "data"
         },
         {
@@ -1906,15 +1906,139 @@
           "type": "task"
         },
         {
+          "id": "8bb4724c",
+          "type": "data"
+        },
+        {
+          "id": "4734aa1f",
+          "type": "data"
+        },
+        {
+          "id": "32f45e43",
+          "type": "task"
+        },
+        {
+          "id": "c992e96c",
+          "type": "data"
+        },
+        {
+          "id": "47492b56",
+          "type": "data"
+        },
+        {
+          "id": "3d21843d",
+          "type": "data"
+        },
+        {
+          "id": "4734aa1f",
+          "type": "parameters"
+        },
+        {
+          "id": "d45c000e",
+          "type": "task"
+        },
+        {
+          "id": "cc8f3e46",
+          "type": "data"
+        },
+        {
           "id": "a031ce89",
           "type": "data"
+        },
+        {
+          "id": "2f18fe5e",
+          "type": "task"
+        },
+        {
+          "id": "85e11043",
+          "type": "data"
+        },
+        {
+          "id": "a16ff476",
+          "type": "data"
+        },
+        {
+          "id": "bdb4add2",
+          "type": "task"
         },
         {
           "id": "d46a082c",
           "type": "data"
         },
         {
-          "id": "4ed40ef0",
+          "id": "012371fe",
+          "type": "data"
+        },
+        {
+          "id": "85e11043",
+          "type": "parameters"
+        },
+        {
+          "id": "5e603373",
+          "type": "task"
+        },
+        {
+          "id": "d5633110",
+          "type": "data"
+        },
+        {
+          "id": "a834110d",
+          "type": "data"
+        },
+        {
+          "id": "39210080",
+          "type": "data"
+        },
+        {
+          "id": "203a7a78",
+          "type": "data"
+        },
+        {
+          "id": "566e415b",
+          "type": "task"
+        },
+        {
+          "id": "fc770019",
+          "type": "task"
+        },
+        {
+          "id": "fe10854d",
+          "type": "task"
+        },
+        {
+          "id": "1fbeeb62",
+          "type": "data"
+        },
+        {
+          "id": "a8404e80",
+          "type": "data"
+        },
+        {
+          "id": "c2af6c30",
+          "type": "data"
+        },
+        {
+          "id": "0a6ff107",
+          "type": "data"
+        },
+        {
+          "id": "9e1f5dd4",
+          "type": "data"
+        },
+        {
+          "id": "7e09f027",
+          "type": "data"
+        },
+        {
+          "id": "21d22ec4",
+          "type": "data"
+        },
+        {
+          "id": "a4a96eb9",
+          "type": "data"
+        },
+        {
+          "id": "29ffdc13",
           "type": "task"
         },
         {
@@ -1922,8 +2046,44 @@
           "type": "data"
         },
         {
+          "id": "4ed40ef0",
+          "type": "task"
+        },
+        {
+          "id": "bffffd40",
+          "type": "task"
+        },
+        {
+          "id": "32eff9bc",
+          "type": "data"
+        },
+        {
+          "id": "941617db",
+          "type": "data"
+        },
+        {
           "id": "df5b3cfe",
           "type": "data"
+        },
+        {
+          "id": "27fb4337",
+          "type": "task"
+        },
+        {
+          "id": "a4a96eb9",
+          "type": "parameters"
+        },
+        {
+          "id": "704dd573",
+          "type": "data"
+        },
+        {
+          "id": "2aaa626e",
+          "type": "task"
+        },
+        {
+          "id": "65dcfdd5",
+          "type": "task"
         }
       ]
     }

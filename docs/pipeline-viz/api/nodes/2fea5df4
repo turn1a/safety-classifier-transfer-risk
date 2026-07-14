@@ -1,0 +1,8 @@
+{
+  "type": "json.json_dataset.JSONDataset",
+  "filepath": "<workspace>/data/08_reporting/target_audit_summary.json",
+  "run_command": "kedro run --to-outputs=target_audit_raw_context",
+  "preview": null,
+  "preview_type": null,
+  "stats": null
+}

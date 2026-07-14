@@ -1,13 +1,66 @@
 ---
-title: "Pipeline"
+title: "Implementation: a resumable evidence pipeline"
+description: "How the transfer-risk study keeps mathematics, models, artifacts, and cloud execution auditable."
 page-layout: full
-toc: false
+toc: true
+toc-depth: 2
 ---
 
-The measurement is a [Kedro](https://kedro.org) project: pure algorithms in `transfer_risk.lib`, thin nodes that read and write through a typed Data Catalog, and pipelines wired one stage at a time (data, models, similarity, attacks, transfer, risk, reporting). The graph below is the live Kedro-Viz export — pan, zoom, and click a node or dataset to see its inputs, outputs, and layer.
-
-This is the full production pipeline — ten surrogates and five attack recipes (the 50 `(surrogate, recipe)` attack cells), wired `data → models → similarity → attacks → transfer → risk → reporting`. For readability the attack stage is drawn here as one node per cell; the actual run splits each cell into several example-shards scaled to the box's cores, so a slow cell spreads across cores, then a reduce step concatenates them — `ParallelRunner` runs the shards and `kedro run --only-missing-outputs` resumes. Click a node or dataset to see its inputs, outputs, and layer; use the focus and pipeline filters to isolate a stage.
+This project is an engineering case study in making a security measurement reviewable after the expensive model work has ended. The embedded view is an interactive graph of configured pipeline wiring. It is a static visual summary, not an inventory of every explicit non-default audit or sensitivity stage. If the embedded view does not load, [open the standalone pipeline graph](pipeline-viz/index.html).
 
 ```{=html}
-<iframe class="viz-frame" src="pipeline-viz/index.html" title="Kedro pipeline graph"></iframe>
+<iframe class="viz-frame" src="pipeline-viz/index.html" title="Interactive Kedro pipeline graph for the transfer-risk study"></iframe>
 ```
+
+The visual graph collapses the attack stage to one readable node per surrogate and recipe. The executed run expands each cell into example shards, then reduces those shards before target evaluation. The original conditional target-benign outputs remain historical artifacts. The audited target injection-to-benign outcome comes from explicit audit stages outside the default chain, linked below.
+
+## Audit and sensitivity stages
+
+The [`audit` pipeline](https://github.com/turn1a/safety-classifier-transfer-risk/blob/main/src/transfer_risk/pipelines/audit/pipeline.py) reuses successful source-attack records and runs the frozen target only on deduplicated originals and perturbations. The completed audit evaluated 4,374 unique texts. It writes aggregate cells, source aggregates, and non-text context rather than publishing prompts.
+
+`audit_finalization` is registered as a separate [saved-aggregate refresh stage](https://github.com/turn1a/safety-classifier-transfer-risk/blob/main/src/transfer_risk/pipeline_registry.py). It recomputes corrected DBS from saved CKA matrices and finalizes the audit without target inference. The [`audit_reporting` pipeline](https://github.com/turn1a/safety-classifier-transfer-risk/blob/main/src/transfer_risk/pipelines/audit_reporting/pipeline.py) is target-free. It reads finalized aggregates to create the 50-cell table, source aggregates, safe summary, true-flip scatter, and M1 versus M2 figure.
+
+The training-only CKA check also has two explicit stages. [`similarity_audit_prepare`](https://github.com/turn1a/safety-classifier-transfer-risk/blob/main/src/transfer_risk/pipelines/similarity_audit_prepare/pipeline.py) extracts the saved training split. [`similarity_audit`](https://github.com/turn1a/safety-classifier-transfer-risk/blob/main/src/transfer_risk/pipelines/similarity_audit/pipeline.py) samples the balanced training-only probe, recomputes CKA, and compares selection membership with saved audit aggregates. It runs serially on MPS because each node retains target representations alongside an fp32 surrogate. It creates no attacks and performs no training.
+
+## Separate the mathematics from orchestration
+
+The [`transfer_risk.lib`](https://github.com/turn1a/safety-classifier-transfer-risk/tree/main/src/transfer_risk/lib) package contains the deterministic parts of the study: linear CKA, Bresenham-based DBS, empirical threshold calibration, enumerated association tests, selection ablation, seed derivation, target-audit aggregation, and reporting transformations. These functions do not load models, open network connections, or depend on Kedro. That boundary makes the CKA rotation and scaling invariants, DBS edge cases, permutation floor, and artifact transformations cheap to test.
+
+Kedro nodes sit around that core. They load catalog-managed inputs, call pure functions where appropriate, execute model or attack work, and emit typed artifacts. For example, the [reporting nodes](https://github.com/turn1a/safety-classifier-transfer-risk/blob/main/src/transfer_risk/pipelines/reporting/nodes.py) recompute corrected DBS from private saved CKA matrices before export, build the public master and surrogate tables, collect denominator aggregates, select redacted qualitative audit entries, and render the three figures. The public site exposes corrected DBS values, while the source matrices remain outside its artifact set.
+
+The [original implementation protocol](https://github.com/turn1a/safety-classifier-transfer-risk/blob/main/SPEC.md) provides the research design and records later audited deviations. The implementation makes each major assumption executable. `tests/lib` covers pure behavior, while pipeline registry and reporting tests verify the assembled graph and published artifact contracts. The [selection-ablation test](https://github.com/turn1a/safety-classifier-transfer-risk/blob/main/tests/lib/test_ablation.py) checks the 1-in-20 enumeration floor for a three-versus-three comparison rather than merely checking that a function returns.
+
+## Let the catalog own artifacts
+
+The [catalog](https://github.com/turn1a/safety-classifier-transfer-risk/blob/main/conf/base/catalog.yml) is the contract between stages. It owns raw Hugging Face datasets, Hub model sources, local surrogate directories, ONNX graphs, CKA matrices, attack shards, per-cell partitions, target-audit aggregates, MLflow-wrapped outputs, figures, and the CSV and JSON files published with the site. Nodes do not reach around it with an ad hoc model download or file sync.
+
+That design also handles the cloud boundary. The base configuration resolves boundary artifacts to local paths. The cloud environment resolves the same logical datasets to an S3 bucket through scoped configuration. A worker can therefore read a staged checkpoint, write an adversarial shard, and let the local downstream stage assemble it later without changing node logic. The resulting lineage is visible:
+
+```text
+canonical data → model and similarity artifacts → attack shards → cell reductions
+→ transfer table → corrected DBS and statistics → public figures and JSON or CSV artifacts
+```
+
+The published [manifest](artifacts/results_manifest.json) records `5af7330` as the cloud execution repo ref, together with the root seed, lockfile hash, model identifier, token windows, and completed-run hardware. Current source links on this page describe the audited post-run reporting implementation, which postdates that execution. The [master results table](artifacts/master_results_table.csv) keeps one historical conditional cell result per surrogate and recipe. The [target audit table](artifacts/target_audit_cells.csv) carries original and perturbed target aggregate counts alongside verified target injection-to-benign outcomes.
+
+## Fan out the expensive work, then resume it
+
+The models, similarity, and attacks pipelines are generated from configuration. Adding a surrogate produces the corresponding materialization or training node, metadata record, similarity computation, and attack work without a pipeline rewrite. The attack builder fans out by surrogate, recipe, and contiguous example span. Its shard size derives from the 191 canonical positive test prompts under the mixed injection/jailbreak label, 50 cells, configured worker count, and a shard multiplier so slow cells can use more than one core.
+
+Each shard writes a separate catalog partition. A reduce node concatenates a cell only after its spans complete. `ParallelRunner` distributes disjoint shards, while `kedro run --only-missing-outputs` skips persisted outputs during recovery. Fixed root and shard seeds make a fixed layout reproducible. The implementation also limits BLAS, joblib, and torch threads inside workers so a 192-core outer pool does not accidentally create nested process pools.
+
+The production sweep ran mostly on an ARM64 AWS `r8g.48xlarge` Graviton4 spot instance with 192 vCPUs. Final shard reductions, transfer, risk calculations, and reporting completed locally. This distinction comes from the [public results manifest](artifacts/results_manifest.json), rather than current Terraform defaults or ignored local state.
+
+## Keep attacks and inference operational
+
+TextAttack runs in process through the [turn1a/TextAttack fork](https://github.com/turn1a/TextAttack). The fork supports the project's Transformers 5 environment, keeps all five requested recipes available, and replaces the TensorFlow Universal Sentence Encoder path with a torch-native sentence-transformer constraint where relevant. The runner uses process-local device and thread configuration before importing the attack implementation, which is necessary when a spawned worker owns one shard.
+
+Every transformer surrogate also exports an ONNX graph. On ARM64, ONNX Runtime failed fused transformer attention with a matrix-dimension mismatch. Torch served transformer victims for the completed attack sweep, while the ONNX artifacts remained parity checks. The fallback is represented in the pipeline configuration and manifest, so runtime behavior is visible instead of being an undocumented machine-specific workaround.
+
+## Apply controls at the execution boundary
+
+The cloud design is intentionally narrow. The instance role is scoped to the experiment bucket and SSM Session Manager core. Access uses SSM rather than an inbound SSH rule. The security group is egress-only and IMDSv2 is required. The staged box holds no Hugging Face token because the catalog provides the model artifacts it needs. The [infrastructure directory](https://github.com/turn1a/safety-classifier-transfer-risk/tree/main/infra) documents the Terraform and cloud recipes.
+
+The site release excludes raw attack logs and model checkpoints. It publishes 50 surrogate-recipe target-audit cells, source aggregates, two redacted qualitative audit entries, CKA sensitivity tables, and reproducibility metadata. That choice retains evidence for the written claims while limiting unnecessary release of attack payloads.
+
+This implementation measures transfer behavior under a specified target, pool, and attack suite. It does not certify detector robustness.

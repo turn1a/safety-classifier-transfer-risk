@@ -1,0 +1,8 @@
+{
+  "type": "pandas.parquet_dataset.ParquetDataset",
+  "filepath": "<workspace>/data/07_model_output/training_probe_similarity_table.parquet",
+  "run_command": "kedro run --to-outputs=training_similarity_table",
+  "preview": null,
+  "preview_type": null,
+  "stats": null
+}

@@ -1,6 +1,6 @@
 {
   "type": "pickle.pickle_dataset.PickleDataset",
-  "filepath": "/Users/aholszewska/dev/risk-transfer/data/04_feature/cka_electra-small-ft.pkl",
+  "filepath": "<workspace>/data/04_feature/cka_electra-small-ft.pkl",
   "run_command": "kedro run --to-outputs=cka__electra-small-ft",
   "preview": null,
   "preview_type": null,

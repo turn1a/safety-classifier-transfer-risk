@@ -1,0 +1,2315 @@
+{
+  "nodes": [
+    {
+      "id": "85e11043",
+      "name": "params:seed",
+      "tags": [
+        "models",
+        "llama-prompt-guard-86m",
+        "similarity_audit",
+        "attacks",
+        "deberta-base-ft-seed",
+        "pwws",
+        "llama-prompt-guard-22m",
+        "bert-base-ft",
+        "bert-attack",
+        "audit",
+        "electra-small-ft",
+        "textfooler",
+        "deepwordbug",
+        "deberta-base-pi-v1",
+        "bae",
+        "roberta-base-ft",
+        "deepset-deberta-injection",
+        "bilstm-attention",
+        "audit_finalization",
+        "similarity",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "models",
+        "risk",
+        "similarity_audit",
+        "smoke",
+        "attacks",
+        "data",
+        "stage",
+        "downstream",
+        "audit_finalization",
+        "similarity",
+        "__default__",
+        "reporting",
+        "audit"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "4734aa1f",
+      "name": "params:similarity",
+      "tags": [
+        "deberta-base-pi-v1",
+        "llama-prompt-guard-86m",
+        "similarity_audit",
+        "roberta-base-ft",
+        "deepset-deberta-injection",
+        "deberta-base-ft-seed",
+        "bilstm-attention",
+        "audit_finalization",
+        "llama-prompt-guard-22m",
+        "bert-base-ft",
+        "similarity",
+        "electra-small-ft",
+        "audit",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "risk",
+        "similarity_audit",
+        "downstream",
+        "stage",
+        "audit_finalization",
+        "similarity",
+        "__default__",
+        "reporting",
+        "audit"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "a031ce89",
+      "name": "surrogate__deberta-base-pi-v1",
+      "tags": [
+        "deepwordbug",
+        "models",
+        "deberta-base-pi-v1",
+        "similarity",
+        "similarity_audit",
+        "bae",
+        "attacks",
+        "pwws",
+        "bert-attack",
+        "textfooler"
+      ],
+      "pipelines": [
+        "models",
+        "similarity_audit",
+        "attacks",
+        "stage",
+        "similarity",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "datasets.surrogate_model_dataset.SurrogateModelDataset"
+    },
+    {
+      "id": "d46a082c",
+      "name": "surrogate__deberta-small-pi-v2",
+      "tags": [
+        "deepwordbug",
+        "models",
+        "similarity",
+        "similarity_audit",
+        "bae",
+        "attacks",
+        "pwws",
+        "bert-attack",
+        "deberta-small-pi-v2",
+        "textfooler"
+      ],
+      "pipelines": [
+        "models",
+        "similarity_audit",
+        "attacks",
+        "stage",
+        "similarity",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "datasets.surrogate_model_dataset.SurrogateModelDataset"
+    },
+    {
+      "id": "d5633110",
+      "name": "surrogate__deepset-deberta-injection",
+      "tags": [
+        "deepwordbug",
+        "models",
+        "similarity",
+        "similarity_audit",
+        "bae",
+        "deepset-deberta-injection",
+        "attacks",
+        "pwws",
+        "bert-attack",
+        "textfooler"
+      ],
+      "pipelines": [
+        "models",
+        "similarity_audit",
+        "attacks",
+        "stage",
+        "similarity",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "datasets.surrogate_model_dataset.SurrogateModelDataset"
+    },
+    {
+      "id": "9e1f5dd4",
+      "name": "surrogate__llama-prompt-guard-22m",
+      "tags": [
+        "deepwordbug",
+        "models",
+        "similarity",
+        "similarity_audit",
+        "bae",
+        "attacks",
+        "pwws",
+        "llama-prompt-guard-22m",
+        "bert-attack",
+        "textfooler"
+      ],
+      "pipelines": [
+        "models",
+        "similarity_audit",
+        "attacks",
+        "stage",
+        "similarity",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "datasets.surrogate_model_dataset.SurrogateModelDataset"
+    },
+    {
+      "id": "be9af28a",
+      "name": "surrogate__llama-prompt-guard-86m",
+      "tags": [
+        "deepwordbug",
+        "models",
+        "similarity",
+        "llama-prompt-guard-86m",
+        "similarity_audit",
+        "bae",
+        "attacks",
+        "pwws",
+        "bert-attack",
+        "textfooler"
+      ],
+      "pipelines": [
+        "models",
+        "similarity_audit",
+        "attacks",
+        "stage",
+        "similarity",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "datasets.surrogate_model_dataset.SurrogateModelDataset"
+    },
+    {
+      "id": "7e09f027",
+      "name": "target_model",
+      "tags": [
+        "similarity_audit",
+        "similarity",
+        "transfer",
+        "audit"
+      ],
+      "pipelines": [
+        "similarity_audit",
+        "transfer",
+        "downstream",
+        "stage",
+        "similarity",
+        "__default__",
+        "audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "raw",
+      "dataset_type": "io.memory_dataset.MemoryDataset"
+    },
+    {
+      "id": "a4a96eb9",
+      "name": "params:device",
+      "tags": [
+        "models",
+        "deberta-base-pi-v1",
+        "llama-prompt-guard-86m",
+        "similarity_audit",
+        "roberta-base-ft",
+        "deepset-deberta-injection",
+        "deberta-base-ft-seed",
+        "bilstm-attention",
+        "llama-prompt-guard-22m",
+        "bert-base-ft",
+        "similarity",
+        "transfer",
+        "electra-small-ft",
+        "audit",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "models",
+        "similarity_audit",
+        "transfer",
+        "downstream",
+        "stage",
+        "similarity",
+        "__default__",
+        "audit"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "32eff9bc",
+      "name": "surrogate__bert-base-ft",
+      "tags": [
+        "deepwordbug",
+        "models",
+        "similarity",
+        "similarity_audit",
+        "bae",
+        "attacks",
+        "pwws",
+        "bert-base-ft",
+        "bert-attack",
+        "textfooler"
+      ],
+      "pipelines": [
+        "models",
+        "similarity_audit",
+        "attacks",
+        "stage",
+        "similarity",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "datasets.surrogate_model_dataset.SurrogateModelDataset"
+    },
+    {
+      "id": "b97b6ffe",
+      "name": "surrogate__bilstm-attention",
+      "tags": [
+        "deepwordbug",
+        "models",
+        "similarity",
+        "similarity_audit",
+        "bae",
+        "attacks",
+        "bilstm-attention",
+        "pwws",
+        "bert-attack",
+        "textfooler"
+      ],
+      "pipelines": [
+        "models",
+        "similarity_audit",
+        "attacks",
+        "stage",
+        "similarity",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "datasets.surrogate_model_dataset.SurrogateModelDataset"
+    },
+    {
+      "id": "012371fe",
+      "name": "surrogate__deberta-base-ft-seed",
+      "tags": [
+        "deepwordbug",
+        "models",
+        "similarity",
+        "similarity_audit",
+        "bae",
+        "attacks",
+        "deberta-base-ft-seed",
+        "pwws",
+        "bert-attack",
+        "textfooler"
+      ],
+      "pipelines": [
+        "models",
+        "similarity_audit",
+        "attacks",
+        "stage",
+        "similarity",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "datasets.surrogate_model_dataset.SurrogateModelDataset"
+    },
+    {
+      "id": "a7b70e72",
+      "name": "surrogate__electra-small-ft",
+      "tags": [
+        "deepwordbug",
+        "models",
+        "similarity",
+        "similarity_audit",
+        "bae",
+        "attacks",
+        "pwws",
+        "bert-attack",
+        "electra-small-ft",
+        "textfooler"
+      ],
+      "pipelines": [
+        "models",
+        "similarity_audit",
+        "attacks",
+        "stage",
+        "similarity",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "datasets.surrogate_model_dataset.SurrogateModelDataset"
+    },
+    {
+      "id": "7e03cea7",
+      "name": "surrogate__roberta-base-ft",
+      "tags": [
+        "deepwordbug",
+        "models",
+        "similarity",
+        "similarity_audit",
+        "bae",
+        "roberta-base-ft",
+        "attacks",
+        "pwws",
+        "bert-attack",
+        "textfooler"
+      ],
+      "pipelines": [
+        "models",
+        "similarity_audit",
+        "attacks",
+        "stage",
+        "similarity",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "datasets.surrogate_model_dataset.SurrogateModelDataset"
+    },
+    {
+      "id": "c992e96c",
+      "name": "cka_matrices",
+      "tags": [
+        "similarity_audit",
+        "audit_finalization",
+        "similarity",
+        "audit"
+      ],
+      "pipelines": [
+        "risk",
+        "similarity_audit",
+        "downstream",
+        "stage",
+        "audit_finalization",
+        "similarity",
+        "__default__",
+        "reporting",
+        "audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "feature",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "3d21843d",
+      "name": "similarity_table",
+      "tags": [
+        "similarity",
+        "transfer",
+        "similarity_audit"
+      ],
+      "pipelines": [
+        "similarity_audit",
+        "transfer",
+        "downstream",
+        "stage",
+        "similarity",
+        "__default__"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pandas.parquet_dataset.ParquetDataset"
+    },
+    {
+      "id": "8bb4724c",
+      "name": "surrogate_selection",
+      "tags": [
+        "similarity_audit",
+        "audit_finalization",
+        "similarity",
+        "audit_reporting",
+        "audit"
+      ],
+      "pipelines": [
+        "risk",
+        "similarity_audit",
+        "downstream",
+        "stage",
+        "audit_reporting",
+        "audit_finalization",
+        "similarity",
+        "__default__",
+        "reporting",
+        "audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "dbb3b583",
+      "name": "params:risk",
+      "tags": [
+        "similarity_audit",
+        "audit_finalization",
+        "audit"
+      ],
+      "pipelines": [
+        "risk",
+        "similarity_audit",
+        "downstream",
+        "audit_finalization",
+        "audit",
+        "__default__"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "148d7559",
+      "name": "target_audit_summary",
+      "tags": [
+        "similarity_audit",
+        "audit_finalization",
+        "audit",
+        "audit_reporting"
+      ],
+      "pipelines": [
+        "audit",
+        "similarity_audit",
+        "audit_reporting",
+        "audit_finalization"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "reporting",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "f2d559fd",
+      "name": "training_split",
+      "tags": [
+        "similarity_audit",
+        "similarity_audit_prepare"
+      ],
+      "pipelines": [
+        "similarity_audit",
+        "similarity_audit_prepare"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_input",
+      "dataset_type": "pandas.parquet_dataset.ParquetDataset"
+    },
+    {
+      "id": "985af94b",
+      "name": "build_training_probe_set",
+      "tags": [
+        "similarity_audit"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity_audit": {
+          "n_probe": 1600
+        },
+        "seed": 20260616
+      },
+      "full_name": "build_training_probe_set"
+    },
+    {
+      "id": "b46ed546",
+      "name": "params:similarity_audit",
+      "tags": [
+        "similarity_audit"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "dac9e28e",
+      "name": "training_probe_set",
+      "tags": [
+        "deberta-base-pi-v1",
+        "llama-prompt-guard-86m",
+        "similarity_audit",
+        "roberta-base-ft",
+        "deepset-deberta-injection",
+        "deberta-base-ft-seed",
+        "bilstm-attention",
+        "llama-prompt-guard-22m",
+        "bert-base-ft",
+        "electra-small-ft",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_input",
+      "dataset_type": "pandas.parquet_dataset.ParquetDataset"
+    },
+    {
+      "id": "4c9216e1",
+      "name": "compute_training_target_reps",
+      "tags": [
+        "similarity_audit"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity": {
+          "n_probe": 2000,
+          "max_seq_len": 512,
+          "pooling": "cls",
+          "cka": {
+            "mode": "minibatch",
+            "batch_size": 64
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        },
+        "device": {
+          "policy": "mps_or_cpu",
+          "allow_mps_fallback": true
+        }
+      },
+      "full_name": "compute_training_target_reps"
+    },
+    {
+      "id": "67ef5da1",
+      "name": "training_target_reps",
+      "tags": [
+        "deberta-base-pi-v1",
+        "llama-prompt-guard-86m",
+        "similarity_audit",
+        "roberta-base-ft",
+        "deepset-deberta-injection",
+        "deberta-base-ft-seed",
+        "bilstm-attention",
+        "llama-prompt-guard-22m",
+        "bert-base-ft",
+        "electra-small-ft",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": "io.memory_dataset.MemoryDataset"
+    },
+    {
+      "id": "439db4c3",
+      "name": "training_cka_bert-base-ft",
+      "tags": [
+        "similarity_audit",
+        "bert-base-ft"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity": {
+          "n_probe": 2000,
+          "max_seq_len": 512,
+          "pooling": "cls",
+          "cka": {
+            "mode": "minibatch",
+            "batch_size": 64
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        },
+        "device": {
+          "policy": "mps_or_cpu",
+          "allow_mps_fallback": true
+        }
+      },
+      "full_name": "training_cka_bert-base-ft"
+    },
+    {
+      "id": "a75d8773",
+      "name": "training_cka__bert-base-ft",
+      "tags": [
+        "similarity_audit",
+        "bert-base-ft"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "feature",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "c989e511",
+      "name": "training_cka_bilstm-attention",
+      "tags": [
+        "bilstm-attention",
+        "similarity_audit"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity": {
+          "n_probe": 2000,
+          "max_seq_len": 512,
+          "pooling": "cls",
+          "cka": {
+            "mode": "minibatch",
+            "batch_size": 64
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        },
+        "device": {
+          "policy": "mps_or_cpu",
+          "allow_mps_fallback": true
+        }
+      },
+      "full_name": "training_cka_bilstm-attention"
+    },
+    {
+      "id": "d7a9206e",
+      "name": "training_cka__bilstm-attention",
+      "tags": [
+        "bilstm-attention",
+        "similarity_audit"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "feature",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "05978d77",
+      "name": "training_cka_deberta-base-ft-seed",
+      "tags": [
+        "similarity_audit",
+        "deberta-base-ft-seed"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity": {
+          "n_probe": 2000,
+          "max_seq_len": 512,
+          "pooling": "cls",
+          "cka": {
+            "mode": "minibatch",
+            "batch_size": 64
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        },
+        "device": {
+          "policy": "mps_or_cpu",
+          "allow_mps_fallback": true
+        }
+      },
+      "full_name": "training_cka_deberta-base-ft-seed"
+    },
+    {
+      "id": "b8790e39",
+      "name": "training_cka__deberta-base-ft-seed",
+      "tags": [
+        "similarity_audit",
+        "deberta-base-ft-seed"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "feature",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "47de68f9",
+      "name": "training_cka_deberta-base-pi-v1",
+      "tags": [
+        "similarity_audit",
+        "deberta-base-pi-v1"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity": {
+          "n_probe": 2000,
+          "max_seq_len": 512,
+          "pooling": "cls",
+          "cka": {
+            "mode": "minibatch",
+            "batch_size": 64
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        },
+        "device": {
+          "policy": "mps_or_cpu",
+          "allow_mps_fallback": true
+        }
+      },
+      "full_name": "training_cka_deberta-base-pi-v1"
+    },
+    {
+      "id": "e0601fed",
+      "name": "training_cka__deberta-base-pi-v1",
+      "tags": [
+        "similarity_audit",
+        "deberta-base-pi-v1"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "feature",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "731876ee",
+      "name": "training_cka_deberta-small-pi-v2",
+      "tags": [
+        "similarity_audit",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity": {
+          "n_probe": 2000,
+          "max_seq_len": 512,
+          "pooling": "cls",
+          "cka": {
+            "mode": "minibatch",
+            "batch_size": 64
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        },
+        "device": {
+          "policy": "mps_or_cpu",
+          "allow_mps_fallback": true
+        }
+      },
+      "full_name": "training_cka_deberta-small-pi-v2"
+    },
+    {
+      "id": "951da194",
+      "name": "training_cka__deberta-small-pi-v2",
+      "tags": [
+        "similarity_audit",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "feature",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "a59aa521",
+      "name": "training_cka_deepset-deberta-injection",
+      "tags": [
+        "similarity_audit",
+        "deepset-deberta-injection"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity": {
+          "n_probe": 2000,
+          "max_seq_len": 512,
+          "pooling": "cls",
+          "cka": {
+            "mode": "minibatch",
+            "batch_size": 64
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        },
+        "device": {
+          "policy": "mps_or_cpu",
+          "allow_mps_fallback": true
+        }
+      },
+      "full_name": "training_cka_deepset-deberta-injection"
+    },
+    {
+      "id": "2ac063af",
+      "name": "training_cka__deepset-deberta-injection",
+      "tags": [
+        "similarity_audit",
+        "deepset-deberta-injection"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "feature",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "3ce5bf54",
+      "name": "training_cka_electra-small-ft",
+      "tags": [
+        "similarity_audit",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity": {
+          "n_probe": 2000,
+          "max_seq_len": 512,
+          "pooling": "cls",
+          "cka": {
+            "mode": "minibatch",
+            "batch_size": 64
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        },
+        "device": {
+          "policy": "mps_or_cpu",
+          "allow_mps_fallback": true
+        }
+      },
+      "full_name": "training_cka_electra-small-ft"
+    },
+    {
+      "id": "ddc7a019",
+      "name": "training_cka__electra-small-ft",
+      "tags": [
+        "similarity_audit",
+        "electra-small-ft"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "feature",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "0b4d8c96",
+      "name": "training_cka_llama-prompt-guard-22m",
+      "tags": [
+        "similarity_audit",
+        "llama-prompt-guard-22m"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity": {
+          "n_probe": 2000,
+          "max_seq_len": 512,
+          "pooling": "cls",
+          "cka": {
+            "mode": "minibatch",
+            "batch_size": 64
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        },
+        "device": {
+          "policy": "mps_or_cpu",
+          "allow_mps_fallback": true
+        }
+      },
+      "full_name": "training_cka_llama-prompt-guard-22m"
+    },
+    {
+      "id": "fbb1bf69",
+      "name": "training_cka__llama-prompt-guard-22m",
+      "tags": [
+        "similarity_audit",
+        "llama-prompt-guard-22m"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "feature",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "e94f0588",
+      "name": "training_cka_llama-prompt-guard-86m",
+      "tags": [
+        "similarity_audit",
+        "llama-prompt-guard-86m"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity": {
+          "n_probe": 2000,
+          "max_seq_len": 512,
+          "pooling": "cls",
+          "cka": {
+            "mode": "minibatch",
+            "batch_size": 64
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        },
+        "device": {
+          "policy": "mps_or_cpu",
+          "allow_mps_fallback": true
+        }
+      },
+      "full_name": "training_cka_llama-prompt-guard-86m"
+    },
+    {
+      "id": "e1bde7ed",
+      "name": "training_cka__llama-prompt-guard-86m",
+      "tags": [
+        "similarity_audit",
+        "llama-prompt-guard-86m"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "feature",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "2bcfdd80",
+      "name": "training_cka_roberta-base-ft",
+      "tags": [
+        "similarity_audit",
+        "roberta-base-ft"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity": {
+          "n_probe": 2000,
+          "max_seq_len": 512,
+          "pooling": "cls",
+          "cka": {
+            "mode": "minibatch",
+            "batch_size": 64
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        },
+        "device": {
+          "policy": "mps_or_cpu",
+          "allow_mps_fallback": true
+        }
+      },
+      "full_name": "training_cka_roberta-base-ft"
+    },
+    {
+      "id": "60699aac",
+      "name": "training_cka__roberta-base-ft",
+      "tags": [
+        "similarity_audit",
+        "roberta-base-ft"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "feature",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "c5686bc7",
+      "name": "reduce_training_cka",
+      "tags": [
+        "similarity_audit"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "reduce_training_cka"
+    },
+    {
+      "id": "4ab67f59",
+      "name": "training_cka_matrices",
+      "tags": [
+        "similarity_audit"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "feature",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "2d14993a",
+      "name": "reduce_training_similarity",
+      "tags": [
+        "similarity_audit"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity": {
+          "n_probe": 2000,
+          "max_seq_len": 512,
+          "pooling": "cls",
+          "cka": {
+            "mode": "minibatch",
+            "batch_size": 64
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        }
+      },
+      "full_name": "reduce_training_similarity"
+    },
+    {
+      "id": "918d504b",
+      "name": "training_similarity_table",
+      "tags": [
+        "similarity_audit"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pandas.parquet_dataset.ParquetDataset"
+    },
+    {
+      "id": "abd24263",
+      "name": "build_public_training_probe_similarity",
+      "tags": [
+        "similarity_audit"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "build_public_training_probe_similarity"
+    },
+    {
+      "id": "7f9db4a7",
+      "name": "pub_training_probe_similarity",
+      "tags": [
+        "similarity_audit"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.CSVDataset.MlflowCSVDataset"
+    },
+    {
+      "id": "13873619",
+      "name": "calibrate_training_thresholds",
+      "tags": [
+        "similarity_audit"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity": {
+          "n_probe": 2000,
+          "max_seq_len": 512,
+          "pooling": "cls",
+          "cka": {
+            "mode": "minibatch",
+            "batch_size": 64
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        }
+      },
+      "full_name": "calibrate_training_thresholds"
+    },
+    {
+      "id": "79a3cdc0",
+      "name": "training_similarity_thresholds",
+      "tags": [
+        "similarity_audit"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "19210c69",
+      "name": "select_training_surrogates",
+      "tags": [
+        "similarity_audit"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "select_training_surrogates"
+    },
+    {
+      "id": "af934d3e",
+      "name": "training_surrogate_selection",
+      "tags": [
+        "similarity_audit"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "86fc2bb9",
+      "name": "build_training_probe_sensitivity_summary",
+      "tags": [
+        "similarity_audit"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity": {
+          "n_probe": 2000,
+          "max_seq_len": 512,
+          "pooling": "cls",
+          "cka": {
+            "mode": "minibatch",
+            "batch_size": 64
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        },
+        "risk": {
+          "decision_tree": {
+            "max_depth": 3
+          },
+          "random_forest": {
+            "n_estimators": 200,
+            "max_depth": 4
+          },
+          "ablation": {
+            "n_permutations": 10000,
+            "alpha": 0.05
+          }
+        },
+        "seed": 20260616
+      },
+      "full_name": "build_training_probe_sensitivity_summary"
+    },
+    {
+      "id": "f3bcea40",
+      "name": "pub_training_probe_similarity_sensitivity",
+      "tags": [
+        "similarity_audit"
+      ],
+      "pipelines": [
+        "similarity_audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.JSONDataset.MlflowJSONDataset"
+    }
+  ],
+  "edges": [
+    {
+      "source": "60699aac",
+      "target": "c5686bc7"
+    },
+    {
+      "source": "05978d77",
+      "target": "b8790e39"
+    },
+    {
+      "source": "79a3cdc0",
+      "target": "19210c69"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "2bcfdd80"
+    },
+    {
+      "source": "dac9e28e",
+      "target": "c989e511"
+    },
+    {
+      "source": "dac9e28e",
+      "target": "a59aa521"
+    },
+    {
+      "source": "b8790e39",
+      "target": "c5686bc7"
+    },
+    {
+      "source": "32eff9bc",
+      "target": "439db4c3"
+    },
+    {
+      "source": "dac9e28e",
+      "target": "e94f0588"
+    },
+    {
+      "source": "b97b6ffe",
+      "target": "c989e511"
+    },
+    {
+      "source": "a75d8773",
+      "target": "c5686bc7"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "3ce5bf54"
+    },
+    {
+      "source": "4c9216e1",
+      "target": "67ef5da1"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "86fc2bb9"
+    },
+    {
+      "source": "67ef5da1",
+      "target": "05978d77"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "2bcfdd80"
+    },
+    {
+      "source": "67ef5da1",
+      "target": "439db4c3"
+    },
+    {
+      "source": "439db4c3",
+      "target": "a75d8773"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "c989e511"
+    },
+    {
+      "source": "a7b70e72",
+      "target": "3ce5bf54"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "4c9216e1"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "2d14993a"
+    },
+    {
+      "source": "dac9e28e",
+      "target": "0b4d8c96"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "e94f0588"
+    },
+    {
+      "source": "67ef5da1",
+      "target": "c989e511"
+    },
+    {
+      "source": "67ef5da1",
+      "target": "a59aa521"
+    },
+    {
+      "source": "a031ce89",
+      "target": "47de68f9"
+    },
+    {
+      "source": "e1bde7ed",
+      "target": "c5686bc7"
+    },
+    {
+      "source": "85e11043",
+      "target": "985af94b"
+    },
+    {
+      "source": "0b4d8c96",
+      "target": "fbb1bf69"
+    },
+    {
+      "source": "67ef5da1",
+      "target": "e94f0588"
+    },
+    {
+      "source": "f2d559fd",
+      "target": "985af94b"
+    },
+    {
+      "source": "731876ee",
+      "target": "951da194"
+    },
+    {
+      "source": "918d504b",
+      "target": "86fc2bb9"
+    },
+    {
+      "source": "985af94b",
+      "target": "dac9e28e"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "0b4d8c96"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "13873619"
+    },
+    {
+      "source": "951da194",
+      "target": "c5686bc7"
+    },
+    {
+      "source": "d7a9206e",
+      "target": "c5686bc7"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "05978d77"
+    },
+    {
+      "source": "8bb4724c",
+      "target": "86fc2bb9"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "439db4c3"
+    },
+    {
+      "source": "67ef5da1",
+      "target": "0b4d8c96"
+    },
+    {
+      "source": "c989e511",
+      "target": "d7a9206e"
+    },
+    {
+      "source": "c992e96c",
+      "target": "86fc2bb9"
+    },
+    {
+      "source": "fbb1bf69",
+      "target": "c5686bc7"
+    },
+    {
+      "source": "e0601fed",
+      "target": "c5686bc7"
+    },
+    {
+      "source": "918d504b",
+      "target": "abd24263"
+    },
+    {
+      "source": "2ac063af",
+      "target": "c5686bc7"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "a59aa521"
+    },
+    {
+      "source": "85e11043",
+      "target": "86fc2bb9"
+    },
+    {
+      "source": "012371fe",
+      "target": "05978d77"
+    },
+    {
+      "source": "dbb3b583",
+      "target": "86fc2bb9"
+    },
+    {
+      "source": "a59aa521",
+      "target": "2ac063af"
+    },
+    {
+      "source": "67ef5da1",
+      "target": "47de68f9"
+    },
+    {
+      "source": "148d7559",
+      "target": "86fc2bb9"
+    },
+    {
+      "source": "918d504b",
+      "target": "19210c69"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "05978d77"
+    },
+    {
+      "source": "67ef5da1",
+      "target": "731876ee"
+    },
+    {
+      "source": "918d504b",
+      "target": "13873619"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "439db4c3"
+    },
+    {
+      "source": "dac9e28e",
+      "target": "47de68f9"
+    },
+    {
+      "source": "c5686bc7",
+      "target": "4ab67f59"
+    },
+    {
+      "source": "d46a082c",
+      "target": "731876ee"
+    },
+    {
+      "source": "dac9e28e",
+      "target": "3ce5bf54"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "c989e511"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "a59aa521"
+    },
+    {
+      "source": "dac9e28e",
+      "target": "731876ee"
+    },
+    {
+      "source": "dac9e28e",
+      "target": "2bcfdd80"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "e94f0588"
+    },
+    {
+      "source": "2bcfdd80",
+      "target": "60699aac"
+    },
+    {
+      "source": "4ab67f59",
+      "target": "2d14993a"
+    },
+    {
+      "source": "dac9e28e",
+      "target": "4c9216e1"
+    },
+    {
+      "source": "3d21843d",
+      "target": "86fc2bb9"
+    },
+    {
+      "source": "3ce5bf54",
+      "target": "ddc7a019"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "47de68f9"
+    },
+    {
+      "source": "7e09f027",
+      "target": "4c9216e1"
+    },
+    {
+      "source": "b46ed546",
+      "target": "985af94b"
+    },
+    {
+      "source": "be9af28a",
+      "target": "e94f0588"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "3ce5bf54"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "731876ee"
+    },
+    {
+      "source": "dac9e28e",
+      "target": "86fc2bb9"
+    },
+    {
+      "source": "9e1f5dd4",
+      "target": "0b4d8c96"
+    },
+    {
+      "source": "7e03cea7",
+      "target": "2bcfdd80"
+    },
+    {
+      "source": "67ef5da1",
+      "target": "3ce5bf54"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "0b4d8c96"
+    },
+    {
+      "source": "47de68f9",
+      "target": "e0601fed"
+    },
+    {
+      "source": "d5633110",
+      "target": "a59aa521"
+    },
+    {
+      "source": "ddc7a019",
+      "target": "c5686bc7"
+    },
+    {
+      "source": "13873619",
+      "target": "79a3cdc0"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "4c9216e1"
+    },
+    {
+      "source": "67ef5da1",
+      "target": "2bcfdd80"
+    },
+    {
+      "source": "79a3cdc0",
+      "target": "86fc2bb9"
+    },
+    {
+      "source": "af934d3e",
+      "target": "86fc2bb9"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "47de68f9"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "731876ee"
+    },
+    {
+      "source": "2d14993a",
+      "target": "918d504b"
+    },
+    {
+      "source": "19210c69",
+      "target": "af934d3e"
+    },
+    {
+      "source": "86fc2bb9",
+      "target": "f3bcea40"
+    },
+    {
+      "source": "abd24263",
+      "target": "7f9db4a7"
+    },
+    {
+      "source": "dac9e28e",
+      "target": "05978d77"
+    },
+    {
+      "source": "e94f0588",
+      "target": "e1bde7ed"
+    },
+    {
+      "source": "dac9e28e",
+      "target": "439db4c3"
+    }
+  ],
+  "layers": [
+    "models",
+    "model_input",
+    "raw",
+    "primary",
+    "feature",
+    "model_output",
+    "reporting"
+  ],
+  "tags": [
+    {
+      "id": "attacks",
+      "name": "attacks"
+    },
+    {
+      "id": "audit",
+      "name": "audit"
+    },
+    {
+      "id": "audit_finalization",
+      "name": "audit_finalization"
+    },
+    {
+      "id": "audit_reporting",
+      "name": "audit_reporting"
+    },
+    {
+      "id": "bae",
+      "name": "bae"
+    },
+    {
+      "id": "bert-attack",
+      "name": "bert-attack"
+    },
+    {
+      "id": "bert-base-ft",
+      "name": "bert-base-ft"
+    },
+    {
+      "id": "bilstm-attention",
+      "name": "bilstm-attention"
+    },
+    {
+      "id": "deberta-base-ft-seed",
+      "name": "deberta-base-ft-seed"
+    },
+    {
+      "id": "deberta-base-pi-v1",
+      "name": "deberta-base-pi-v1"
+    },
+    {
+      "id": "deberta-small-pi-v2",
+      "name": "deberta-small-pi-v2"
+    },
+    {
+      "id": "deepset-deberta-injection",
+      "name": "deepset-deberta-injection"
+    },
+    {
+      "id": "deepwordbug",
+      "name": "deepwordbug"
+    },
+    {
+      "id": "electra-small-ft",
+      "name": "electra-small-ft"
+    },
+    {
+      "id": "llama-prompt-guard-22m",
+      "name": "llama-prompt-guard-22m"
+    },
+    {
+      "id": "llama-prompt-guard-86m",
+      "name": "llama-prompt-guard-86m"
+    },
+    {
+      "id": "models",
+      "name": "models"
+    },
+    {
+      "id": "pwws",
+      "name": "pwws"
+    },
+    {
+      "id": "roberta-base-ft",
+      "name": "roberta-base-ft"
+    },
+    {
+      "id": "similarity",
+      "name": "similarity"
+    },
+    {
+      "id": "similarity_audit",
+      "name": "similarity_audit"
+    },
+    {
+      "id": "similarity_audit_prepare",
+      "name": "similarity_audit_prepare"
+    },
+    {
+      "id": "textfooler",
+      "name": "textfooler"
+    },
+    {
+      "id": "transfer",
+      "name": "transfer"
+    }
+  ],
+  "pipelines": [
+    {
+      "id": "__default__",
+      "name": "__default__"
+    },
+    {
+      "id": "smoke",
+      "name": "smoke"
+    },
+    {
+      "id": "reporting",
+      "name": "reporting"
+    },
+    {
+      "id": "similarity",
+      "name": "similarity"
+    },
+    {
+      "id": "transfer",
+      "name": "transfer"
+    },
+    {
+      "id": "models",
+      "name": "models"
+    },
+    {
+      "id": "audit",
+      "name": "audit"
+    },
+    {
+      "id": "similarity_audit_prepare",
+      "name": "similarity_audit_prepare"
+    },
+    {
+      "id": "data",
+      "name": "data"
+    },
+    {
+      "id": "risk",
+      "name": "risk"
+    },
+    {
+      "id": "similarity_audit",
+      "name": "similarity_audit"
+    },
+    {
+      "id": "attacks",
+      "name": "attacks"
+    },
+    {
+      "id": "audit_reporting",
+      "name": "audit_reporting"
+    },
+    {
+      "id": "audit_finalization",
+      "name": "audit_finalization"
+    },
+    {
+      "id": "stage",
+      "name": "stage"
+    },
+    {
+      "id": "downstream",
+      "name": "downstream"
+    }
+  ],
+  "modular_pipelines": {
+    "__root__": {
+      "id": "__root__",
+      "name": "__root__",
+      "inputs": [],
+      "outputs": [],
+      "children": [
+        {
+          "id": "a7b70e72",
+          "type": "data"
+        },
+        {
+          "id": "b8790e39",
+          "type": "data"
+        },
+        {
+          "id": "ddc7a019",
+          "type": "data"
+        },
+        {
+          "id": "0b4d8c96",
+          "type": "task"
+        },
+        {
+          "id": "05978d77",
+          "type": "task"
+        },
+        {
+          "id": "be9af28a",
+          "type": "data"
+        },
+        {
+          "id": "f3bcea40",
+          "type": "data"
+        },
+        {
+          "id": "7e03cea7",
+          "type": "data"
+        },
+        {
+          "id": "8bb4724c",
+          "type": "data"
+        },
+        {
+          "id": "4734aa1f",
+          "type": "data"
+        },
+        {
+          "id": "c5686bc7",
+          "type": "task"
+        },
+        {
+          "id": "c992e96c",
+          "type": "data"
+        },
+        {
+          "id": "b46ed546",
+          "type": "data"
+        },
+        {
+          "id": "3d21843d",
+          "type": "data"
+        },
+        {
+          "id": "4734aa1f",
+          "type": "parameters"
+        },
+        {
+          "id": "86fc2bb9",
+          "type": "task"
+        },
+        {
+          "id": "67ef5da1",
+          "type": "data"
+        },
+        {
+          "id": "a031ce89",
+          "type": "data"
+        },
+        {
+          "id": "c989e511",
+          "type": "task"
+        },
+        {
+          "id": "a75d8773",
+          "type": "data"
+        },
+        {
+          "id": "85e11043",
+          "type": "data"
+        },
+        {
+          "id": "951da194",
+          "type": "data"
+        },
+        {
+          "id": "d7a9206e",
+          "type": "data"
+        },
+        {
+          "id": "7f9db4a7",
+          "type": "data"
+        },
+        {
+          "id": "dbb3b583",
+          "type": "data"
+        },
+        {
+          "id": "b46ed546",
+          "type": "parameters"
+        },
+        {
+          "id": "4c9216e1",
+          "type": "task"
+        },
+        {
+          "id": "439db4c3",
+          "type": "task"
+        },
+        {
+          "id": "d46a082c",
+          "type": "data"
+        },
+        {
+          "id": "47de68f9",
+          "type": "task"
+        },
+        {
+          "id": "012371fe",
+          "type": "data"
+        },
+        {
+          "id": "731876ee",
+          "type": "task"
+        },
+        {
+          "id": "2bcfdd80",
+          "type": "task"
+        },
+        {
+          "id": "85e11043",
+          "type": "parameters"
+        },
+        {
+          "id": "a59aa521",
+          "type": "task"
+        },
+        {
+          "id": "13873619",
+          "type": "task"
+        },
+        {
+          "id": "dac9e28e",
+          "type": "data"
+        },
+        {
+          "id": "f2d559fd",
+          "type": "data"
+        },
+        {
+          "id": "e0601fed",
+          "type": "data"
+        },
+        {
+          "id": "d5633110",
+          "type": "data"
+        },
+        {
+          "id": "2ac063af",
+          "type": "data"
+        },
+        {
+          "id": "fbb1bf69",
+          "type": "data"
+        },
+        {
+          "id": "dbb3b583",
+          "type": "parameters"
+        },
+        {
+          "id": "148d7559",
+          "type": "data"
+        },
+        {
+          "id": "e94f0588",
+          "type": "task"
+        },
+        {
+          "id": "9e1f5dd4",
+          "type": "data"
+        },
+        {
+          "id": "2d14993a",
+          "type": "task"
+        },
+        {
+          "id": "7e09f027",
+          "type": "data"
+        },
+        {
+          "id": "a4a96eb9",
+          "type": "data"
+        },
+        {
+          "id": "e1bde7ed",
+          "type": "data"
+        },
+        {
+          "id": "b97b6ffe",
+          "type": "data"
+        },
+        {
+          "id": "918d504b",
+          "type": "data"
+        },
+        {
+          "id": "32eff9bc",
+          "type": "data"
+        },
+        {
+          "id": "19210c69",
+          "type": "task"
+        },
+        {
+          "id": "3ce5bf54",
+          "type": "task"
+        },
+        {
+          "id": "79a3cdc0",
+          "type": "data"
+        },
+        {
+          "id": "af934d3e",
+          "type": "data"
+        },
+        {
+          "id": "985af94b",
+          "type": "task"
+        },
+        {
+          "id": "60699aac",
+          "type": "data"
+        },
+        {
+          "id": "4ab67f59",
+          "type": "data"
+        },
+        {
+          "id": "a4a96eb9",
+          "type": "parameters"
+        },
+        {
+          "id": "abd24263",
+          "type": "task"
+        }
+      ]
+    }
+  },
+  "selected_pipeline": "similarity_audit"
+}

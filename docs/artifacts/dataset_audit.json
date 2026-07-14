@@ -1,0 +1,17 @@
+{
+  "n_raw": 2968,
+  "n_after_min_chars": 2968,
+  "n_duplicates_removed": 21,
+  "n_cross_source_overlaps": 0,
+  "n_final": 2947,
+  "label_balance": {
+    "1": 1910,
+    "0": 1037
+  },
+  "per_source": {
+    "jackhhao/jailbreak-classification": 1286,
+    "Lakera/gandalf_ignore_instructions": 999,
+    "deepset/prompt-injections": 662
+  },
+  "per_source_count_stage": "post_deduplication"
+}

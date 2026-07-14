@@ -1,0 +1,53 @@
+{
+  "code": "def finalize_target_audit(  # noqa: PLR0913\n    raw_cells: pd.DataFrame,\n    raw_sources: pd.DataFrame,\n    raw_context: dict[str, Any],\n    master_results_table: pd.DataFrame,\n    cka_matrices: dict[str, Any],\n    similarity_params: dict[str, Any],\n    surrogate_selection: dict[str, Any],\n    risk_params: dict[str, Any],\n    seed: int,\n) -> tuple[pd.DataFrame, dict[str, Any]]:\n    \"\"\"Finalize audit artifacts with corrected DBS and no target-model access.\n\n    Args:\n        raw_cells: Saved raw target-inference cell aggregates.\n        raw_sources: Saved raw target-inference source aggregates.\n        raw_context: Saved non-text context or a legacy audit summary.\n        master_results_table: Saved master result grid with mean CKA values.\n        cka_matrices: Saved target-vs-surrogate CKA matrices.\n        similarity_params: Similarity parameters supplying the DBS box width.\n        surrogate_selection: Saved M1/M2 membership.\n        risk_params: Risk parameters for deterministic selection ablations.\n        seed: Root reproducibility seed.\n\n    Returns:\n        Corrected complete audit cells and final audit summary.\n    \"\"\"\n    cells, summary = target_audit.finalize_audit_from_aggregates(\n        raw_cells,\n        raw_sources,\n        raw_context,\n        master_results_table,\n        cka_matrices,\n        similarity_params,\n        surrogate_selection,\n        risk_params,\n        seed,\n    )\n    logger.info(\n        \"Finalized target audit with corrected DBS: %d source successes, %d true flips\",\n        summary[\"full_cohort\"][\"source_successful\"],\n        summary[\"full_cohort\"][\"true_target_flips\"],\n    )\n    return cells, summary\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/audit/nodes.py",
+  "parameters": {
+    "similarity": {
+      "n_probe": 2000,
+      "max_seq_len": 512,
+      "pooling": "cls",
+      "cka": {
+        "mode": "minibatch",
+        "batch_size": 64
+      },
+      "dbs": {
+        "box": 1
+      },
+      "thresholds": {
+        "r1_quantile": 0.75,
+        "r2_quantile": 0.25
+      }
+    },
+    "risk": {
+      "decision_tree": {
+        "max_depth": 3
+      },
+      "random_forest": {
+        "n_estimators": 200,
+        "max_depth": 4
+      },
+      "ablation": {
+        "n_permutations": 10000,
+        "alpha": 0.05
+      }
+    },
+    "seed": 20260616
+  },
+  "run_command": "kedro run --to-nodes='finalize_target_audit'",
+  "inputs": [
+    "target_audit_raw_cells",
+    "target_audit_raw_sources",
+    "target_audit_raw_context",
+    "master_results_table",
+    "cka_matrices",
+    "params:similarity",
+    "surrogate_selection",
+    "params:risk",
+    "params:seed"
+  ],
+  "outputs": [
+    "target_audit_cells",
+    "target_audit_summary"
+  ],
+  "preview": null
+}

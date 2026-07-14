@@ -1,0 +1,138 @@
+{
+  "code": "def build_results_manifest_node(\n    params_reporting: dict[str, Any],\n    params_seed: int,\n    params_models: dict[str, Any],\n    params_attacks: dict[str, Any],\n    params_similarity: dict[str, Any],\n    params_transfer: dict[str, Any],\n) -> dict[str, Any]:\n    \"\"\"Build the safe public results manifest.\n\n    Args:\n        params_reporting: Reporting-stage manifest parameters.\n        params_seed: Root reproducibility seed.\n        params_models: Models-stage parameters (target id, surrogate count).\n        params_attacks: Attack-stage parameters.\n        params_similarity: Similarity-stage parameters.\n        params_transfer: Transfer-stage parameters.\n\n    Returns:\n        Results manifest for ``docs/artifacts/results_manifest.json``.\n    \"\"\"\n    manifest_cfg = params_reporting[\"manifest\"]\n    return build_results_manifest(\n        {\n            \"schema_version\": str(manifest_cfg[\"schema_version\"]),\n            \"experiment_commit\": str(manifest_cfg[\"experiment_commit\"]),\n            \"root_seed\": int(params_seed),\n            \"uv_lock_sha256\": str(manifest_cfg[\"uv_lock_sha256\"]),\n            \"target\": str(params_models[\"target\"]),\n            \"probe_window\": {\n                \"n_probe\": int(params_similarity[\"n_probe\"]),\n                \"max_seq_len\": int(params_similarity[\"max_seq_len\"]),\n            },\n            \"attack_window\": {\n                \"eval_set_size\": int(params_attacks[\"eval_set_size\"]),\n                \"max_seq_len\": int(params_attacks[\"max_seq_len\"]),\n                \"query_budget\": int(params_attacks[\"query_budget\"]),\n            },\n            \"transfer_window\": {\"max_seq_len\": int(params_transfer[\"max_seq_len\"])},\n            \"attack_attempts_per_cell\": int(params_attacks[\"eval_set_size\"]),\n            \"query_budget\": int(params_attacks[\"query_budget\"]),\n            \"n_surrogates\": len(params_models[\"surrogates\"]),\n            \"n_recipes\": len(params_attacks[\"recipes\"]),\n            \"hardware\": dict(manifest_cfg[\"hardware\"]),\n            \"completion_note\": str(manifest_cfg[\"completion_note\"]),\n        }\n    )\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/reporting/nodes.py",
+  "parameters": {
+    "reporting": {
+      "manifest": {
+        "schema_version": "1.0",
+        "experiment_commit": "5af7330",
+        "uv_lock_sha256": "fed6bd35da2963e19ac5fe00ab14fff0937120bb2c92e132741256cfc1de8f36",
+        "hardware": {
+          "instance_type": "r8g.48xlarge",
+          "vcpus": 192,
+          "architecture": "Graviton4",
+          "pricing_model": "spot",
+          "victim_backend": "torch on ARM"
+        },
+        "completion_note": "Most attack shards ran on a 192-vCPU Graviton4 spot instance; final shard reductions and reporting completed locally."
+      }
+    },
+    "seed": 20260616,
+    "models": {
+      "target": "protectai/deberta-v3-base-prompt-injection-v2",
+      "surrogates": [
+        {
+          "name": "deberta-base-pi-v1",
+          "kind": "pretrained"
+        },
+        {
+          "name": "deberta-small-pi-v2",
+          "kind": "pretrained",
+          "gated": true
+        },
+        {
+          "name": "deepset-deberta-injection",
+          "kind": "pretrained"
+        },
+        {
+          "name": "llama-prompt-guard-86m",
+          "kind": "pretrained",
+          "gated": true
+        },
+        {
+          "name": "llama-prompt-guard-22m",
+          "kind": "pretrained",
+          "gated": true
+        },
+        {
+          "name": "bert-base-ft",
+          "kind": "finetune"
+        },
+        {
+          "name": "roberta-base-ft",
+          "kind": "finetune"
+        },
+        {
+          "name": "electra-small-ft",
+          "kind": "finetune"
+        },
+        {
+          "name": "deberta-base-ft-seed",
+          "kind": "finetune"
+        },
+        {
+          "name": "bilstm-attention",
+          "kind": "bilstm"
+        }
+      ],
+      "finetune": {
+        "lr": 0.00002,
+        "batch_size": 32,
+        "epochs": 3,
+        "max_seq_len": 512
+      },
+      "bilstm": {
+        "embed_dim": 128,
+        "hidden_dim": 256,
+        "num_layers": 2,
+        "dropout": 0.3,
+        "lr": 0.001,
+        "batch_size": 64,
+        "epochs": 5,
+        "max_vocab": 20000,
+        "max_seq_len": 512
+      }
+    },
+    "attacks": {
+      "recipes": [
+        "deepwordbug",
+        "pwws",
+        "textfooler",
+        "bae",
+        "bert-attack"
+      ],
+      "semantic_encoder": "sentence-transformers",
+      "eval_set_size": 191,
+      "max_seq_len": 512,
+      "max_prompt_chars": 3200,
+      "query_budget": 6000,
+      "shard_size": 100000
+    },
+    "similarity": {
+      "n_probe": 2000,
+      "max_seq_len": 512,
+      "pooling": "cls",
+      "cka": {
+        "mode": "minibatch",
+        "batch_size": 64
+      },
+      "dbs": {
+        "box": 1
+      },
+      "thresholds": {
+        "r1_quantile": 0.75,
+        "r2_quantile": 0.25
+      }
+    },
+    "transfer": {
+      "target": "protectai/deberta-v3-base-prompt-injection-v2",
+      "benign_label": 0,
+      "batch_size": 64,
+      "max_seq_len": 512,
+      "max_transferred_examples": 8
+    }
+  },
+  "run_command": "kedro run --to-nodes='build_results_manifest'",
+  "inputs": [
+    "params:reporting",
+    "params:seed",
+    "params:models",
+    "params:attacks",
+    "params:similarity",
+    "params:transfer"
+  ],
+  "outputs": [
+    "pub_results_manifest"
+  ],
+  "preview": null
+}

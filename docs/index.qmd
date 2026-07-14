@@ -1,155 +1,101 @@
 ---
-title: "Measuring adversarial transferability risk for a text prompt-injection classifier"
+title: "Measured genuine target injection-to-benign outcomes from surrogate-crafted prompts"
 author: "Aspen Hazel Olszewska"
-date: "2026-06-19"
-bibliography: references.bib
+date: "2026-07-14"
+description: "A reproducible CKA-guided audit of adversarial transfer risk for a public prompt-injection detector."
 toc: true
 toc-depth: 2
-abstract: |
-  A deployed text safety classifier cannot be certified robust: the set of adversarial inputs that evade any finite checker is infinite [@vassilev-2025]. A tractable alternative is to measure how leaky a given classifier is, and which other models an attacker can use to find inputs that transfer to it. This work ports the transferability-risk method of @cox-bunzel-2025 from the image domain to a deployed text prompt-injection detector, `protectai/deberta-v3-base-prompt-injection-v2`. For a fixed probe set it computes layer-wise Centered Kernel Alignment [@kornblith-2019] between the target and ten surrogate classifiers, reduces each comparison to a mean-CKA scalar and a Diagonal Box Similarity scalar [@klause-bunzel-2025], and splits the pool at empirical quantile thresholds into a high-similarity set (M1) and a low-similarity set (M2). Five TextAttack recipes [@morris-2020] attack each surrogate; the adversarial examples are replayed against the frozen target to measure transfer; and a one-sided permutation test compares M1 against M2. Over a 2,000-prompt probe at a 512-token window, CKA orders the pool as expected: the same-backbone anchor tops it and a from-scratch BiLSTM floors it. Replaying the resulting adversarial examples against the frozen target, transfer rate rises with CKA across all fifty (surrogate, recipe) cells (Spearman ρ = 0.66, p = 2×10⁻⁷), and the high-similarity surrogate set transfers 2.7× as often as the low-similarity set (0.51 versus 0.19). The three-versus-three selection test is bounded below by a `1/20 = 0.05` floor, so the effect is large where the exact p-value cannot be: evidence that similarity predicts transfer, reported without overclaiming significance.
 ---
 
-## Introduction
+I built a reproducible pipeline to measure whether attacks crafted against accessible surrogate classifiers can produce verified target injection-to-benign outcomes on a public detector. The work keeps the original experiment, post-hoc target audit, and CKA sensitivity artifacts separate so the reported outcome, denominator, and limitations remain visible.
 
-Prompt-injection detectors, jailbreak filters, and content gates are deployed in front of language models as if they were guarantees. They are not. @vassilev-2025 gives the negative result: for any finite checker the set of adversarial prompts that evade it is infinite, so no classifier covers it. "Is this filter safe?" has no useful answer.
+The target is `protectai/deberta-v3-base-prompt-injection-v2`, a public, now-archived detector. Its card defines 0 as benign and 1 as injection. The project is no longer maintained as of July 2026.
 
-A comparative question does have one: how leaky is this filter relative to others, and which models can an attacker use to craft inputs that transfer to it? @cox-bunzel-2025 make that question operational in the image domain. They select surrogate models that bracket a target in representational similarity, attack the surrogates, measure how often the attacks transfer to the target, and fit a regression that predicts transfer rate from similarity. No public, runnable implementation of that method exists, and none has been applied to text safety classifiers.
+::: {.metric-grid aria-label="Key audited metrics"}
+<div class="metric-card">
+<p class="metric-value">1,054 / 4,009</p>
+<p class="metric-label">verified target injection-to-benign outcomes, rate 0.263</p>
+</div>
+<div class="metric-card">
+<p class="metric-value">ρ = 0.83</p>
+<p class="metric-label">mean CKA versus macro true-flip rate, p = 0.0047, n = 10</p>
+</div>
+<div class="metric-card">
+<p class="metric-value">+33.1 pp</p>
+<p class="metric-label">M1 minus M2 macro true-flip contrast, p = 0.05 and 1-in-20 floor</p>
+</div>
+<div class="metric-card">
+<p class="metric-value">Jaccard = 1.0</p>
+<p class="metric-label">M1 and M2 membership under training-only CKA sensitivity</p>
+</div>
+:::
 
-This project is the first such implementation. It reproduces the five-step pipeline against a named, deployed prompt-injection detector, with seeded and reproducible code, concrete numbers, and a clear boundary: it measures and compares leakiness; it does not certify robustness. The target is a mitigation for OWASP LLM01 (Prompt Injection), so the measurement is a relative robustness score for that control, not a guarantee about it.
+## Result in one view
 
-## Background and related work
+::: {.hero-figure}
+![Surrogate-level macro true target injection-to-benign flip rate versus mean CKA. Large dark points are the ten surrogate-level summaries; lighter points retain recipe context.](figures/fig_true_flip_scatter.png){fig-alt="Scatter plot of mean CKA against verified target injection-to-benign flip rate. Ten dark surrogate summaries have a positive rank association." width=100%}
+:::
 
-Three results bracket the method. @vassilev-2025 motivates measurement over certification. @cox-bunzel-2025 supplies the constructive recipe: bracket the target by representational similarity, attack surrogates, and regress transfer on similarity. @klause-bunzel-2025 is the empirical predecessor that relates network similarity to attack transferability and introduces Diagonal Box Similarity (DBS); it is the source of the CNN-derived thresholds that have to be recalibrated for text.
+The target audit revisited all 4,362 successful source attacks. The target predicted injection on the original prompt for 4,009 and benign for 353. It predicted benign after perturbation for 1,398. Of the 4,009 baseline injection predictions, 1,054 became benign after perturbation, giving the primary true target flip rate of 0.2629.
 
-Representational similarity is measured with linear Centered Kernel Alignment [@kornblith-2019], which compares two activation matrices in `[0, 1]`, invariant to orthogonal rotation and isotropic scaling.
+Across ten surrogate-level summaries, mean CKA versus macro true target flip rate has Spearman rho = 0.8303 and two-sided p = 0.00471 under exact enumeration and the exchangeability null for this designed pool. It describes this fixed pool, not a population predictor.
 
-The attacks are word- and character-level adversarial perturbations against text classifiers, run through TextAttack [@morris-2020]: DeepWordBug [@gao-2018] edits characters of high-saliency tokens; PWWS [@ren-2019] substitutes WordNet synonyms ordered by word saliency; TextFooler [@jin-2020] swaps counter-fitted-embedding synonyms under a semantic-similarity constraint; BAE [@garg-ramakrishnan-2020] and BERT-Attack [@li-2020] fill masked positions with a BERT masked-language model. The set spans character, lexical (WordNet and embedding), and masked-LM perturbation families.
+The earlier 1,398 / 4,362 = 0.3205 conditional target-benign rate remains a valid historical estimand. It answers P[target benign on perturbed prompt | source success]. It is not a target flip rate because the original run had not retained target baselines. The [target audit summary](artifacts/target_audit_summary.json) and [50-cell audit table](artifacts/target_audit_cells.csv) make the distinction explicit.
 
-## Method
+## What I built and owned
 
-**Probe and similarity.** A deterministic, class-balanced probe set of 2,000 prompts is tokenised to a 512-token window and passed through the target and each surrogate. For every surrogate the pipeline harvests per-layer hidden states and computes the layer-by-layer CKA matrix against the target, then reduces it to two scalars: `mean_cka`, the mean over all layer pairs, and `dbs`, the average over a band of cells around the matched-depth diagonal. CKA self-similarity, rotation invariance, and scaling invariance, and the DBS box-size edge cases, are checked as unit-test invariants.
+I implemented a Kedro system that starts with a canonical, deduplicated corpus and ends with figures, tables, metrics, and reproducibility metadata. The corpus has 2,968 raw rows and 2,947 after 21 exact-normalized duplicates are removed. Its positive class mixes direct prompt-injection and jailbreak-style examples.
 
-**Selection.** Thresholds `r1` and `r2` are calibrated as the upper- and lower-quartile of the observed `mean_cka` distribution rather than copied from the image-domain paper. Surrogates with `mean_cka ≥ r1` form the high-similarity set M1; those with `mean_cka ≤ r2` form the low-similarity set M2.
-
-**Attack and transfer.** Each surrogate is attacked with the five recipes over the held-out injection prompts it originally classifies as injections. Every adversarial example that flips its surrogate is replayed against the frozen target; the transfer rate of a `(surrogate, recipe)` cell is the fraction that also flip the target to "benign".
-
-**Risk model and ablation.** Transfer rate is regressed on the similarity features with shallow tree models, read for feature importance rather than prediction at this sample size, with Spearman correlation as the primary trend evidence. The headline test is a direct, one-sided permutation test of M1 against M2 on the difference in group-mean transfer rate, evaluated on each surrogate's mean-across-recipes and max-across-recipes transfer. With small groups the label assignments are enumerated exactly, giving an exact p-value; three versus three surrogates have only `C(6,3) = 20` assignments, so the smallest attainable one-sided p-value is `1/20 = 0.05`, which the report states alongside the effect size.
-
-## Data and models
-
-Three public prompt-injection datasets are harmonised to a single `text`/`label` schema (label 1 = injection), deduplicated by normalised exact match, and checked for cross-source overlap.
-
-| Source | Rows |
-| --- | --- |
-| jackhhao/jailbreak-classification | 1,286 |
-| Lakera/gandalf_ignore_instructions | 999 |
-| deepset/prompt-injections | 662 |
-| Total (raw) | 2,968 |
-
-Deduplication removes 21 exact duplicates and finds 0 cross-source overlaps, leaving 2,947 rows (1,910 injection and 1,037 benign, 64.8% / 35.2%), split 80/10/10 into train, validation, and test. The test-split injections are the attack evaluation set.
-
-The target is `protectai/deberta-v3-base-prompt-injection-v2`, a deployed DeBERTa-v3-base prompt-injection detector. The ten surrogates span the similarity range from the target's own backbone (fine-tuned by us with a different seed, as a CKA sanity anchor) down to a from-scratch BiLSTM floor.
-
-| Surrogate | Backbone | Kind |
-| --- | --- | --- |
-| deberta-base-ft-seed | DeBERTa-v3-base | fine-tuned (same backbone as target) |
-| deepset-deberta-injection | DeBERTa-v3-base | pretrained detector |
-| deberta-small-pi-v2 | DeBERTa-v3-small | pretrained detector (gated) |
-| deberta-base-pi-v1 | DeBERTa-v3-base | pretrained detector |
-| bert-base-ft | BERT-base | fine-tuned |
-| roberta-base-ft | RoBERTa-base | fine-tuned |
-| electra-small-ft | ELECTRA-small | fine-tuned |
-| llama-prompt-guard-86m | mDeBERTa-base | pretrained detector (gated) |
-| llama-prompt-guard-22m | mDeBERTa-xsmall | pretrained detector (gated) |
-| bilstm-attention | BiLSTM (from scratch) | non-transformer floor |
-
-The four fine-tuned surrogates reach 0.96 to 0.97 validation accuracy and the BiLSTM 0.89, so each is a competent detector rather than a degenerate one; this matters because transfer is only meaningful between models that actually perform the task.
-
-## System architecture
-
-The implementation is a Kedro project with a deliberate split: the security-relevant mathematics (CKA, DBS, threshold calibration, deterministic seeding, the transfer-rate and permutation statistics) lives in a pure `transfer_risk.lib` package with no I/O, unit-tested in isolation against the invariants above; the nodes are thin wrappers that read inputs from a typed Data Catalog, call `lib`, and write artifacts; and the pipelines wire nodes to catalog datasets without business logic.
-
-The models, similarity, and attack pipelines are generated from configuration: one node per surrogate (train or materialise, then export to ONNX), one CKA node per surrogate, and one attack node per `(surrogate, recipe, example-shard)`. A RAM-bounded `ParallelRunner` runs the independent nodes across cores (capping concurrent workers to what fits in memory, since each torch victim holds a multi-gigabyte resident set), and `kedro run --only-missing-outputs` resumes by skipping artifacts already written, so an interrupted run continues where it stopped.
-
-Every model and dataset crosses process and machine boundaries through the catalog, not ad-hoc I/O. Pretrained surrogates, fine-tune backbones, and the target are HuggingFace Hub datasets; each trained surrogate persists through an fsspec-aware model-directory dataset, and its ONNX graph through a matching dataset; ONNX export is an in-environment `torch.onnx.export` node. A `${globals:...}` root layer points these boundary artifacts at local paths by default and at an S3 bucket under the cloud environment, via scoped resolvers, so the catalog, rather than a sync script, owns where data lives.
-
-The attack sweep is the only expensive stage. It runs on a single high-core ARM Graviton spot instance provisioned by Terraform (S3 state exchange, least-privilege instance role, egress-only security group with SSM Session Manager instead of SSH, IMDSv2 required). The box reads splits and surrogate checkpoints from S3 through the catalog, serves victim inference from the torch checkpoints, writes each cell's adversarial partition back to S3, and self-terminates; it holds no HuggingFace token and makes no Hub calls. Each surrogate's ONNX graph is exported and parity-checked, but the ARM64 ONNX Runtime mis-handles the fused attention on these models, so torch serves the victims. The cheap downstream (transfer, risk, reporting) and MLflow tracking run locally, so results land on the development machine and MLflow stays a single local writer. Runs are seeded from one root seed and tracked in MLflow with the git SHA.
+The measurement path is compact:
 
 ```{mermaid}
 flowchart LR
-  A["Probe set<br/>(benign + injection)"] --> B["CKA + DBS<br/>target vs each surrogate"]
-  B --> C["Calibrate r1 / r2<br/>split into M1 (high) · M2 (low)"]
-  C --> D["Attack each surrogate<br/>5 TextAttack recipes"]
-  D --> E["Replay on frozen target<br/>→ transfer rate"]
-  E --> F["Regress transfer ~ similarity<br/>+ M1-vs-M2 permutation test"]
+  A["2,000-prompt balanced probe"] --> B["Layer-wise CKA and DBS"]
+  B --> C["Quartile-based M1 and M2 groups"]
+  C --> D["Five attacks per surrogate"]
+  D --> E["Target audit on original and perturbed texts"]
+  E --> F["True-flip association and selection contrast"]
 ```
 
-The interactive pipeline graph is on the [Pipeline](pipeline.qmd) page.
+The original sweep contains 50 cells and 9,550 attempted source evaluations. TextAttack skipped 950 baseline source misses. Of 8,600 eligible attempts, 4,362 succeeded and 4,238 failed. Successful-source denominators range from 6 to 161 with a median of 85.
 
-## Results
+## How the audit changed the outcome
 
-### Representational similarity
+The audit runs the frozen target on deduplicated successful-source originals and perturbations, then maps the predictions back to aggregate cells. It evaluated 4,374 unique target texts and publishes aggregate-only artifacts. The [source table](artifacts/target_audit_sources.csv) reports source-success counts, target baselines, perturbed outcomes, and true flips without raw prompts.
 
-CKA is computed layer-by-layer between the target and each surrogate over the 2,000-prompt probe at a 512-token window, then reduced to `mean_cka` and `dbs`.
+Source success means a perturbed canonical-positive prompt changes the source prediction from positive to benign. The primary audited outcome is P[target benign after perturbation | target injection before perturbation, source success]. This is stricter than the historical conditional target-benign rate. The target card lists `jackhhao/jailbreak-classification` among its training sources, and record-level decontamination against the target's full training mixture remains unavailable.
 
-| Surrogate | mean CKA | DBS |
-| --- | --- | --- |
-| deberta-base-ft-seed | 0.475 | 0.751 |
-| deepset-deberta-injection | 0.454 | 0.620 |
-| deberta-small-pi-v2 | 0.451 | 0.656 |
-| bert-base-ft | 0.445 | 0.644 |
-| electra-small-ft | 0.430 | 0.566 |
-| roberta-base-ft | 0.428 | 0.643 |
-| llama-prompt-guard-86m | 0.417 | 0.588 |
-| llama-prompt-guard-22m | 0.412 | 0.610 |
-| deberta-base-pi-v1 | 0.329 | 0.538 |
-| bilstm-attention | 0.259 | 0.179 |
+Source-success aggregates are 2,851 for Lakera, 533 for deepset, and 978 for jackhhao. These are source-success counts, not raw test-prompt counts. A post-hoc sensitivity excludes every jackhhao record. It retains 3,384 source successes, 3,158 target baseline injections, and 982 true flips, for a rate of 0.3110. Mean CKA then has rho = 0.9030 and p = 0.000807, while the M1 minus M2 contrast is +37.0 percentage points with p = 0.05. Removing that known source did not weaken the within-pool association. It does not establish absence of target-training contamination.
 
-![Per-surrogate representational similarity to the target (mean CKA and DBS).](figures/fig_cka_heatmap.png){width=70%}
+## Engineering decisions
 
-The sanity check holds. `deberta-base-ft-seed`, the target's backbone fine-tuned by us on the same task with a different seed, tops both `mean_cka` (0.475) and `dbs` (0.751), and the from-scratch BiLSTM floors both (0.259 and 0.179). That is the ordering expected if CKA measures representational similarity.
+The security-sensitive mathematics is kept in a [pure core](https://github.com/turn1a/safety-classifier-transfer-risk/tree/main/src/transfer_risk/lib): linear CKA, Bresenham DBS, threshold calibration, deterministic seed derivation, association tests, audit aggregation, and permutation testing. Thin Kedro nodes handle model loading, TextAttack execution, catalog I/O, and report generation.
 
-One result is worth stating plainly: `deberta-base-pi-v1`, a deployed detector built on the *same* DeBERTa-v3-base backbone as the target, sits near the bottom on `mean_cka` (0.329), below several different-architecture models. Sharing a backbone does not by itself produce high representational similarity once the training data and objective differ; this is why similarity has to be measured rather than assumed from architecture.
+The [catalog](https://github.com/turn1a/safety-classifier-transfer-risk/blob/main/conf/base/catalog.yml) owns datasets, Hub models, checkpoints, ONNX exports, attack partitions, audit outputs, figures, and site artifacts. The production attack sweep used an ARM64 AWS `r8g.48xlarge` Graviton4 spot instance with 192 vCPUs, while final reductions and reporting ran locally. ARM64 ONNX Runtime failed fused transformer attention, so torch served transformer victims; exported ONNX graphs stayed in the pipeline as parity checks.
 
-Calibrated from the `mean_cka` distribution, the thresholds are `r1 = 0.450` and `r2 = 0.413`. They split the pool into a high-similarity set M1 = {`deberta-base-ft-seed`, `deepset-deberta-injection`, `deberta-small-pi-v2`} and a low-similarity set M2 = {`llama-prompt-guard-22m`, `deberta-base-pi-v1`, `bilstm-attention`}. The selection ablation compares these two sets.
+The target audit adds a distinct inference path. Audit finalization recomputes corrected DBS from saved CKA matrices without target inference, and the audit-report stage produces aggregate tables and figures without target-model access. The [implementation page](pipeline.qmd) links the relevant stages and source locations.
 
-### Attack transfer and the M1-vs-M2 ablation
+## What the evidence supports
 
-Each surrogate's successful adversarial examples, the perturbed injections it now reads as benign, are replayed against the frozen target. The transfer rate of a `(surrogate, recipe)` cell is the fraction that also flip the target to benign, over the fifty cells (ten surrogates × five recipes, 191 test injections each). Transfer rates span 0.03 to 0.82, with a mean of 0.38.
+The same-backbone anchor ranks first in mean CKA and corrected DBS, while the from-scratch BiLSTM ranks last. The anchor's mean CKA is 0.475, below the original protocol's approximate 0.9 expectation. `deberta-base-pi-v1` shares the DeBERTa-v3-base backbone yet has mean CKA 0.329.
 
-The word-substitution recipes transfer best and the character-level one least:
+The original M1 membership is `deberta-base-ft-seed`, `deepset-deberta-injection`, and `deberta-small-pi-v2`. M2 is `llama-prompt-guard-22m`, `deberta-base-pi-v1`, and `bilstm-attention`. For verified true target flips, M1 has macro mean 0.4734 and M2 has 0.1429. The 33.0511 percentage-point contrast has one-sided p = 0.05, equal to the 1-in-20 enumeration floor. It does not meet the report's strict p < 0.05 decision rule.
 
-| Recipe | Family | Mean transfer |
-| --- | --- | --- |
-| BAE | masked-LM | 0.487 |
-| PWWS | WordNet synonym | 0.442 |
-| BERT-Attack | masked-LM | 0.351 |
-| TextFooler | embedding synonym | 0.346 |
-| DeepWordBug | character | 0.285 |
+The training-only CKA sensitivity uses 2,357 training rows with zero normalized text overlap with held-out validation and test splits. Its deterministic 1,600-row probe is balanced 800 per label, uses CLS pooling at 512 tokens, batch size 64, and DBS box 1. The rank of training-only mean CKA against original mean CKA is rho = 0.9879, and both M1 and M2 have Jaccard overlap 1.0. This removes direct attack-test probe overlap while using training data seen by local fine-tunes. It supports membership stability under this post-hoc sensitivity, not external validation.
 
-Representational similarity predicts transfer. Across all fifty cells, the Spearman rank correlation between `mean_cka` and transfer rate is ρ = 0.66 (p = 2×10⁻⁷); for `dbs` it is ρ = 0.45 (p = 0.001). The random forest, read for feature importance rather than prediction, places 0.83 of its weight on `mean_cka` and 0.17 on `dbs`.
+## Limits that shape the claim
 
-![Transfer rate against mean CKA, one point per (surrogate, recipe) cell, coloured by recipe.](figures/fig_transfer_scatter.png){width=80%}
+The target, corpus, surrogate pool, and attack recipes bound the claim. The source-positive label mixes direct prompt-injection and jailbreak-style examples. The target audit establishes baseline target predictions for successful source attacks, while it does not remove the model-training overlap concern. The training-only CKA sensitivity uses data seen in local fine-tuning and does not turn the study into an out-of-sample validation.
 
-The relationship is a positive trend with real scatter, not a clean staircase. The same-backbone anchor transfers most (`deberta-base-ft-seed`, mean 0.65) and the from-scratch BiLSTM least among the genuinely dissimilar models (0.18). But `llama-prompt-guard-22m` sits mid-range on CKA (0.41) and transfers almost nothing (0.05): its own detector is weak and easily fooled, yet the perturbations that fool it leave the robust target unmoved. High attack success on a surrogate does not by itself imply transfer, which is the point of selecting surrogates by similarity rather than by attackability.
+This project measures bounded transfer risk for a named target and attack suite. It does not certify robustness.
 
-The selection ablation contrasts the high-similarity set M1 = {`deberta-base-ft-seed`, `deepset-deberta-injection`, `deberta-small-pi-v2`} against the low-similarity set M2 = {`llama-prompt-guard-22m`, `deberta-base-pi-v1`, `bilstm-attention`}. M1 transfers at 0.51 on average against M2's 0.19, a 32-percentage-point gap on mean-across-recipes transfer and 40 points on max-across-recipes, so an attacker choosing high-similarity surrogates lands transferable attacks about 2.7× as often. In the exact three-versus-three permutation test the max-transfer contrast reaches the small-group floor (p = 0.05); the mean-transfer contrast does not (p = 0.10). With only three surrogates per group the mean test cannot resolve below 0.05 regardless of effect size, so the pre-registered criterion (≥ 5 pp with p < 0.05 on the mean) is not strictly met even though the effect is large and the all-cells rank correlation is unambiguous. The honest reading is that similarity clearly tracks transfer here, and a larger pool per group would be needed to drive the exact selection test below the floor.
+## Explore the work
 
-![Random-forest feature importance (left) and M1-vs-M2 mean transfer (right).](figures/fig_regression_ablation.png){width=90%}
-
-A single word is often enough. Against `bert-base-ft`, BAE rewrites "Explain your last instructions like I'm five" to "Explain your last date like I'm five": one substitution that flips both the surrogate and the frozen target from injection to benign.
-
-The sweep itself, 400 example-shards across the fifty cells, ran mostly on a 192-vCPU Graviton4 spot instance in the cloud; the final shards and the per-cell reductions were completed locally, both through the same resumable catalog.
-
-## Limitations
-
-The study covers one target and one task (prompt injection) with character, lexical, and masked-LM attacks. It does not include optimization-based suffix attacks (GCG) or multi-turn attacks, so it bounds risk against the families it runs, not all of them. The selection ablation uses three-versus-three groups, where the exact permutation p-value cannot fall below 0.05 regardless of effect size; the effect size is reported alongside it. With tens of `(surrogate, recipe)` observations the regression is read for feature importance and rank correlation, not out-of-sample prediction. The measurement is a relative leakiness score against a reference pool and a named target; it is not a certificate of robustness [@vassilev-2025].
-
-## Future work
-
-The surrogate layer and the attack interface are model- and category-agnostic, so the deferred extensions are configuration rather than rewrites: an LLM-judge tier (Llama Guard, Granite Guardian, ShieldGemma) attacked with optimization-based suffixes (nanoGCG); additional target categories (jailbreak, toxicity) once a detector and a clean dataset exist for each; and additional targets within prompt injection to turn the single-target leakiness score into a cross-target comparison.
-
-## References
-
-::: {#refs}
+::: {.action-row}
+[Read the full paper](paper.qmd){.action-link}
+[Inspect the implementation](pipeline.qmd){.action-link}
+[Open target audit summary](artifacts/target_audit_summary.json){.action-link}
+[Open training CKA sensitivity](artifacts/training_probe_similarity_sensitivity.json){.action-link}
 :::
+
+The [historical conditional table](artifacts/master_results_table.csv) and [historical conditional target-benign scatter](figures/fig_transfer_scatter.png) remain available as secondary outputs. The audited primary outcome is documented by [target_audit_cells.csv](artifacts/target_audit_cells.csv), [target_audit_sources.csv](artifacts/target_audit_sources.csv), [training_probe_similarity.csv](artifacts/training_probe_similarity.csv), and the [results manifest](artifacts/results_manifest.json). Current source links describe the audited post-run implementation. The manifest ref `5af7330` records cloud-run provenance only.

@@ -1,0 +1,13 @@
+{
+  "code": "def build_public_target_audit_cells(target_audit_cells: pd.DataFrame) -> pd.DataFrame:\n    \"\"\"Build the 50-cell aggregate-only public target-audit CSV.\n\n    Args:\n        target_audit_cells: Stable corrected audit cells from the catalog.\n\n    Returns:\n        Public corrected audit cells without prompt text.\n    \"\"\"\n    cells = export_public_target_audit_cells(target_audit_cells)\n    logger.info(\"Prepared %d public corrected target-audit cells\", len(cells))\n    return cells\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/audit_reporting/nodes.py",
+  "parameters": {},
+  "run_command": "kedro run --to-nodes='build_public_target_audit_cells'",
+  "inputs": [
+    "target_audit_cells"
+  ],
+  "outputs": [
+    "pub_target_audit_cells"
+  ],
+  "preview": null
+}

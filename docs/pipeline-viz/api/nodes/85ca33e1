@@ -1,0 +1,12 @@
+{
+  "type": "artifacts.mlflow_artifact_dataset.CSVDataset.MlflowCSVDataset",
+  "filepath": "<workspace>/docs/artifacts/master_results_table.csv",
+  "run_command": "kedro run --to-outputs=pub_master_results_table",
+  "preview": null,
+  "preview_type": null,
+  "stats": {
+    "rows": 50,
+    "columns": 8,
+    "file_size": 6884
+  }
+}

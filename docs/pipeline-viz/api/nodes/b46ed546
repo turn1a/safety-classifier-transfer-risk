@@ -1,0 +1,7 @@
+{
+  "parameters": {
+    "similarity_audit": {
+      "n_probe": 1600
+    }
+  }
+}

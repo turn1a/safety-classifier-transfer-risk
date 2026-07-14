@@ -1,105 +1,111 @@
-# AGENTS.md — safety-classifier-transfer-risk
+# AGENTS.md: safety-classifier-transfer-risk
 
-Contributor and agent guide. `CLAUDE.md` is a symlink to this file. The full method and the phase-by-phase build plan live in [SPEC.md](SPEC.md); this file covers conventions. Rules are non-negotiable unless marked otherwise.
+Contributor and agent guide. `CLAUDE.md` is a symlink to this file. [SPEC.md](SPEC.md) preserves the original implementation protocol and its audited updates. These rules apply unless a user explicitly narrows the work.
 
-## 1. Purpose
+## Purpose
 
-Measure and compare adversarial transferability risk for text safety classifiers (v1: prompt-injection detection). The pipeline computes CKA similarity between a target classifier and surrogates, attacks the surrogates with TextAttack, measures transfer to the frozen target, and fits a risk regression. It **measures and compares** leakiness; it never **certifies** robustness (Vassilev 2025). Keep that boundary in every doc and result.
+Measure transfer risk for text safety classifiers, initially a prompt-injection detector. The project computes CKA between a frozen target and surrogate pool, attacks surrogates with TextAttack, and audits the target on originals and perturbations.
 
-## 2. Scope — v1 non-goals (deferred, leave extension points only)
+The primary audited outcome is a verified target injection-to-benign outcome: the source attack succeeds, the target predicts injection on the original, and the target predicts benign after perturbation. The historical conditional target-benign rate is P[target benign on perturbed prompt | source success]. It is a separate estimand and must never be described as a verified target prediction change.
 
-- GCG / nanoGCG suffix attacks (v2, the LLM-judge tier).
-- Jailbreak, CBRNE, toxicity target categories (v2/v3). Keep the design category-agnostic so adding one is config, not a rewrite.
-- Multi-turn / Crescendo attacks (out of scope; document as a limitation).
-- Any agentic wrapper. Build the deterministic core.
+This project measures bounded transfer behavior. It does not certify robustness.
 
-Excluded entirely (do not build, even later): CSAM, election/political-content, bias/fairness, and profanity classifiers; any image-modality work.
+## Scope
 
-## 3. Project layout
+v1 covers a public archived prompt-injection target, ten surrogates, CKA and corrected DBS, five TextAttack recipes, target auditing, a source-excluded sensitivity, and a training-only CKA sensitivity.
 
-```
+Do not add:
+
+- GCG or nanoGCG suffix attacks.
+- LLM-judge targets.
+- Multi-turn attacks.
+- Agentic wrappers.
+- New task categories without explicit user direction.
+
+Do not build CSAM, election content, bias or fairness classifiers, profanity classifiers, or image modalities.
+
+## Project layout
+
+```text
 src/transfer_risk/
-├── lib/                  # PURE algorithms (no I/O, no Kedro): cka, dbs, seeds, thresholds
-├── pipelines/<stage>/    # one Kedro pipeline per stage: nodes.py + pipeline.py
+├── lib/                         # pure CKA, DBS, seeds, audit and statistics helpers
+├── pipelines/
 │   ├── data models similarity attacks transfer risk reporting
-│   └── smoke             # a wiring-check pipeline, excluded from __default__
-├── pipeline_registry.py  # find_pipelines(); __default__ = data … reporting (smoke excluded)
+│   ├── audit                    # target inference plus audit finalization
+│   ├── audit_reporting          # target-free public audit report
+│   ├── similarity_audit_prepare # saved training split boundary
+│   └── similarity_audit         # serial training-only CKA sensitivity
+├── pipeline_registry.py
 └── settings.py
-conf/base/                # catalog.yml, parameters_<stage>.yml, mlflow.yml
-data/01_raw … 08_reporting/   # Kedro data layers (gitignored except .gitkeep)
-tests/{lib,pipelines}/     # unit tests mirror lib/; registry test builds every pipeline
-refs/                      # the three reference papers (git-lfs)
-infra/                     # Terraform for the cloud sweep (S3 + spot box); see infra/README.md
+conf/base/                       # catalog, parameters, MLflow
+docs/artifacts/                  # catalog-generated aggregate report artifacts
+tests/                           # pure and pipeline tests
+infra/                           # Terraform cloud sweep documentation
 ```
 
-## 4. Architecture — pure lib vs Kedro nodes
+`__default__` contains the original measurement chain. `audit`, `audit_finalization`, `audit_reporting`, `similarity_audit_prepare`, and `similarity_audit` are explicit stages outside it.
 
-- **Pure modules** (`transfer_risk.lib.*`) hold the security-relevant maths: CKA, DBS, deterministic seeding, threshold calibration. No I/O, no network, no imports of `kedro`, `mlflow`, `transformers`, or `textattack`. Unit-tested in isolation.
-- **Nodes** (`pipelines/<stage>/nodes.py`) are thin: they read inputs from the catalog, call `lib` functions, and return artifacts. Heavy I/O (model loading, attack running) lives here, not in `lib`.
-- **Pipelines** (`pipeline.py`) wire nodes to catalog datasets and `params:`. No business logic in pipeline assembly.
+## Pure core and Kedro nodes
 
-This mirrors the pure/glue split: the deterministic core is small, tested, and import-clean; the orchestration is everything else.
+- Pure modules in `transfer_risk.lib` contain deterministic algorithms. They do not perform I/O, network access, model loading, or Kedro orchestration.
+- Nodes read catalog inputs, invoke pure helpers where appropriate, run heavy inference or attacks, and return catalog outputs.
+- Pipeline assembly wires datasets and parameters. Do not place business logic in `pipeline.py`.
+- Corrected DBS uses the Bresenham-centered diagonal-box implementation and is recomputed from saved CKA matrices before report export.
 
-## 5. Development environment
+## Audit and public artifact policy
 
-- **Python 3.13** (newest stable minus one), managed by **`uv`** exclusively. Never `pip`, never `poetry`.
-- Bootstrap: `just install` (= `uv sync` + `uv run pre-commit install --install-hooks`).
-- Recipes (all in `justfile`): `just fmt | lint | type | test | check | hooks | run | run-thin | viz | viz-build | docs | mlflow-ui`, plus `setup-data` and the `cloud-*` sweep recipes (`cloud-stage`/`cloud-up`/`cloud-finish`/`cloud-logs`/`cloud-attach`/`cloud-down`; [infra/README.md](infra/README.md)). `just` with no argument runs `check` (lint + type + test).
-- Telemetry is opted out (`.telemetry` + `DO_NOT_TRACK=1` in the justfile).
+- `audit` performs frozen-target inference on deduplicated successful-source originals and perturbations. It emits raw aggregate cells, source aggregates, and non-text context.
+- `audit_finalization` recomputes corrected DBS and final summaries from saved aggregates without target inference.
+- `audit_reporting` must remain target-free. It publishes aggregate-only cells, source rows, summaries, and figures.
+- `similarity_audit_prepare` materializes the saved training split. `similarity_audit` runs serially on MPS, recomputes CKA over a training-only probe, and creates no attacks or training.
+- Every public artifact must be catalog-owned and wrapped in `MlflowArtifactDataset`. Do not publish raw prompts, perturbations, model checkpoints, or private CKA matrices.
+- `qualitative_examples.json` is a redacted audit artifact. It may contain only surrogate, recipe, edit count, categorical label, change summary, and audit note. Do not quote, paraphrase, or recreate underlying prompt text in public documentation.
+- Public docs must label original conditional target-benign artifacts as historical or secondary when true target flip artifacts are present.
 
-> Environment note: the venv runs a native **arm64** Python 3.13, so the MPS / PyTorch path works (verified: `torch.backends.mps.is_available()` is `True`). If you recreate the venv, force the native build — `uv venv --python cpython-3.13-macos-aarch64-none && uv sync` — otherwise uv may pick up a stray x86_64 interpreter and lose MPS.
+## Statistical writing
 
-## 6. uv-first workflow (mandated)
+- Treat the ten surrogate summaries as designed-pool units of analysis. Do not present them as random samples.
+- State that enumerated p-values condition on an exchangeability null for the designed pool. Do not present them as population or general-predictor validation.
+- The M1 versus M2 decision rule is a project rule: at least five percentage points and strict p < 0.05.
+- A p value of 0.05 in a three-versus-three enumeration equals the 1-in-20 floor and does not satisfy the strict decision rule.
+- Tree regressors remain exploratory machinery. Do not report feature importance as research evidence.
+- Preserve source and contamination limits. `jackhhao/jailbreak-classification` is both a canonical source and a target-card training source. Record-level decontamination is unavailable.
 
-> Always use `uv` to create, add, modify, or run things. Do not hand-edit the `dependencies` / `[dependency-groups]` arrays in `pyproject.toml`; let `uv` populate them.
+## Development environment
 
-- Add a runtime dep: `uv add <pkg>`. Dev dep: `uv add --dev <pkg>`. Remove: `uv remove [--dev] <pkg>`. Upgrade: `uv lock --upgrade-package <pkg>` then `uv sync`.
-- Run anything Python via `uv run …`. Never invoke `python`/`pytest`/`mypy`/ `ruff`/`kedro` directly.
-- `uv.lock` is committed and authoritative. `[tool.*]` config edits are fine.
-- The heavy ML stack (torch, transformers, datasets, scikit-learn already present transitively, textattack, a CKA library) is added per pipeline as it lands. Pin TextAttack only after confirming it installs on 3.13 — fall back to a maintained fork if not.
+- Use Python 3.13 and `uv` exclusively. Do not use `pip` or Poetry.
+- Run Python tooling through `uv run`.
+- Use `just install`, `just check`, `just docs`, and the documented cloud or audit recipes.
+- `.env` owns environment variables. Never place credentials in source or command history.
+- Derive all randomness from the root seed through `transfer_risk.lib.seeds`.
 
-## 7. Code quality (non-negotiable)
+## Kedro and catalog conventions
 
-- **Google-style docstrings** on every module, class, and function — public and private (ruff `D` + `interrogate`; see §12).
-- `just lint` (ruff) must pass with zero diagnostics; `just type` (mypy strict on `src/`) must pass. A scoped `ARG001` ignore covers the few node functions that accept catalog-wired inputs they don't directly reference (see `pyproject.toml`).
-- No unseeded randomness anywhere. Derive all seeds from the one root seed via `transfer_risk.lib.seeds`.
+- Adding a surrogate is configuration plus matching catalog entries, never a pipeline-code edit.
+- Tunable values belong in `conf/base/parameters_<stage>.yml`.
+- Every data, model, S3 boundary, report, and public artifact crosses through the catalog.
+- Cloud paths resolve through catalog configuration. Do not add `aws s3 sync`, `from_pretrained`, `load_dataset`, or `save_pretrained` calls inside nodes.
+- Dynamic models, similarity, and attacks fan out by configured surrogate and attack shard. Resume through `--only-missing-outputs`.
 
-## 8. Kedro conventions
+## Quality and tests
 
-- Adding a target or surrogate is a single entry in `conf/base/parameters_models.yml` plus a catalog factory match — never a pipeline code change (SPEC.md §5).
-- All tunable knobs live in `conf/base/parameters_<stage>.yml`, read as `params:<stage>`. No magic numbers in nodes.
-- Every artifact is a catalog entry with a `kedro-viz` layer. Intermediate data stays under `data/NN_<layer>/` and is gitignored.
-- `pipeline_registry.register_pipelines` keeps `__default__` = the full chain and excludes `smoke`.
+- Write Google-style docstrings on public and private functions, classes, and modules.
+- `just lint` and `just type` must pass for source changes.
+- Tests assert behavioral invariants. CKA tests cover self-similarity, rotation, and scaling. DBS tests cover diagonal and full-box behavior. Audit tests cover aggregate-only output and target-free reporting.
+- The coverage gate applies to `transfer_risk.lib`; heavy model and attack nodes use focused pipeline tests.
 
-## 9. Tests and coverage
+## Reproducibility and provenance
 
-- `tests/lib/` mirrors `transfer_risk.lib` (the invariants in SPEC.md §12: CKA self-similarity, rotation/scaling invariance; DBS box edge cases; thresholds `0 < r2 < r1 < 1`). `tests/pipelines/test_pipeline_registry.py` asserts every pipeline builds.
-- Coverage gate (`pyproject.toml`) is **90%** on `transfer_risk.lib`. The heavy torch / TextAttack I/O nodes stay outside the gate — gate the deterministic core, not the glue.
-- Tests run on the pre-push hook, not pre-commit, to keep commits fast.
+- `uv.lock` is authoritative.
+- Kedro-MLflow records parameters, metrics, artifacts, and source provenance.
+- The manifest's execution ref identifies cloud-run provenance only. Current source links can describe audited post-run reporting code that postdates the cloud run.
+- The completed production sweep used an ARM64 `r8g.48xlarge` Graviton4 spot instance with 192 vCPUs. Final reductions, target auditing, and reporting ran locally.
 
-## 10. Reproducibility and tracking
+## Documentation
 
-- One root seed → `SeedSequence` → per-component seeds. Commit `uv.lock`.
-- Runs are tracked by kedro-mlflow in `sqlite:///mlflow.db` (MLflow 3.x deprecates the `./mlruns` file store). Log params, metrics, artifacts, and the git SHA.
-
-## 11. Git
-
-- Conventional commits (`feat:`, `fix:`, `docs:`, `chore:`, `test:`, `refactor:`).
-- Keep `CHANGELOG.md` (Keep a Changelog format) current.
-- Notebooks are exploratory only; outputs are stripped by the nbstripout hook. The source of truth is `src/` + `conf/`, never a notebook.
-
-## 12. Conventions from the hardening review (non-negotiable)
-
-Standing rules distilled from a review; treat them at §7 weight.
-
-- **Keep docs current as you go.** Update `README.md`, `CHANGELOG.md`, `SPEC.md`, and this file in the same change that alters behaviour — not in a batch afterwards.
-- **One paragraph per line in Markdown.** `.mdformat.toml` sets `wrap = "no"`; never hand-wrap prose. `just fmt` and the pre-commit hook enforce it. `refs/` is the only exclusion.
-- **Everything goes through the catalog — data, models, and S3.** Raw HuggingFace *datasets* are `HFDataset` entries; Hub *models* (pretrained surrogates, fine-tune backbones, the target) are `HuggingFaceHubModelDataset` entries; every surrogate is persisted through the `surrogate__{name}` factory (`SurrogateModelDataset`) and its ONNX graph through `onnx__{name}` (`OnnxModelDataset`). No `from_pretrained(hub_id)` / `load_dataset` / `save_pretrained` / `aws s3 sync` inside nodes or scripts. Cloud data locations are catalog-owned via `${globals:...}` (local in base, `s3://` in the `cloud` env, from a scoped `tr.bucket` resolver). The models/similarity/attacks pipelines are generated dynamically (one node per surrogate, and per `(surrogate, recipe, shard)`); they run with a RAM-bounded `ParallelRunner` (caps workers to fit torch victims in memory) and resume with `--only-missing-outputs`. Dotted dataset names are reserved for namespacing, so factory names use `__` (e.g. `surrogate__{name}`).
-- **Docstrings on public AND private functions.** ruff `D` covers public APIs; `interrogate` (`fail-under = 100`, checks private/nested/magic/init) covers the rest. Both run in `just lint` and pre-commit.
-- **Logging, not print.** `conf/logging.yml` configures the rich console plus a rotating `logs/run.log`; nodes log meaningful progress via `logging.getLogger(__name__)`.
-- **Env vars live in `.env`** (loaded by `settings.py` and by `just` via `dotenv-load`), never typed ad-hoc on the command line. `.env.example` documents them; `.env` is gitignored.
-- **MLflow logs flattened params, metrics, and artifacts** — not just parameter blobs. New scalars go through the `track_run_metrics` node; new file artifacts are wrapped in `MlflowArtifactDataset`.
-- **Tests assert real invariants**, not "runs without error". Move pure logic into `transfer_risk.lib` and test its behaviour; gate the deterministic core, not the glue.
-- **Attacks run in the main env**, in-process, via the `turn1a/TextAttack` fork — never a separate-interpreter subprocess. Never drop an attack for a missing dependency; fork and patch upstream instead.
-- **All setup steps are justfile recipes** (e.g. `just setup-data` for NLTK data, embeddings, the sentence encoder), never silent in-code downloads.
-- **Consult the newest API docs** for every library and write to current best practice; verify against the installed version, not memory.
+- Keep `README.md`, `CHANGELOG.md`, `SPEC.md`, this file, and relevant docs pages current with behavior changes.
+- Use one paragraph per line in Markdown.
+- Keep technical claims concrete. State the outcome, denominator, artifact, and limitation before interpretation.
+- Use straight quotes where practical. Do not use rhetorical em or en dashes.
+- Do not claim target prediction changes from the historical conditional target-benign metric. Use verified target injection-to-benign terminology only when an audit baseline is present.
+- Keep measurement and certification language to one sentence per research document.

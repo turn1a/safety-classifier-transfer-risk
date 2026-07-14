@@ -1,0 +1,14 @@
+{
+  "code": "def build_surrogate_summary_table(\n    master_results_corrected: pd.DataFrame,\n    surrogate_selection: dict[str, Any],\n) -> pd.DataFrame:\n    \"\"\"Build the 10-row surrogate summary table.\n\n    Args:\n        master_results_corrected: Corrected master table.\n        surrogate_selection: Saved M1/M2 selection bands.\n\n    Returns:\n        Surrogate summary for ``docs/artifacts/surrogate_summary.csv``.\n    \"\"\"\n    return build_surrogate_summary(master_results_corrected, surrogate_selection)\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/reporting/nodes.py",
+  "parameters": {},
+  "run_command": "kedro run --to-nodes='build_surrogate_summary_table'",
+  "inputs": [
+    "master_results_corrected",
+    "surrogate_selection"
+  ],
+  "outputs": [
+    "pub_surrogate_summary"
+  ],
+  "preview": null
+}

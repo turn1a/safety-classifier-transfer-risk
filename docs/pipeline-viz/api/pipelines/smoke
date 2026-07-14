@@ -4,35 +4,42 @@
       "id": "85e11043",
       "name": "params:seed",
       "tags": [
-        "deepwordbug",
-        "bert-attack",
-        "bae",
-        "pwws",
-        "deberta-small-pi-v2",
-        "deberta-base-ft-seed",
-        "electra-small-ft",
-        "deberta-base-pi-v1",
-        "deepset-deberta-injection",
         "models",
-        "textfooler",
-        "roberta-base-ft",
-        "bilstm-attention",
-        "llama-prompt-guard-22m",
         "llama-prompt-guard-86m",
-        "similarity",
+        "similarity_audit",
         "attacks",
-        "bert-base-ft"
+        "deberta-base-ft-seed",
+        "pwws",
+        "llama-prompt-guard-22m",
+        "bert-base-ft",
+        "bert-attack",
+        "audit",
+        "electra-small-ft",
+        "textfooler",
+        "deepwordbug",
+        "deberta-base-pi-v1",
+        "bae",
+        "roberta-base-ft",
+        "deepset-deberta-injection",
+        "bilstm-attention",
+        "audit_finalization",
+        "similarity",
+        "deberta-small-pi-v2"
       ],
       "pipelines": [
-        "data",
-        "__default__",
-        "similarity",
-        "risk",
-        "downstream",
         "models",
+        "risk",
+        "similarity_audit",
+        "smoke",
         "attacks",
+        "data",
         "stage",
-        "smoke"
+        "downstream",
+        "audit_finalization",
+        "similarity",
+        "__default__",
+        "reporting",
+        "audit"
       ],
       "type": "parameters",
       "modular_pipelines": null,
@@ -92,11 +99,11 @@
       "target": "d43760b6"
     },
     {
-      "source": "811f7764",
+      "source": "85e11043",
       "target": "624699ec"
     },
     {
-      "source": "85e11043",
+      "source": "811f7764",
       "target": "624699ec"
     }
   ],
@@ -113,6 +120,18 @@
     {
       "id": "attacks",
       "name": "attacks"
+    },
+    {
+      "id": "audit",
+      "name": "audit"
+    },
+    {
+      "id": "audit_finalization",
+      "name": "audit_finalization"
+    },
+    {
+      "id": "audit_reporting",
+      "name": "audit_reporting"
     },
     {
       "id": "bae",
@@ -179,6 +198,14 @@
       "name": "similarity"
     },
     {
+      "id": "similarity_audit",
+      "name": "similarity_audit"
+    },
+    {
+      "id": "similarity_audit_prepare",
+      "name": "similarity_audit_prepare"
+    },
+    {
       "id": "textfooler",
       "name": "textfooler"
     },
@@ -213,6 +240,14 @@
       "name": "models"
     },
     {
+      "id": "audit",
+      "name": "audit"
+    },
+    {
+      "id": "similarity_audit_prepare",
+      "name": "similarity_audit_prepare"
+    },
+    {
       "id": "data",
       "name": "data"
     },
@@ -221,8 +256,20 @@
       "name": "risk"
     },
     {
+      "id": "similarity_audit",
+      "name": "similarity_audit"
+    },
+    {
       "id": "attacks",
       "name": "attacks"
+    },
+    {
+      "id": "audit_reporting",
+      "name": "audit_reporting"
+    },
+    {
+      "id": "audit_finalization",
+      "name": "audit_finalization"
     },
     {
       "id": "stage",
@@ -241,16 +288,16 @@
       "outputs": [],
       "children": [
         {
-          "id": "624699ec",
-          "type": "task"
-        },
-        {
-          "id": "85e11043",
+          "id": "811f7764",
           "type": "parameters"
         },
         {
           "id": "85e11043",
           "type": "data"
+        },
+        {
+          "id": "624699ec",
+          "type": "task"
         },
         {
           "id": "d43760b6",
@@ -258,11 +305,11 @@
         },
         {
           "id": "811f7764",
-          "type": "parameters"
+          "type": "data"
         },
         {
-          "id": "811f7764",
-          "type": "data"
+          "id": "85e11043",
+          "type": "parameters"
         }
       ]
     }

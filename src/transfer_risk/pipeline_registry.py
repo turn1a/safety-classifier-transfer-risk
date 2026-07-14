@@ -15,6 +15,16 @@ from __future__ import annotations
 from kedro.framework.project import find_pipelines
 from kedro.pipeline import Pipeline
 
+from transfer_risk.pipelines.audit.pipeline import create_finalization_pipeline
+
+_EXCLUDED_FROM_DEFAULT = (
+    "smoke",
+    "audit",
+    "audit_finalization",
+    "audit_reporting",
+    "similarity_audit_prepare",
+    "similarity_audit",
+)
 _STAGE = ("data", "models", "similarity")
 _DOWNSTREAM = ("transfer", "risk", "reporting")
 
@@ -22,7 +32,10 @@ _DOWNSTREAM = ("transfer", "risk", "reporting")
 def register_pipelines() -> dict[str, Pipeline]:
     """Return a mapping of pipeline name to ``Pipeline`` object."""
     pipelines: dict[str, Pipeline] = find_pipelines()
-    domain = [pipeline for name, pipeline in pipelines.items() if name != "smoke"]
+    pipelines["audit_finalization"] = create_finalization_pipeline()
+    domain = [
+        pipeline for name, pipeline in pipelines.items() if name not in _EXCLUDED_FROM_DEFAULT
+    ]
     pipelines["__default__"] = sum(domain, Pipeline([]))
     pipelines["stage"] = sum((pipelines[name] for name in _STAGE), Pipeline([]))
     pipelines["downstream"] = sum((pipelines[name] for name in _DOWNSTREAM), Pipeline([]))

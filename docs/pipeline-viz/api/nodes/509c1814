@@ -1,0 +1,33 @@
+{
+  "code": "def build_public_run_metrics_bundle(\n    master_results_corrected: pd.DataFrame,\n    adversarial_examples: dict[str, list[dict[str, Any]]],\n    ablation_results: dict[str, Any],\n    thresholds: dict[str, float],\n    params_attacks: dict[str, Any],\n) -> dict[str, Any]:\n    \"\"\"Build corrected public run metrics from saved artifacts.\n\n    Args:\n        master_results_corrected: Corrected master table.\n        adversarial_examples: Catalog-wired attack records, used only for aggregate\n            result-type counts.\n        ablation_results: Saved ablation result dict.\n        thresholds: Calibrated thresholds.\n        params_attacks: Attack-stage parameters (attempts per cell).\n\n    Returns:\n        Public run metrics for ``docs/artifacts/run_metrics.json``.\n    \"\"\"\n    metrics = build_public_run_metrics(\n        master_results_corrected,\n        ablation_results,\n        thresholds,\n    )\n    metrics[\"counts\"][\"attack_attempts_per_cell\"] = int(params_attacks[\"eval_set_size\"])\n    metrics[\"counts\"][\"query_budget\"] = int(params_attacks[\"query_budget\"])\n    metrics[\"attack_outcomes\"] = summarize_attack_outcomes(adversarial_examples)\n    return metrics\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/reporting/nodes.py",
+  "parameters": {
+    "attacks": {
+      "recipes": [
+        "deepwordbug",
+        "pwws",
+        "textfooler",
+        "bae",
+        "bert-attack"
+      ],
+      "semantic_encoder": "sentence-transformers",
+      "eval_set_size": 191,
+      "max_seq_len": 512,
+      "max_prompt_chars": 3200,
+      "query_budget": 6000,
+      "shard_size": 100000
+    }
+  },
+  "run_command": "kedro run --to-nodes='build_public_run_metrics'",
+  "inputs": [
+    "master_results_corrected",
+    "adversarial_examples",
+    "ablation_results",
+    "thresholds",
+    "params:attacks"
+  ],
+  "outputs": [
+    "pub_run_metrics"
+  ],
+  "preview": null
+}

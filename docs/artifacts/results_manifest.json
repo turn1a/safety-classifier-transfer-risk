@@ -1,0 +1,31 @@
+{
+  "schema_version": "1.0",
+  "experiment_commit": "5af7330",
+  "root_seed": 20260616,
+  "uv_lock_sha256": "fed6bd35da2963e19ac5fe00ab14fff0937120bb2c92e132741256cfc1de8f36",
+  "target": "protectai/deberta-v3-base-prompt-injection-v2",
+  "probe_window": {
+    "n_probe": 2000,
+    "max_seq_len": 512
+  },
+  "attack_window": {
+    "eval_set_size": 191,
+    "max_seq_len": 512,
+    "query_budget": 6000
+  },
+  "transfer_window": {
+    "max_seq_len": 512
+  },
+  "attack_attempts_per_cell": 191,
+  "query_budget": 6000,
+  "n_surrogates": 10,
+  "n_recipes": 5,
+  "hardware": {
+    "instance_type": "r8g.48xlarge",
+    "vcpus": 192,
+    "architecture": "Graviton4",
+    "pricing_model": "spot",
+    "victim_backend": "torch on ARM"
+  },
+  "completion_note": "Most attack shards ran on a 192-vCPU Graviton4 spot instance; final shard reductions and reporting completed locally."
+}

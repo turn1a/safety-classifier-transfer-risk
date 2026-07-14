@@ -1,0 +1,8 @@
+{
+  "type": "pickle.pickle_dataset.PickleDataset",
+  "filepath": "<workspace>/data/04_feature/training_cka_llama-prompt-guard-22m.pkl",
+  "run_command": "kedro run --to-outputs=training_cka__llama-prompt-guard-22m",
+  "preview": null,
+  "preview_type": null,
+  "stats": null
+}

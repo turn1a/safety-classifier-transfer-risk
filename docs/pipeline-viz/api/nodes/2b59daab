@@ -1,0 +1,10 @@
+{
+  "parameters": {
+    "audit": {
+      "eval_set_size": 191,
+      "max_prompt_chars": 3200,
+      "injection_label": 1,
+      "excluded_training_source": "jackhhao/jailbreak-classification"
+    }
+  }
+}

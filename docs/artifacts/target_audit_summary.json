@@ -1,0 +1,606 @@
+{
+  "full_cohort": {
+    "source_successful": 4362,
+    "target_original_benign": 353,
+    "target_original_injection": 4009,
+    "target_perturbed_benign": 1398,
+    "true_target_flips": 1054,
+    "conditional_target_benign_rate": 0.3204951856946355,
+    "true_target_flip_rate": 0.2629084559740584,
+    "source_composition": {
+      "Lakera/gandalf_ignore_instructions": 2851,
+      "deepset/prompt-injections": 533,
+      "jackhhao/jailbreak-classification": 978
+    },
+    "surrogate_macro": {
+      "analysis_unit": "one row per surrogate",
+      "aggregation": "unweighted mean and maximum across each surrogate's defined recipe-level cells",
+      "undefined_rate_handling": "undefined cell rates are excluded; a surrogate-level outcome is null when none of its cells has that outcome denominator",
+      "row_count": 10,
+      "rows": [
+        {
+          "surrogate": "bert-base-ft",
+          "mean_cka": 0.4450094194724594,
+          "dbs": 0.6247945268997297,
+          "source_successful": 377,
+          "target_original_benign": 59,
+          "target_original_injection": 318,
+          "target_perturbed_benign": 170,
+          "true_target_flips": 113,
+          "conditional_target_benign_rate_macro_mean": 0.4449768967416026,
+          "conditional_target_benign_rate_macro_max": 0.6235294117647059,
+          "conditional_target_benign_rate_defined_cell_count": 5,
+          "true_target_flip_rate_macro_mean": 0.3500828384159088,
+          "true_target_flip_rate_macro_max": 0.5616438356164384,
+          "true_target_flip_rate_defined_cell_count": 5
+        },
+        {
+          "surrogate": "bilstm-attention",
+          "mean_cka": 0.25871896606466466,
+          "dbs": 0.25871896606466466,
+          "source_successful": 658,
+          "target_original_benign": 59,
+          "target_original_injection": 599,
+          "target_perturbed_benign": 111,
+          "true_target_flips": 56,
+          "conditional_target_benign_rate_macro_mean": 0.1752838286577085,
+          "conditional_target_benign_rate_macro_max": 0.2773109243697479,
+          "conditional_target_benign_rate_defined_cell_count": 5,
+          "true_target_flip_rate_macro_mean": 0.09967613553320218,
+          "true_target_flip_rate_macro_max": 0.21296296296296297,
+          "true_target_flip_rate_defined_cell_count": 5
+        },
+        {
+          "surrogate": "deberta-base-ft-seed",
+          "mean_cka": 0.4754217532198447,
+          "dbs": 0.7047500471308572,
+          "source_successful": 305,
+          "target_original_benign": 59,
+          "target_original_injection": 246,
+          "target_perturbed_benign": 198,
+          "true_target_flips": 140,
+          "conditional_target_benign_rate_macro_mean": 0.646842105263158,
+          "conditional_target_benign_rate_macro_max": 0.7142857142857143,
+          "conditional_target_benign_rate_defined_cell_count": 5,
+          "true_target_flip_rate_macro_mean": 0.5567388639729065,
+          "true_target_flip_rate_macro_max": 0.65,
+          "true_target_flip_rate_defined_cell_count": 5
+        },
+        {
+          "surrogate": "deberta-base-pi-v1",
+          "mean_cka": 0.329011060483958,
+          "dbs": 0.5116043897764262,
+          "source_successful": 320,
+          "target_original_benign": 20,
+          "target_original_injection": 300,
+          "target_perturbed_benign": 111,
+          "true_target_flips": 91,
+          "conditional_target_benign_rate_macro_mean": 0.34539311694480757,
+          "conditional_target_benign_rate_macro_max": 0.4444444444444444,
+          "conditional_target_benign_rate_defined_cell_count": 5,
+          "true_target_flip_rate_macro_mean": 0.29959568208855697,
+          "true_target_flip_rate_macro_max": 0.4117647058823529,
+          "true_target_flip_rate_defined_cell_count": 5
+        },
+        {
+          "surrogate": "deberta-small-pi-v2",
+          "mean_cka": 0.451372545278504,
+          "dbs": 0.611447851817069,
+          "source_successful": 652,
+          "target_original_benign": 9,
+          "target_original_injection": 643,
+          "target_perturbed_benign": 226,
+          "true_target_flips": 217,
+          "conditional_target_benign_rate_macro_mean": 0.33792998550618536,
+          "conditional_target_benign_rate_macro_max": 0.45323741007194246,
+          "conditional_target_benign_rate_defined_cell_count": 5,
+          "true_target_flip_rate_macro_mean": 0.3280738802301993,
+          "true_target_flip_rate_macro_max": 0.44525547445255476,
+          "true_target_flip_rate_defined_cell_count": 5
+        },
+        {
+          "surrogate": "deepset-deberta-injection",
+          "mean_cka": 0.4542644298102016,
+          "dbs": 0.5925868661068476,
+          "source_successful": 132,
+          "target_original_benign": 8,
+          "target_original_injection": 124,
+          "target_perturbed_benign": 75,
+          "true_target_flips": 67,
+          "conditional_target_benign_rate_macro_mean": 0.556989247311828,
+          "conditional_target_benign_rate_macro_max": 0.8181818181818182,
+          "conditional_target_benign_rate_defined_cell_count": 5,
+          "true_target_flip_rate_macro_mean": 0.5352838732149078,
+          "true_target_flip_rate_macro_max": 0.8181818181818182,
+          "true_target_flip_rate_defined_cell_count": 5
+        },
+        {
+          "surrogate": "electra-small-ft",
+          "mean_cka": 0.4295596540530011,
+          "dbs": 0.554979968918018,
+          "source_successful": 278,
+          "target_original_benign": 40,
+          "target_original_injection": 238,
+          "target_perturbed_benign": 154,
+          "true_target_flips": 115,
+          "conditional_target_benign_rate_macro_mean": 0.5443940664974856,
+          "conditional_target_benign_rate_macro_max": 0.7777777777777778,
+          "conditional_target_benign_rate_defined_cell_count": 5,
+          "true_target_flip_rate_macro_mean": 0.4711285573595604,
+          "true_target_flip_rate_macro_max": 0.75,
+          "true_target_flip_rate_defined_cell_count": 5
+        },
+        {
+          "surrogate": "llama-prompt-guard-22m",
+          "mean_cka": 0.4123087022398452,
+          "dbs": 0.5849065485835402,
+          "source_successful": 626,
+          "target_original_benign": 14,
+          "target_original_injection": 612,
+          "target_perturbed_benign": 32,
+          "true_target_flips": 18,
+          "conditional_target_benign_rate_macro_mean": 0.051050072408211945,
+          "conditional_target_benign_rate_macro_max": 0.06349206349206349,
+          "conditional_target_benign_rate_defined_cell_count": 5,
+          "true_target_flip_rate_macro_mean": 0.0292927440552601,
+          "true_target_flip_rate_macro_max": 0.04065040650406504,
+          "true_target_flip_rate_defined_cell_count": 5
+        },
+        {
+          "surrogate": "llama-prompt-guard-86m",
+          "mean_cka": 0.4169064105029701,
+          "dbs": 0.5656751756015568,
+          "source_successful": 596,
+          "target_original_benign": 20,
+          "target_original_injection": 576,
+          "target_perturbed_benign": 107,
+          "true_target_flips": 87,
+          "conditional_target_benign_rate_macro_mean": 0.17711537358247428,
+          "conditional_target_benign_rate_macro_max": 0.24793388429752067,
+          "conditional_target_benign_rate_defined_cell_count": 5,
+          "true_target_flip_rate_macro_mean": 0.1508360920125626,
+          "true_target_flip_rate_macro_max": 0.2222222222222222,
+          "true_target_flip_rate_defined_cell_count": 5
+        },
+        {
+          "surrogate": "roberta-base-ft",
+          "mean_cka": 0.4284723991738573,
+          "dbs": 0.6293337763511132,
+          "source_successful": 418,
+          "target_original_benign": 65,
+          "target_original_injection": 353,
+          "target_perturbed_benign": 214,
+          "true_target_flips": 150,
+          "conditional_target_benign_rate_macro_mean": 0.5416740988480119,
+          "conditional_target_benign_rate_macro_max": 0.7111111111111111,
+          "conditional_target_benign_rate_defined_cell_count": 5,
+          "true_target_flip_rate_macro_mean": 0.4400717884528677,
+          "true_target_flip_rate_macro_max": 0.6708860759493671,
+          "true_target_flip_rate_defined_cell_count": 5
+        }
+      ]
+    },
+    "cka_dbs_association": {
+      "conditional_target_benign_rate": {
+        "mean_cka": {
+          "designed_pool": {
+            "label": "designed surrogate pool",
+            "unit": "one row per surrogate",
+            "n_surrogates": 10
+          },
+          "exchangeability_null": {
+            "rho": 0.7575757575757576,
+            "two_sided_p": 0.014929453262786597,
+            "n": 10,
+            "exact": true,
+            "p_value_label": "exact enumeration under the exchangeability null for the designed pool"
+          }
+        },
+        "dbs": {
+          "designed_pool": {
+            "label": "designed surrogate pool",
+            "unit": "one row per surrogate",
+            "n_surrogates": 10
+          },
+          "exchangeability_null": {
+            "rho": 0.5272727272727272,
+            "two_sided_p": 0.12310240299823633,
+            "n": 10,
+            "exact": true,
+            "p_value_label": "exact enumeration under the exchangeability null for the designed pool"
+          }
+        }
+      },
+      "true_target_flip_rate": {
+        "mean_cka": {
+          "designed_pool": {
+            "label": "designed surrogate pool",
+            "unit": "one row per surrogate",
+            "n_surrogates": 10
+          },
+          "exchangeability_null": {
+            "rho": 0.8303030303030303,
+            "two_sided_p": 0.004710648148148148,
+            "n": 10,
+            "exact": true,
+            "p_value_label": "exact enumeration under the exchangeability null for the designed pool"
+          }
+        },
+        "dbs": {
+          "designed_pool": {
+            "label": "designed surrogate pool",
+            "unit": "one row per surrogate",
+            "n_surrogates": 10
+          },
+          "exchangeability_null": {
+            "rho": 0.5878787878787879,
+            "two_sided_p": 0.08060570987654321,
+            "n": 10,
+            "exact": true,
+            "p_value_label": "exact enumeration under the exchangeability null for the designed pool"
+          }
+        }
+      }
+    },
+    "selection_ablation": {
+      "conditional_target_benign_rate": {
+        "designed_pool": {
+          "label": "saved M1/M2 designed pool",
+          "unit": "one row per surrogate",
+          "n_m1": 3,
+          "n_m2": 3
+        },
+        "one_sided_exchangeability_null": {
+          "m1_mean": 0.5139204460270571,
+          "m2_mean": 0.19057567267024267,
+          "mean_diff_pp": 32.33447733568144,
+          "mean_p_value": 0.1,
+          "m1_max_mean": 0.6619016475131584,
+          "m2_max_mean": 0.2617491441020853,
+          "max_diff_pp": 40.01525034110731,
+          "max_p_value": 0.05,
+          "exact": true,
+          "n_m1": 3,
+          "n_m2": 3,
+          "p_value_label": "exact enumeration under the exchangeability null for the designed M1/M2 pool"
+        }
+      },
+      "true_target_flip_rate": {
+        "designed_pool": {
+          "label": "saved M1/M2 designed pool",
+          "unit": "one row per surrogate",
+          "n_m1": 3,
+          "n_m2": 3
+        },
+        "one_sided_exchangeability_null": {
+          "m1_mean": 0.4733655391393379,
+          "m2_mean": 0.14285485389233976,
+          "mean_diff_pp": 33.051068524699815,
+          "mean_p_value": 0.05,
+          "m1_max_mean": 0.6378124308781243,
+          "m2_max_mean": 0.221792691783127,
+          "max_diff_pp": 41.60197390949973,
+          "max_p_value": 0.05,
+          "exact": true,
+          "n_m1": 3,
+          "n_m2": 3,
+          "p_value_label": "exact enumeration under the exchangeability null for the designed M1/M2 pool"
+        }
+      }
+    },
+    "unique_text_counts": {
+      "unique_originals": 189,
+      "unique_perturbations": 4185,
+      "unique_texts": 4374
+    },
+    "target_baseline_on_unique_originals": {
+      "target_original_benign": 22,
+      "target_original_injection": 167
+    }
+  },
+  "known_source_excluded_sensitivity": {
+    "analysis_label": "post-hoc sensitivity analysis excluding one known source",
+    "exclusion_stage": "records filtered before per-cell aggregation",
+    "excluded_source": "jackhhao/jailbreak-classification",
+    "source_successful": 3384,
+    "target_original_benign": 226,
+    "target_original_injection": 3158,
+    "target_perturbed_benign": 1203,
+    "true_target_flips": 982,
+    "conditional_target_benign_rate": 0.3554964539007092,
+    "true_target_flip_rate": 0.3109563014566181,
+    "source_composition": {
+      "Lakera/gandalf_ignore_instructions": 2851,
+      "deepset/prompt-injections": 533
+    },
+    "surrogate_macro": {
+      "analysis_unit": "one row per surrogate",
+      "aggregation": "unweighted mean and maximum across each surrogate's defined recipe-level cells",
+      "undefined_rate_handling": "undefined cell rates are excluded; a surrogate-level outcome is null when none of its cells has that outcome denominator",
+      "row_count": 10,
+      "rows": [
+        {
+          "surrogate": "bert-base-ft",
+          "mean_cka": 0.4450094194724594,
+          "dbs": 0.6247945268997297,
+          "source_successful": 310,
+          "target_original_benign": 40,
+          "target_original_injection": 270,
+          "target_perturbed_benign": 144,
+          "true_target_flips": 106,
+          "conditional_target_benign_rate_macro_mean": 0.46137262737262735,
+          "conditional_target_benign_rate_macro_max": 0.6533333333333333,
+          "conditional_target_benign_rate_defined_cell_count": 5,
+          "true_target_flip_rate_macro_mean": 0.38770678925477686,
+          "true_target_flip_rate_macro_max": 0.6060606060606061,
+          "true_target_flip_rate_defined_cell_count": 5
+        },
+        {
+          "surrogate": "bilstm-attention",
+          "mean_cka": 0.25871896606466466,
+          "dbs": 0.25871896606466466,
+          "source_successful": 501,
+          "target_original_benign": 31,
+          "target_original_injection": 470,
+          "target_perturbed_benign": 81,
+          "true_target_flips": 51,
+          "conditional_target_benign_rate_macro_mean": 0.1653926199292978,
+          "conditional_target_benign_rate_macro_max": 0.2916666666666667,
+          "conditional_target_benign_rate_defined_cell_count": 5,
+          "true_target_flip_rate_macro_mean": 0.11189661418467545,
+          "true_target_flip_rate_macro_max": 0.23595505617977527,
+          "true_target_flip_rate_defined_cell_count": 5
+        },
+        {
+          "surrogate": "deberta-base-ft-seed",
+          "mean_cka": 0.4754217532198447,
+          "dbs": 0.7047500471308572,
+          "source_successful": 284,
+          "target_original_benign": 54,
+          "target_original_injection": 230,
+          "target_perturbed_benign": 186,
+          "true_target_flips": 133,
+          "conditional_target_benign_rate_macro_mean": 0.6541770493414184,
+          "conditional_target_benign_rate_macro_max": 0.725,
+          "conditional_target_benign_rate_defined_cell_count": 5,
+          "true_target_flip_rate_macro_mean": 0.5673947643601183,
+          "true_target_flip_rate_macro_max": 0.6610169491525424,
+          "true_target_flip_rate_defined_cell_count": 5
+        },
+        {
+          "surrogate": "deberta-base-pi-v1",
+          "mean_cka": 0.329011060483958,
+          "dbs": 0.5116043897764262,
+          "source_successful": 264,
+          "target_original_benign": 5,
+          "target_original_injection": 259,
+          "target_perturbed_benign": 94,
+          "true_target_flips": 89,
+          "conditional_target_benign_rate_macro_mean": 0.3511110254391076,
+          "conditional_target_benign_rate_macro_max": 0.4576271186440678,
+          "conditional_target_benign_rate_defined_cell_count": 5,
+          "true_target_flip_rate_macro_mean": 0.3380312407898615,
+          "true_target_flip_rate_macro_max": 0.4482758620689655,
+          "true_target_flip_rate_defined_cell_count": 5
+        },
+        {
+          "surrogate": "deberta-small-pi-v2",
+          "mean_cka": 0.451372545278504,
+          "dbs": 0.611447851817069,
+          "source_successful": 418,
+          "target_original_benign": 9,
+          "target_original_injection": 409,
+          "target_perturbed_benign": 218,
+          "true_target_flips": 209,
+          "conditional_target_benign_rate_macro_mean": 0.5104801026272553,
+          "conditional_target_benign_rate_macro_max": 0.6629213483146067,
+          "conditional_target_benign_rate_defined_cell_count": 5,
+          "true_target_flip_rate_macro_mean": 0.49878533594241115,
+          "true_target_flip_rate_macro_max": 0.6551724137931034,
+          "true_target_flip_rate_defined_cell_count": 5
+        },
+        {
+          "surrogate": "deepset-deberta-injection",
+          "mean_cka": 0.4542644298102016,
+          "dbs": 0.5925868661068476,
+          "source_successful": 132,
+          "target_original_benign": 8,
+          "target_original_injection": 124,
+          "target_perturbed_benign": 75,
+          "true_target_flips": 67,
+          "conditional_target_benign_rate_macro_mean": 0.556989247311828,
+          "conditional_target_benign_rate_macro_max": 0.8181818181818182,
+          "conditional_target_benign_rate_defined_cell_count": 5,
+          "true_target_flip_rate_macro_mean": 0.5352838732149078,
+          "true_target_flip_rate_macro_max": 0.8181818181818182,
+          "true_target_flip_rate_defined_cell_count": 5
+        },
+        {
+          "surrogate": "electra-small-ft",
+          "mean_cka": 0.4295596540530011,
+          "dbs": 0.554979968918018,
+          "source_successful": 241,
+          "target_original_benign": 26,
+          "target_original_injection": 215,
+          "target_perturbed_benign": 133,
+          "true_target_flips": 108,
+          "conditional_target_benign_rate_macro_mean": 0.5463265306122449,
+          "conditional_target_benign_rate_macro_max": 0.8,
+          "conditional_target_benign_rate_defined_cell_count": 5,
+          "true_target_flip_rate_macro_mean": 0.4926332761722043,
+          "true_target_flip_rate_macro_max": 0.782608695652174,
+          "true_target_flip_rate_defined_cell_count": 5
+        },
+        {
+          "surrogate": "llama-prompt-guard-22m",
+          "mean_cka": 0.4123087022398452,
+          "dbs": 0.5849065485835402,
+          "source_successful": 409,
+          "target_original_benign": 0,
+          "target_original_injection": 409,
+          "target_perturbed_benign": 17,
+          "true_target_flips": 17,
+          "conditional_target_benign_rate_macro_mean": 0.04161397169527251,
+          "conditional_target_benign_rate_macro_max": 0.06172839506172839,
+          "conditional_target_benign_rate_defined_cell_count": 5,
+          "true_target_flip_rate_macro_mean": 0.04161397169527251,
+          "true_target_flip_rate_macro_max": 0.06172839506172839,
+          "true_target_flip_rate_defined_cell_count": 5
+        },
+        {
+          "surrogate": "llama-prompt-guard-86m",
+          "mean_cka": 0.4169064105029701,
+          "dbs": 0.5656751756015568,
+          "source_successful": 478,
+          "target_original_benign": 5,
+          "target_original_injection": 473,
+          "target_perturbed_benign": 72,
+          "true_target_flips": 67,
+          "conditional_target_benign_rate_macro_mean": 0.1488435221898532,
+          "conditional_target_benign_rate_macro_max": 0.23300970873786409,
+          "conditional_target_benign_rate_defined_cell_count": 5,
+          "true_target_flip_rate_macro_mean": 0.13973358239394013,
+          "true_target_flip_rate_macro_max": 0.22549019607843138,
+          "true_target_flip_rate_defined_cell_count": 5
+        },
+        {
+          "surrogate": "roberta-base-ft",
+          "mean_cka": 0.4284723991738573,
+          "dbs": 0.6293337763511132,
+          "source_successful": 347,
+          "target_original_benign": 48,
+          "target_original_injection": 299,
+          "target_perturbed_benign": 183,
+          "true_target_flips": 135,
+          "conditional_target_benign_rate_macro_mean": 0.5465988510983456,
+          "conditional_target_benign_rate_macro_max": 0.7209302325581395,
+          "conditional_target_benign_rate_defined_cell_count": 5,
+          "true_target_flip_rate_macro_mean": 0.4549770258980786,
+          "true_target_flip_rate_macro_max": 0.6842105263157895,
+          "true_target_flip_rate_defined_cell_count": 5
+        }
+      ]
+    },
+    "cka_dbs_association": {
+      "conditional_target_benign_rate": {
+        "mean_cka": {
+          "designed_pool": {
+            "label": "designed surrogate pool",
+            "unit": "one row per surrogate",
+            "n_surrogates": 10
+          },
+          "exchangeability_null": {
+            "rho": 0.793939393939394,
+            "two_sided_p": 0.008778108465608466,
+            "n": 10,
+            "exact": true,
+            "p_value_label": "exact enumeration under the exchangeability null for the designed pool"
+          }
+        },
+        "dbs": {
+          "designed_pool": {
+            "label": "designed surrogate pool",
+            "unit": "one row per surrogate",
+            "n_surrogates": 10
+          },
+          "exchangeability_null": {
+            "rho": 0.6121212121212121,
+            "two_sided_p": 0.06673500881834216,
+            "n": 10,
+            "exact": true,
+            "p_value_label": "exact enumeration under the exchangeability null for the designed pool"
+          }
+        }
+      },
+      "true_target_flip_rate": {
+        "mean_cka": {
+          "designed_pool": {
+            "label": "designed surrogate pool",
+            "unit": "one row per surrogate",
+            "n_surrogates": 10
+          },
+          "exchangeability_null": {
+            "rho": 0.9030303030303031,
+            "two_sided_p": 0.0008074294532627866,
+            "n": 10,
+            "exact": true,
+            "p_value_label": "exact enumeration under the exchangeability null for the designed pool"
+          }
+        },
+        "dbs": {
+          "designed_pool": {
+            "label": "designed surrogate pool",
+            "unit": "one row per surrogate",
+            "n_surrogates": 10
+          },
+          "exchangeability_null": {
+            "rho": 0.6,
+            "two_sided_p": 0.07342647707231041,
+            "n": 10,
+            "exact": true,
+            "p_value_label": "exact enumeration under the exchangeability null for the designed pool"
+          }
+        }
+      }
+    },
+    "selection_ablation": {
+      "conditional_target_benign_rate": {
+        "designed_pool": {
+          "label": "saved M1/M2 designed pool",
+          "unit": "one row per surrogate",
+          "n_m1": 3,
+          "n_m2": 3
+        },
+        "one_sided_exchangeability_null": {
+          "m1_mean": 0.5738821330935006,
+          "m2_mean": 0.18603920568789264,
+          "mean_diff_pp": 38.78429274056079,
+          "mean_p_value": 0.05,
+          "m1_max_mean": 0.735367722165475,
+          "m2_max_mean": 0.27034072679082094,
+          "max_diff_pp": 46.5026995374654,
+          "max_p_value": 0.05,
+          "exact": true,
+          "n_m1": 3,
+          "n_m2": 3,
+          "p_value_label": "exact enumeration under the exchangeability null for the designed M1/M2 pool"
+        }
+      },
+      "true_target_flip_rate": {
+        "designed_pool": {
+          "label": "saved M1/M2 designed pool",
+          "unit": "one row per surrogate",
+          "n_m1": 3,
+          "n_m2": 3
+        },
+        "one_sided_exchangeability_null": {
+          "m1_mean": 0.5338213245058124,
+          "m2_mean": 0.16384727555660317,
+          "mean_diff_pp": 36.997404894920926,
+          "mean_p_value": 0.05,
+          "m1_max_mean": 0.7114570603758213,
+          "m2_max_mean": 0.2486531044368231,
+          "max_diff_pp": 46.280395593899826,
+          "max_p_value": 0.05,
+          "exact": true,
+          "n_m1": 3,
+          "n_m2": 3,
+          "p_value_label": "exact enumeration under the exchangeability null for the designed M1/M2 pool"
+        }
+      }
+    }
+  },
+  "membership": {
+    "M1": [
+      "deberta-base-ft-seed",
+      "deepset-deberta-injection",
+      "deberta-small-pi-v2"
+    ],
+    "M2": [
+      "llama-prompt-guard-22m",
+      "deberta-base-pi-v1",
+      "bilstm-attention"
+    ],
+    "basis": "saved original mean CKA membership; audit changes outcomes only"
+  }
+}

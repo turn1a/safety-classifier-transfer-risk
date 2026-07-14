@@ -2,6 +2,7 @@
 # the fraction that flip its prediction (SPEC.md §3.1 step 5).
 transfer:
   target: protectai/deberta-v3-base-prompt-injection-v2
+  benign_label: 0
   batch_size: 64
   max_seq_len: 512 # the target judges transfer over the same window the attack used (attacks.max_seq_len)
   # How many worked transfer cases (surrogate AND target flipped) to persist for the write-up's

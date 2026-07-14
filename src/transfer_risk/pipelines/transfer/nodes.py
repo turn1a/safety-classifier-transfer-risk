@@ -13,8 +13,8 @@ from transfer_risk.modeling import predict
 
 logger = logging.getLogger(__name__)
 
-# The class id meaning "not an injection"; a target prediction equal to it on a perturbed
-# prompt means the attack transferred (matches transfer_rate's default).
+# The class id meaning "not an injection"; used for the conditional target-benign rate on
+# perturbed prompts (matches transfer_rate's default benign_label).
 _BENIGN_LABEL = 0
 
 
@@ -100,13 +100,14 @@ def evaluate_transfer(
     params: dict[str, Any],
     device_params: dict[str, Any],
 ) -> tuple[pd.DataFrame, list[dict[str, Any]]]:
-    """Feed successful adversarial examples to the frozen target; record transfer rate.
+    """Feed successful adversarial examples to the frozen target; record conditional benign rate.
 
-    The transfer rate per (surrogate, recipe) is the fraction of the surrogate's
-    successful adversarial examples (injection -> benign on the surrogate) that the
-    frozen target *also* predicts benign — i.e. the attack transfers. Alongside the rate
-    table, a few genuinely transferred examples (surrogate and target both flipped) are
-    selected for the write-up's before/after illustration.
+    For each (surrogate, recipe) cell the stored ``transfer_rate`` is the fraction of
+    successful source attacks whose perturbed text the frozen target predicts benign. That
+    measures target benign-on-perturbed given a successful source attack; it is not a true
+    target flip because original-prompt target predictions are not evaluated here. The
+    post-hoc ``audit`` pipeline recomputes true flips from saved text. A few cases where the
+    target also predicts benign on perturbed text are kept for qualitative examples.
 
     Args:
         adversarial_examples: PartitionedDataset of per-cell loaders (one cell per partition).
@@ -115,13 +116,14 @@ def evaluate_transfer(
         device_params: the ``device`` block.
 
     Returns:
-        The per-(surrogate, recipe) transfer-rate table and a small list of worked
-        transferred examples (``surrogate``, ``recipe``, ``original``, ``perturbed``,
+        The per-(surrogate, recipe) conditional target-benign table and a small list of worked
+        examples (``surrogate``, ``recipe``, ``original``, ``perturbed``,
         ``n_words_changed``).
     """
     device = resolve_device(device_params["policy"])
     model = target["model"].to(device).eval()
     tokenizer = target["tokenizer"]
+    benign_label = int(params.get("benign_label", _BENIGN_LABEL))
     max_seq_len = int(params.get("max_seq_len", 256))
     batch_size = int(params["batch_size"])
     max_examples = int(params.get("max_transferred_examples", 8))
@@ -146,7 +148,7 @@ def evaluate_transfer(
             batch_size=batch_size,
             device=device,
         )
-        rate = transfer_rate(target_preds)
+        rate = transfer_rate(target_preds, benign_label=benign_label)
         rows.append(
             {
                 "surrogate": surrogate,
@@ -156,7 +158,7 @@ def evaluate_transfer(
             }
         )
         for record, prediction in zip(successful, target_preds, strict=True):
-            if prediction == _BENIGN_LABEL:
+            if prediction == benign_label:
                 candidates.append(
                     {
                         "surrogate": surrogate,

@@ -1,0 +1,5 @@
+# Explicit post-hoc CKA sensitivity: the dedicated local training dataframe only.
+# The sample is intentionally fixed at 800 rows of each canonical label; it neither trains
+# models nor creates attack data.
+similarity_audit:
+  n_probe: 1600

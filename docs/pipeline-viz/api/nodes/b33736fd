@@ -1,5 +1,5 @@
 {
-  "type": "huggingface.hugging_face_dataset.HFDataset",
+  "type": "io.memory_dataset.MemoryDataset",
   "filepath": null,
   "run_command": null,
   "preview": null,

@@ -1,0 +1,13 @@
+{
+  "code": "def publish_public_dataset_audit(dataset_audit: dict[str, Any]) -> dict[str, Any]:\n    \"\"\"Publish the safe dataset audit aggregate.\n\n    Args:\n        dataset_audit: Saved dataset audit JSON.\n\n    Returns:\n        Public dataset audit for ``docs/artifacts/dataset_audit.json``.\n    \"\"\"\n    return publish_dataset_audit(dataset_audit)\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/reporting/nodes.py",
+  "parameters": {},
+  "run_command": "kedro run --to-nodes='publish_public_dataset_audit'",
+  "inputs": [
+    "dataset_audit"
+  ],
+  "outputs": [
+    "pub_dataset_audit"
+  ],
+  "preview": null
+}

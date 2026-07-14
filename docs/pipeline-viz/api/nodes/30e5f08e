@@ -1,0 +1,32 @@
+{
+  "code": "def recompute_master_dbs(\n    master_results_table: pd.DataFrame,\n    cka_matrices: dict[str, Any],\n    params_similarity: dict[str, Any],\n) -> pd.DataFrame:\n    \"\"\"Recompute DBS from saved CKA matrices without mutating upstream artifacts.\n\n    Args:\n        master_results_table: Saved master results table.\n        cka_matrices: Saved CKA matrices keyed by surrogate.\n        params_similarity: Similarity-stage parameters (``dbs.box`` half-width).\n\n    Returns:\n        Copy of the master table with corrected ``dbs`` and ``n_target_benign``.\n    \"\"\"\n    box = int(params_similarity[\"dbs\"][\"box\"])\n    corrected = apply_corrected_dbs(master_results_table, cka_matrices, box=box)\n    logger.info(\"Recomputed corrected DBS for %d master rows (box=%d)\", len(corrected), box)\n    return corrected\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/reporting/nodes.py",
+  "parameters": {
+    "similarity": {
+      "n_probe": 2000,
+      "max_seq_len": 512,
+      "pooling": "cls",
+      "cka": {
+        "mode": "minibatch",
+        "batch_size": 64
+      },
+      "dbs": {
+        "box": 1
+      },
+      "thresholds": {
+        "r1_quantile": 0.75,
+        "r2_quantile": 0.25
+      }
+    }
+  },
+  "run_command": "kedro run --to-nodes='recompute_master_dbs'",
+  "inputs": [
+    "master_results_table",
+    "cka_matrices",
+    "params:similarity"
+  ],
+  "outputs": [
+    "master_results_corrected"
+  ],
+  "preview": null
+}

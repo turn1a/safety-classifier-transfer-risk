@@ -4,6 +4,7 @@ from kedro.pipeline import Pipeline, node
 
 from transfer_risk.pipelines.risk.nodes import (
     fit_regressors,
+    recompute_risk_master_dbs,
     run_ablation,
     track_run_metrics,
 )
@@ -14,15 +15,21 @@ def create_pipeline() -> Pipeline:
     return Pipeline(
         [
             node(
+                recompute_risk_master_dbs,
+                inputs=["master_results_table", "cka_matrices", "params:similarity"],
+                outputs="risk_master_results_corrected",
+                name="recompute_risk_master_dbs",
+            ),
+            node(
                 fit_regressors,
-                inputs=["master_results_table", "params:risk", "params:seed"],
+                inputs=["risk_master_results_corrected", "params:risk", "params:seed"],
                 outputs="regressors",
                 name="fit_regressors",
             ),
             node(
                 run_ablation,
                 inputs=[
-                    "master_results_table",
+                    "risk_master_results_corrected",
                     "surrogate_selection",
                     "params:risk",
                     "params:seed",
@@ -33,7 +40,7 @@ def create_pipeline() -> Pipeline:
             node(
                 track_run_metrics,
                 inputs=[
-                    "master_results_table",
+                    "risk_master_results_corrected",
                     "ablation_results",
                     "regressors",
                     "thresholds",

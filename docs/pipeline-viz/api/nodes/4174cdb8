@@ -1,0 +1,39 @@
+{
+  "code": "def run_target_audit(\n    adversarial_examples: dict[str, list[dict[str, Any]]],\n    target: dict[str, Any],\n    task_splits: dict[str, pd.DataFrame],\n    master_results_table: pd.DataFrame,\n    transfer_params: dict[str, Any],\n    audit_params: dict[str, Any],\n    device_params: dict[str, Any],\n    *,\n    predict_fn: PredictFn = predict,\n) -> tuple[pd.DataFrame, pd.DataFrame, dict[str, Any]]:\n    \"\"\"Evaluate the frozen target once and persist only raw, prediction-derived aggregates.\n\n    Reuses successful source attack records, deduplicates target inputs, and records\n    original/perturbed target predictions to quantify conditional benign rates and true target\n    flips. The legacy-shaped raw cell table is finalized separately so corrected DBS can be\n    applied without repeating target inference. No surrogate models are loaded.\n\n    Args:\n        adversarial_examples: Saved ``{surrogate__recipe: records}`` attack table.\n        target: Frozen target bundle from ``target_model``.\n        task_splits: Saved train/val/test splits for source attribution.\n        master_results_table: Saved master table used only to retain the legacy raw cell grid.\n        transfer_params: Transfer-stage parameters (``max_seq_len``, ``batch_size``,\n            ``benign_label``).\n        audit_params: Audit parameters (``eval_set_size``, ``max_prompt_chars``,\n            ``excluded_training_source``).\n        device_params: Device resolution parameters.\n        predict_fn: Injectable prediction function for tests.\n\n    Returns:\n        Legacy-compatible raw cells, raw source aggregates, and non-text raw context.\n    \"\"\"\n    benign_label = int(transfer_params.get(\"benign_label\", 0))\n    injection_label = int(audit_params.get(\"injection_label\", 1))\n    max_seq_len = int(transfer_params.get(\"max_seq_len\", 256))\n    batch_size = int(transfer_params[\"batch_size\"])\n    eval_set_size = int(audit_params[\"eval_set_size\"])\n    max_prompt_chars = int(audit_params[\"max_prompt_chars\"])\n    excluded_source = str(\n        audit_params.get(\"excluded_training_source\", target_audit.KNOWN_TARGET_TRAINING_SOURCE)\n    )\n    if excluded_source != target_audit.KNOWN_TARGET_TRAINING_SOURCE:\n        msg = (\n            f\"audit.excluded_training_source must be {target_audit.KNOWN_TARGET_TRAINING_SOURCE!r}\"\n        )\n        raise ValueError(msg)\n\n    source_map = target_audit.build_eval_original_source_map(\n        task_splits[\"test\"],\n        eval_set_size=eval_set_size,\n        max_prompt_chars=max_prompt_chars,\n    )\n    flattened = target_audit.flatten_successful_records(adversarial_examples)\n    annotated = target_audit.assign_sources_to_records(\n        flattened,\n        source_map,\n        max_prompt_chars=max_prompt_chars,\n    )\n    unique_originals = target_audit.dedupe_texts([record[\"original\"] for record in annotated])\n    unique_perturbed = target_audit.dedupe_texts([record[\"perturbed\"] for record in annotated])\n    unique_text_stats = target_audit.collect_unique_texts(annotated)\n\n    device = resolve_device(device_params[\"policy\"])\n    model = target[\"model\"].to(device).eval()\n    tokenizer = target[\"tokenizer\"]\n    original_predictions = _predict_unique_texts(\n        unique_originals,\n        predict_fn=predict_fn,\n        model=model,\n        tokenizer=tokenizer,\n        max_seq_len=max_seq_len,\n        batch_size=batch_size,\n        device=device,\n    )\n    perturbed_predictions = _predict_unique_texts(\n        unique_perturbed,\n        predict_fn=predict_fn,\n        model=model,\n        tokenizer=tokenizer,\n        max_seq_len=max_seq_len,\n        batch_size=batch_size,\n        device=device,\n    )\n    prediction_records = target_audit.attach_predictions(\n        annotated, original_predictions, perturbed_predictions\n    )\n    baseline_counts = target_audit.baseline_counts_on_unique_originals(\n        unique_originals,\n        original_predictions,\n        benign_label=benign_label,\n    )\n\n    cells = target_audit.build_full_grid_cells(\n        prediction_records,\n        master_results_table,\n        benign_label=benign_label,\n        injection_label=injection_label,\n    )\n    sources = target_audit.aggregate_by_source(\n        prediction_records,\n        benign_label=benign_label,\n        injection_label=injection_label,\n    )\n    context = target_audit.build_raw_audit_context(\n        excluded_source=excluded_source,\n        unique_text_stats=unique_text_stats,\n        baseline_counts=baseline_counts,\n    )\n    logger.info(\n        \"Target audit inference aggregates complete: %d source successes, %d true flips\",\n        int(cells[\"source_successful\"].sum()),\n        int(cells[\"true_target_flips\"].sum()),\n    )\n    return cells, sources, context\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/audit/nodes.py",
+  "parameters": {
+    "transfer": {
+      "target": "protectai/deberta-v3-base-prompt-injection-v2",
+      "benign_label": 0,
+      "batch_size": 64,
+      "max_seq_len": 512,
+      "max_transferred_examples": 8
+    },
+    "audit": {
+      "eval_set_size": 191,
+      "max_prompt_chars": 3200,
+      "injection_label": 1,
+      "excluded_training_source": "jackhhao/jailbreak-classification"
+    },
+    "device": {
+      "policy": "mps_or_cpu",
+      "allow_mps_fallback": true
+    }
+  },
+  "run_command": "kedro run --to-nodes='run_target_audit'",
+  "inputs": [
+    "adversarial_examples",
+    "target_model",
+    "task_splits",
+    "master_results_table",
+    "params:transfer",
+    "params:audit",
+    "params:device"
+  ],
+  "outputs": [
+    "target_audit_raw_cells",
+    "target_audit_raw_sources",
+    "target_audit_raw_context"
+  ],
+  "preview": null
+}

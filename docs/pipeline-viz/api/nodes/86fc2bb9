@@ -1,0 +1,54 @@
+{
+  "code": "def build_training_probe_sensitivity_summary(  # noqa: PLR0913\n    training_probe: pd.DataFrame,\n    training_similarity: pd.DataFrame,\n    training_thresholds: dict[str, Any],\n    training_selection: dict[str, Any],\n    original_similarity: pd.DataFrame,\n    original_selection: dict[str, Any],\n    original_cka_matrices: dict[str, Any],\n    target_audit_summary: dict[str, Any],\n    similarity_params: dict[str, Any],\n    risk_params: dict[str, Any],\n    seed: int,\n) -> dict[str, Any]:\n    \"\"\"Build the public post-hoc sensitivity summary from saved aggregate evidence.\n\n    Args:\n        training_probe: Saved training-only probe.\n        training_similarity: Recomputed training-probe CKA/DBS table.\n        training_thresholds: Thresholds calibrated from training-probe mean CKA.\n        training_selection: Training-probe M1/M2 membership.\n        original_similarity: Saved original similarity table.\n        original_selection: Saved original M1/M2 membership.\n        original_cka_matrices: Saved original matrices used for corrected DBS only.\n        target_audit_summary: Final stable target-outcome audit aggregate.\n        similarity_params: Original CKA settings.\n        risk_params: Risk-stage ablation settings.\n        seed: Root reproducibility seed.\n\n    Returns:\n        JSON-compatible post-hoc sensitivity summary with no raw attack or prompt data.\n    \"\"\"\n    summary = summarize_training_probe_sensitivity(\n        training_probe=training_probe,\n        training_similarity=training_similarity,\n        training_thresholds=training_thresholds,\n        training_selection=training_selection,\n        original_similarity=original_similarity,\n        original_selection=original_selection,\n        original_cka_matrices=original_cka_matrices,\n        target_audit_summary=target_audit_summary,\n        similarity_params=similarity_params,\n        risk_params=risk_params,\n        seed=seed,\n    )\n    logger.info(\n        \"Prepared post-hoc training-probe CKA sensitivity summary from %d probe rows\",\n        summary[\"probe_metadata\"][\"n_rows\"],\n    )\n    return summary\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/similarity_audit/nodes.py",
+  "parameters": {
+    "similarity": {
+      "n_probe": 2000,
+      "max_seq_len": 512,
+      "pooling": "cls",
+      "cka": {
+        "mode": "minibatch",
+        "batch_size": 64
+      },
+      "dbs": {
+        "box": 1
+      },
+      "thresholds": {
+        "r1_quantile": 0.75,
+        "r2_quantile": 0.25
+      }
+    },
+    "risk": {
+      "decision_tree": {
+        "max_depth": 3
+      },
+      "random_forest": {
+        "n_estimators": 200,
+        "max_depth": 4
+      },
+      "ablation": {
+        "n_permutations": 10000,
+        "alpha": 0.05
+      }
+    },
+    "seed": 20260616
+  },
+  "run_command": "kedro run --to-nodes='build_training_probe_sensitivity_summary'",
+  "inputs": [
+    "training_probe_set",
+    "training_similarity_table",
+    "training_similarity_thresholds",
+    "training_surrogate_selection",
+    "similarity_table",
+    "surrogate_selection",
+    "cka_matrices",
+    "target_audit_summary",
+    "params:similarity",
+    "params:risk",
+    "params:seed"
+  ],
+  "outputs": [
+    "pub_training_probe_similarity_sensitivity"
+  ],
+  "preview": null
+}

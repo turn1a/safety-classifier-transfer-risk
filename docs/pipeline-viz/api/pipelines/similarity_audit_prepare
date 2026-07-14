@@ -1,0 +1,281 @@
+{
+  "nodes": [
+    {
+      "id": "8289686f",
+      "name": "task_splits",
+      "tags": [
+        "models",
+        "llama-prompt-guard-86m",
+        "attacks",
+        "deberta-base-ft-seed",
+        "pwws",
+        "llama-prompt-guard-22m",
+        "bert-base-ft",
+        "bert-attack",
+        "audit",
+        "electra-small-ft",
+        "similarity_audit_prepare",
+        "textfooler",
+        "deepwordbug",
+        "deberta-base-pi-v1",
+        "bae",
+        "roberta-base-ft",
+        "deepset-deberta-injection",
+        "bilstm-attention",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "models",
+        "attacks",
+        "data",
+        "stage",
+        "audit",
+        "__default__",
+        "similarity_audit_prepare"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_input",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "fccab00d",
+      "name": "extract_training_split",
+      "tags": [
+        "similarity_audit_prepare"
+      ],
+      "pipelines": [
+        "similarity_audit_prepare"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "extract_training_split"
+    },
+    {
+      "id": "f2d559fd",
+      "name": "training_split",
+      "tags": [
+        "similarity_audit",
+        "similarity_audit_prepare"
+      ],
+      "pipelines": [
+        "similarity_audit",
+        "similarity_audit_prepare"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_input",
+      "dataset_type": "pandas.parquet_dataset.ParquetDataset"
+    }
+  ],
+  "edges": [
+    {
+      "source": "fccab00d",
+      "target": "f2d559fd"
+    },
+    {
+      "source": "8289686f",
+      "target": "fccab00d"
+    }
+  ],
+  "layers": [
+    "feature",
+    "model_input",
+    "model_output",
+    "models",
+    "primary",
+    "raw",
+    "reporting"
+  ],
+  "tags": [
+    {
+      "id": "attacks",
+      "name": "attacks"
+    },
+    {
+      "id": "audit",
+      "name": "audit"
+    },
+    {
+      "id": "audit_finalization",
+      "name": "audit_finalization"
+    },
+    {
+      "id": "audit_reporting",
+      "name": "audit_reporting"
+    },
+    {
+      "id": "bae",
+      "name": "bae"
+    },
+    {
+      "id": "bert-attack",
+      "name": "bert-attack"
+    },
+    {
+      "id": "bert-base-ft",
+      "name": "bert-base-ft"
+    },
+    {
+      "id": "bilstm-attention",
+      "name": "bilstm-attention"
+    },
+    {
+      "id": "deberta-base-ft-seed",
+      "name": "deberta-base-ft-seed"
+    },
+    {
+      "id": "deberta-base-pi-v1",
+      "name": "deberta-base-pi-v1"
+    },
+    {
+      "id": "deberta-small-pi-v2",
+      "name": "deberta-small-pi-v2"
+    },
+    {
+      "id": "deepset-deberta-injection",
+      "name": "deepset-deberta-injection"
+    },
+    {
+      "id": "deepwordbug",
+      "name": "deepwordbug"
+    },
+    {
+      "id": "electra-small-ft",
+      "name": "electra-small-ft"
+    },
+    {
+      "id": "llama-prompt-guard-22m",
+      "name": "llama-prompt-guard-22m"
+    },
+    {
+      "id": "llama-prompt-guard-86m",
+      "name": "llama-prompt-guard-86m"
+    },
+    {
+      "id": "models",
+      "name": "models"
+    },
+    {
+      "id": "pwws",
+      "name": "pwws"
+    },
+    {
+      "id": "roberta-base-ft",
+      "name": "roberta-base-ft"
+    },
+    {
+      "id": "similarity",
+      "name": "similarity"
+    },
+    {
+      "id": "similarity_audit",
+      "name": "similarity_audit"
+    },
+    {
+      "id": "similarity_audit_prepare",
+      "name": "similarity_audit_prepare"
+    },
+    {
+      "id": "textfooler",
+      "name": "textfooler"
+    },
+    {
+      "id": "transfer",
+      "name": "transfer"
+    }
+  ],
+  "pipelines": [
+    {
+      "id": "__default__",
+      "name": "__default__"
+    },
+    {
+      "id": "smoke",
+      "name": "smoke"
+    },
+    {
+      "id": "reporting",
+      "name": "reporting"
+    },
+    {
+      "id": "similarity",
+      "name": "similarity"
+    },
+    {
+      "id": "transfer",
+      "name": "transfer"
+    },
+    {
+      "id": "models",
+      "name": "models"
+    },
+    {
+      "id": "audit",
+      "name": "audit"
+    },
+    {
+      "id": "similarity_audit_prepare",
+      "name": "similarity_audit_prepare"
+    },
+    {
+      "id": "data",
+      "name": "data"
+    },
+    {
+      "id": "risk",
+      "name": "risk"
+    },
+    {
+      "id": "similarity_audit",
+      "name": "similarity_audit"
+    },
+    {
+      "id": "attacks",
+      "name": "attacks"
+    },
+    {
+      "id": "audit_reporting",
+      "name": "audit_reporting"
+    },
+    {
+      "id": "audit_finalization",
+      "name": "audit_finalization"
+    },
+    {
+      "id": "stage",
+      "name": "stage"
+    },
+    {
+      "id": "downstream",
+      "name": "downstream"
+    }
+  ],
+  "modular_pipelines": {
+    "__root__": {
+      "id": "__root__",
+      "name": "__root__",
+      "inputs": [],
+      "outputs": [],
+      "children": [
+        {
+          "id": "8289686f",
+          "type": "data"
+        },
+        {
+          "id": "f2d559fd",
+          "type": "data"
+        },
+        {
+          "id": "fccab00d",
+          "type": "task"
+        }
+      ]
+    }
+  },
+  "selected_pipeline": "similarity_audit_prepare"
+}

@@ -1,0 +1,12 @@
+{
+  "type": "artifacts.mlflow_artifact_dataset.CSVDataset.MlflowCSVDataset",
+  "filepath": "<workspace>/docs/artifacts/target_audit_cells.csv",
+  "run_command": "kedro run --to-outputs=pub_target_audit_cells",
+  "preview": null,
+  "preview_type": null,
+  "stats": {
+    "rows": 50,
+    "columns": 11,
+    "file_size": 6050
+  }
+}

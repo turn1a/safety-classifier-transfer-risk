@@ -1,0 +1,13 @@
+{
+  "code": "def build_public_training_probe_similarity(training_similarity: pd.DataFrame) -> pd.DataFrame:\n    \"\"\"Select the public training-probe CKA and corrected-DBS table.\n\n    Args:\n        training_similarity: Internal per-surrogate training-probe similarity table.\n\n    Returns:\n        Public three-column training-probe similarity table.\n    \"\"\"\n    public_table = export_training_probe_similarity(training_similarity)\n    logger.info(\"Prepared %d public training-probe similarity rows\", len(public_table))\n    return public_table\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/similarity_audit/nodes.py",
+  "parameters": {},
+  "run_command": "kedro run --to-nodes='build_public_training_probe_similarity'",
+  "inputs": [
+    "training_similarity_table"
+  ],
+  "outputs": [
+    "pub_training_probe_similarity"
+  ],
+  "preview": null
+}

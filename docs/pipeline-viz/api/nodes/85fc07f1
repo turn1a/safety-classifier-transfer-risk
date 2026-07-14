@@ -2,6 +2,7 @@
   "parameters": {
     "transfer": {
       "target": "protectai/deberta-v3-base-prompt-injection-v2",
+      "benign_label": 0,
       "batch_size": 64,
       "max_seq_len": 512,
       "max_transferred_examples": 8

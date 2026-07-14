@@ -1,0 +1,89 @@
+{
+  "counts": {
+    "n_cells": 50,
+    "n_surrogates": 10,
+    "n_recipes": 5,
+    "attack_attempts_per_cell": 191,
+    "query_budget": 6000
+  },
+  "transfer": {
+    "macro_cell_mean": 0.38216487917614733,
+    "pooled_target_benign": 1398,
+    "pooled_successful": 4362,
+    "pooled_target_benign_rate": 0.3204951856946355,
+    "cell_successful_min": 6,
+    "cell_successful_median": 85.0,
+    "cell_successful_mean": 87.24,
+    "cell_successful_max": 161
+  },
+  "associations": {
+    "surrogate": {
+      "mean_cka": {
+        "rho": 0.7575757575757576,
+        "two_sided_p": 0.014929453262786597,
+        "n": 10,
+        "exact": true
+      },
+      "dbs": {
+        "rho": 0.5272727272727272,
+        "two_sided_p": 0.12310240299823633,
+        "n": 10,
+        "exact": true
+      }
+    },
+    "recipe_sensitivity": {
+      "bae": {
+        "rho": 0.6,
+        "two_sided_p": 0.07342647707231041,
+        "n": 10,
+        "exact": true
+      },
+      "bert-attack": {
+        "rho": 0.7575757575757576,
+        "two_sided_p": 0.014929453262786597,
+        "n": 10,
+        "exact": true
+      },
+      "deepwordbug": {
+        "rho": 0.5515151515151515,
+        "two_sided_p": 0.10488260582010582,
+        "n": 10,
+        "exact": true
+      },
+      "pwws": {
+        "rho": 0.7818181818181819,
+        "two_sided_p": 0.010530753968253969,
+        "n": 10,
+        "exact": true
+      },
+      "textfooler": {
+        "rho": 0.7454545454545455,
+        "two_sided_p": 0.01740575396825397,
+        "n": 10,
+        "exact": true
+      }
+    }
+  },
+  "thresholds": {
+    "r1": 0.44978176382699286,
+    "r2": 0.4134581293056264
+  },
+  "ablation": {
+    "m1_mean": 0.5139204460270571,
+    "m2_mean": 0.19057567267024267,
+    "mean_diff_pp": 32.33447733568144,
+    "mean_p_value": 0.1,
+    "max_diff_pp": 40.01525034110731,
+    "max_p_value": 0.05,
+    "n_m1": 3,
+    "n_m2": 3
+  },
+  "attack_outcomes": {
+    "attempted": 9550,
+    "eligible": 8600,
+    "successful": 4362,
+    "failed": 4238,
+    "skipped": 950,
+    "eligible_attack_success_rate": 0.5072093023255814
+  }
+}

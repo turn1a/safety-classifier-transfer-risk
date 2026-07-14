@@ -1,58 +1,198 @@
 {
   "nodes": [
     {
-      "id": "a526bcbb",
-      "name": "surrogate_registry",
-      "tags": [
-        "transfer",
-        "models"
-      ],
+      "id": "014ac4b5",
+      "name": "dataset_audit",
+      "tags": [],
       "pipelines": [
-        "__default__",
-        "transfer",
         "downstream",
-        "models",
-        "stage"
+        "data",
+        "stage",
+        "__default__",
+        "reporting"
       ],
       "type": "data",
       "modular_pipelines": null,
       "node_extras": null,
-      "layer": "primary",
+      "layer": "reporting",
       "dataset_type": "json.json_dataset.JSONDataset"
     },
     {
-      "id": "85e11043",
-      "name": "params:seed",
+      "id": "6d297261",
+      "name": "build_qualitative_examples",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "build_qualitative_examples"
+    },
+    {
+      "id": "533f7b78",
+      "name": "pub_qualitative_examples",
       "tags": [
-        "deepwordbug",
-        "bert-attack",
-        "bae",
-        "pwws",
-        "deberta-small-pi-v2",
-        "deberta-base-ft-seed",
-        "electra-small-ft",
-        "deberta-base-pi-v1",
-        "deepset-deberta-injection",
-        "models",
-        "textfooler",
-        "roberta-base-ft",
-        "bilstm-attention",
-        "llama-prompt-guard-22m",
-        "llama-prompt-guard-86m",
-        "similarity",
-        "attacks",
-        "bert-base-ft"
+        "audit_reporting"
       ],
       "pipelines": [
-        "data",
+        "audit_reporting",
         "__default__",
-        "similarity",
-        "risk",
-        "downstream",
-        "models",
-        "attacks",
-        "stage",
-        "smoke"
+        "reporting",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.JSONDataset.MlflowJSONDataset"
+    },
+    {
+      "id": "38aedcc3",
+      "name": "build_results_manifest",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "reporting": {
+          "manifest": {
+            "schema_version": "1.0",
+            "experiment_commit": "5af7330",
+            "uv_lock_sha256": "fed6bd35da2963e19ac5fe00ab14fff0937120bb2c92e132741256cfc1de8f36",
+            "hardware": {
+              "instance_type": "r8g.48xlarge",
+              "vcpus": 192,
+              "architecture": "Graviton4",
+              "pricing_model": "spot",
+              "victim_backend": "torch on ARM"
+            },
+            "completion_note": "Most attack shards ran on a 192-vCPU Graviton4 spot instance; final shard reductions and reporting completed locally."
+          }
+        },
+        "seed": 20260616,
+        "models": {
+          "target": "protectai/deberta-v3-base-prompt-injection-v2",
+          "surrogates": [
+            {
+              "name": "deberta-base-pi-v1",
+              "kind": "pretrained"
+            },
+            {
+              "name": "deberta-small-pi-v2",
+              "kind": "pretrained",
+              "gated": true
+            },
+            {
+              "name": "deepset-deberta-injection",
+              "kind": "pretrained"
+            },
+            {
+              "name": "llama-prompt-guard-86m",
+              "kind": "pretrained",
+              "gated": true
+            },
+            {
+              "name": "llama-prompt-guard-22m",
+              "kind": "pretrained",
+              "gated": true
+            },
+            {
+              "name": "bert-base-ft",
+              "kind": "finetune"
+            },
+            {
+              "name": "roberta-base-ft",
+              "kind": "finetune"
+            },
+            {
+              "name": "electra-small-ft",
+              "kind": "finetune"
+            },
+            {
+              "name": "deberta-base-ft-seed",
+              "kind": "finetune"
+            },
+            {
+              "name": "bilstm-attention",
+              "kind": "bilstm"
+            }
+          ],
+          "finetune": {
+            "lr": 0.00002,
+            "batch_size": 32,
+            "epochs": 3,
+            "max_seq_len": 512
+          },
+          "bilstm": {
+            "embed_dim": 128,
+            "hidden_dim": 256,
+            "num_layers": 2,
+            "dropout": 0.3,
+            "lr": 0.001,
+            "batch_size": 64,
+            "epochs": 5,
+            "max_vocab": 20000,
+            "max_seq_len": 512
+          }
+        },
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler",
+            "bae",
+            "bert-attack"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 191,
+          "max_seq_len": 512,
+          "max_prompt_chars": 3200,
+          "query_budget": 6000,
+          "shard_size": 100000
+        },
+        "similarity": {
+          "n_probe": 2000,
+          "max_seq_len": 512,
+          "pooling": "cls",
+          "cka": {
+            "mode": "minibatch",
+            "batch_size": 64
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        },
+        "transfer": {
+          "target": "protectai/deberta-v3-base-prompt-injection-v2",
+          "benign_label": 0,
+          "batch_size": 64,
+          "max_seq_len": 512,
+          "max_transferred_examples": 8
+        }
+      },
+      "full_name": "build_results_manifest"
+    },
+    {
+      "id": "961b6053",
+      "name": "params:reporting",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
       ],
       "type": "parameters",
       "modular_pipelines": null,
@@ -61,18 +201,349 @@
       "dataset_type": null
     },
     {
-      "id": "dc6633a2",
-      "name": "adversarial__deberta-base-pi-v1__bae",
+      "id": "85e11043",
+      "name": "params:seed",
       "tags": [
-        "transfer",
-        "bae",
+        "models",
+        "llama-prompt-guard-86m",
+        "similarity_audit",
+        "attacks",
+        "deberta-base-ft-seed",
+        "pwws",
+        "llama-prompt-guard-22m",
+        "bert-base-ft",
+        "bert-attack",
+        "audit",
+        "electra-small-ft",
+        "textfooler",
+        "deepwordbug",
         "deberta-base-pi-v1",
+        "bae",
+        "roberta-base-ft",
+        "deepset-deberta-injection",
+        "bilstm-attention",
+        "audit_finalization",
+        "similarity",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "models",
+        "risk",
+        "similarity_audit",
+        "smoke",
+        "attacks",
+        "data",
+        "stage",
+        "downstream",
+        "audit_finalization",
+        "similarity",
+        "__default__",
+        "reporting",
+        "audit"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "d3e844b2",
+      "name": "params:models",
+      "tags": [
+        "models",
+        "deberta-base-pi-v1",
+        "llama-prompt-guard-86m",
+        "roberta-base-ft",
+        "deepset-deberta-injection",
+        "deberta-base-ft-seed",
+        "bilstm-attention",
+        "llama-prompt-guard-22m",
+        "bert-base-ft",
+        "electra-small-ft",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "models",
+        "downstream",
+        "stage",
+        "__default__",
+        "reporting"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "9d4defaf",
+      "name": "params:attacks",
+      "tags": [
+        "llama-prompt-guard-86m",
+        "attacks",
+        "deberta-base-ft-seed",
+        "pwws",
+        "llama-prompt-guard-22m",
+        "bert-base-ft",
+        "bert-attack",
+        "electra-small-ft",
+        "textfooler",
+        "deepwordbug",
+        "deberta-base-pi-v1",
+        "bae",
+        "roberta-base-ft",
+        "deepset-deberta-injection",
+        "bilstm-attention",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream",
         "attacks"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "4734aa1f",
+      "name": "params:similarity",
+      "tags": [
+        "deberta-base-pi-v1",
+        "llama-prompt-guard-86m",
+        "similarity_audit",
+        "roberta-base-ft",
+        "deepset-deberta-injection",
+        "deberta-base-ft-seed",
+        "bilstm-attention",
+        "audit_finalization",
+        "llama-prompt-guard-22m",
+        "bert-base-ft",
+        "similarity",
+        "electra-small-ft",
+        "audit",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "risk",
+        "similarity_audit",
+        "downstream",
+        "stage",
+        "audit_finalization",
+        "similarity",
+        "__default__",
+        "reporting",
+        "audit"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "85fc07f1",
+      "name": "params:transfer",
+      "tags": [
+        "audit",
+        "transfer"
       ],
       "pipelines": [
         "transfer",
         "downstream",
+        "audit",
         "__default__",
+        "reporting"
+      ],
+      "type": "parameters",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": null
+    },
+    {
+      "id": "e65a3713",
+      "name": "pub_results_manifest",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.JSONDataset.MlflowJSONDataset"
+    },
+    {
+      "id": "a526bcbb",
+      "name": "surrogate_registry",
+      "tags": [
+        "transfer",
+        "models"
+      ],
+      "pipelines": [
+        "models",
+        "transfer",
+        "downstream",
+        "stage",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "primary",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "02410b8f",
+      "name": "surrogate_meta__deberta-base-pi-v1",
+      "tags": [
+        "models",
+        "deberta-base-pi-v1"
+      ],
+      "pipelines": [
+        "models",
+        "downstream",
+        "stage",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "7e39a93a",
+      "name": "surrogate_meta__deberta-small-pi-v2",
+      "tags": [
+        "models",
+        "deberta-small-pi-v2"
+      ],
+      "pipelines": [
+        "models",
+        "downstream",
+        "stage",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "c2bc5378",
+      "name": "surrogate_meta__deepset-deberta-injection",
+      "tags": [
+        "models",
+        "deepset-deberta-injection"
+      ],
+      "pipelines": [
+        "models",
+        "downstream",
+        "stage",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "3fa904ad",
+      "name": "surrogate_meta__llama-prompt-guard-22m",
+      "tags": [
+        "models",
+        "llama-prompt-guard-22m"
+      ],
+      "pipelines": [
+        "models",
+        "downstream",
+        "stage",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "e4531676",
+      "name": "surrogate_meta__llama-prompt-guard-86m",
+      "tags": [
+        "models",
+        "llama-prompt-guard-86m"
+      ],
+      "pipelines": [
+        "models",
+        "downstream",
+        "stage",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "17a3809e",
+      "name": "publish_public_dataset_audit",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "publish_public_dataset_audit"
+    },
+    {
+      "id": "662facac",
+      "name": "pub_dataset_audit",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.JSONDataset.MlflowJSONDataset"
+    },
+    {
+      "id": "dc6633a2",
+      "name": "adversarial__deberta-base-pi-v1__bae",
+      "tags": [
+        "deberta-base-pi-v1",
+        "transfer",
+        "bae",
+        "attacks"
+      ],
+      "pipelines": [
+        "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -85,15 +556,15 @@
       "id": "57413c99",
       "name": "adversarial__deberta-base-pi-v1__bert-attack",
       "tags": [
+        "deberta-base-pi-v1",
         "bert-attack",
         "transfer",
-        "deberta-base-pi-v1",
         "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -107,14 +578,14 @@
       "name": "adversarial__deberta-base-pi-v1__deepwordbug",
       "tags": [
         "deepwordbug",
-        "transfer",
         "deberta-base-pi-v1",
+        "transfer",
         "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -127,15 +598,15 @@
       "id": "95153150",
       "name": "adversarial__deberta-base-pi-v1__pwws",
       "tags": [
-        "transfer",
-        "pwws",
         "deberta-base-pi-v1",
+        "pwws",
+        "transfer",
         "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -148,15 +619,15 @@
       "id": "6620885a",
       "name": "adversarial__deberta-base-pi-v1__textfooler",
       "tags": [
-        "transfer",
         "deberta-base-pi-v1",
+        "transfer",
         "attacks",
         "textfooler"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -170,14 +641,14 @@
       "name": "adversarial__deberta-small-pi-v2__bae",
       "tags": [
         "transfer",
-        "deberta-small-pi-v2",
         "bae",
+        "deberta-small-pi-v2",
         "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -190,15 +661,15 @@
       "id": "f284aa9f",
       "name": "adversarial__deberta-small-pi-v2__bert-attack",
       "tags": [
-        "transfer",
         "bert-attack",
+        "transfer",
         "deberta-small-pi-v2",
         "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -217,9 +688,9 @@
         "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -232,15 +703,15 @@
       "id": "a5e0f6c8",
       "name": "adversarial__deberta-small-pi-v2__pwws",
       "tags": [
+        "pwws",
         "transfer",
         "deberta-small-pi-v2",
-        "pwws",
         "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -253,15 +724,15 @@
       "id": "ff9596b4",
       "name": "adversarial__deberta-small-pi-v2__textfooler",
       "tags": [
+        "attacks",
         "transfer",
         "deberta-small-pi-v2",
-        "attacks",
         "textfooler"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -276,13 +747,13 @@
       "tags": [
         "transfer",
         "bae",
-        "attacks",
-        "deepset-deberta-injection"
+        "deepset-deberta-injection",
+        "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -297,13 +768,13 @@
       "tags": [
         "bert-attack",
         "transfer",
-        "attacks",
-        "deepset-deberta-injection"
+        "deepset-deberta-injection",
+        "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -318,13 +789,13 @@
       "tags": [
         "deepwordbug",
         "transfer",
-        "attacks",
-        "deepset-deberta-injection"
+        "deepset-deberta-injection",
+        "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -337,15 +808,15 @@
       "id": "e670fb12",
       "name": "adversarial__deepset-deberta-injection__pwws",
       "tags": [
-        "transfer",
         "pwws",
-        "attacks",
-        "deepset-deberta-injection"
+        "transfer",
+        "deepset-deberta-injection",
+        "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -358,15 +829,15 @@
       "id": "b0fdcd7e",
       "name": "adversarial__deepset-deberta-injection__textfooler",
       "tags": [
-        "transfer",
         "attacks",
+        "transfer",
         "deepset-deberta-injection",
         "textfooler"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -379,15 +850,15 @@
       "id": "03a1a6c6",
       "name": "adversarial__llama-prompt-guard-22m__bae",
       "tags": [
+        "llama-prompt-guard-22m",
         "transfer",
         "bae",
-        "attacks",
-        "llama-prompt-guard-22m"
+        "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -400,15 +871,15 @@
       "id": "2603c4e4",
       "name": "adversarial__llama-prompt-guard-22m__bert-attack",
       "tags": [
+        "llama-prompt-guard-22m",
         "bert-attack",
         "transfer",
-        "attacks",
-        "llama-prompt-guard-22m"
+        "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -422,14 +893,14 @@
       "name": "adversarial__llama-prompt-guard-22m__deepwordbug",
       "tags": [
         "deepwordbug",
+        "llama-prompt-guard-22m",
         "transfer",
-        "attacks",
-        "llama-prompt-guard-22m"
+        "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -442,15 +913,15 @@
       "id": "508399ad",
       "name": "adversarial__llama-prompt-guard-22m__pwws",
       "tags": [
-        "transfer",
         "pwws",
-        "attacks",
-        "llama-prompt-guard-22m"
+        "llama-prompt-guard-22m",
+        "transfer",
+        "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -463,15 +934,15 @@
       "id": "68871835",
       "name": "adversarial__llama-prompt-guard-22m__textfooler",
       "tags": [
+        "llama-prompt-guard-22m",
         "transfer",
         "attacks",
-        "llama-prompt-guard-22m",
         "textfooler"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -484,15 +955,15 @@
       "id": "7d804a86",
       "name": "adversarial__llama-prompt-guard-86m__bae",
       "tags": [
+        "llama-prompt-guard-86m",
         "transfer",
         "bae",
-        "attacks",
-        "llama-prompt-guard-86m"
+        "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -505,15 +976,15 @@
       "id": "410fc0cf",
       "name": "adversarial__llama-prompt-guard-86m__bert-attack",
       "tags": [
-        "transfer",
+        "llama-prompt-guard-86m",
         "bert-attack",
-        "attacks",
-        "llama-prompt-guard-86m"
+        "transfer",
+        "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -527,14 +998,14 @@
       "name": "adversarial__llama-prompt-guard-86m__deepwordbug",
       "tags": [
         "deepwordbug",
+        "llama-prompt-guard-86m",
         "transfer",
-        "attacks",
-        "llama-prompt-guard-86m"
+        "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -547,15 +1018,15 @@
       "id": "f1b89c2a",
       "name": "adversarial__llama-prompt-guard-86m__pwws",
       "tags": [
-        "transfer",
         "pwws",
-        "attacks",
-        "llama-prompt-guard-86m"
+        "llama-prompt-guard-86m",
+        "transfer",
+        "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -568,15 +1039,15 @@
       "id": "36147977",
       "name": "adversarial__llama-prompt-guard-86m__textfooler",
       "tags": [
+        "llama-prompt-guard-86m",
         "transfer",
-        "attacks",
         "textfooler",
-        "llama-prompt-guard-86m"
+        "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -589,47 +1060,55 @@
       "id": "7e09f027",
       "name": "target_model",
       "tags": [
-        "similarity",
-        "transfer"
-      ],
-      "pipelines": [
-        "__default__",
+        "similarity_audit",
         "similarity",
         "transfer",
+        "audit"
+      ],
+      "pipelines": [
+        "similarity_audit",
+        "transfer",
         "downstream",
-        "stage"
+        "stage",
+        "similarity",
+        "__default__",
+        "audit"
       ],
       "type": "data",
       "modular_pipelines": null,
       "node_extras": null,
       "layer": "raw",
-      "dataset_type": "datasets.hub_model_dataset.HuggingFaceHubModelDataset"
+      "dataset_type": "io.memory_dataset.MemoryDataset"
     },
     {
       "id": "a4a96eb9",
       "name": "params:device",
       "tags": [
-        "roberta-base-ft",
-        "deberta-small-pi-v2",
-        "bilstm-attention",
-        "deberta-base-ft-seed",
-        "electra-small-ft",
-        "llama-prompt-guard-22m",
+        "models",
+        "deberta-base-pi-v1",
         "llama-prompt-guard-86m",
+        "similarity_audit",
+        "roberta-base-ft",
+        "deepset-deberta-injection",
+        "deberta-base-ft-seed",
+        "bilstm-attention",
+        "llama-prompt-guard-22m",
+        "bert-base-ft",
         "similarity",
         "transfer",
-        "models",
-        "bert-base-ft",
-        "deberta-base-pi-v1",
-        "deepset-deberta-injection"
+        "electra-small-ft",
+        "audit",
+        "deberta-small-pi-v2"
       ],
       "pipelines": [
-        "__default__",
-        "similarity",
+        "models",
+        "similarity_audit",
         "transfer",
         "downstream",
-        "models",
-        "stage"
+        "stage",
+        "similarity",
+        "__default__",
+        "audit"
       ],
       "type": "parameters",
       "modular_pipelines": null,
@@ -638,123 +1117,148 @@
       "dataset_type": null
     },
     {
-      "id": "a92442d7",
-      "name": "adversarial__bilstm-attention__bae",
+      "id": "75a1b589",
+      "name": "surrogate_meta__bert-base-ft",
       "tags": [
-        "transfer",
-        "bae",
-        "bilstm-attention",
-        "attacks"
+        "models",
+        "bert-base-ft"
       ],
       "pipelines": [
-        "transfer",
+        "models",
         "downstream",
+        "stage",
         "__default__",
-        "attacks"
+        "reporting"
       ],
       "type": "data",
       "modular_pipelines": null,
       "node_extras": null,
-      "layer": "model_output",
-      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
     },
     {
-      "id": "95894134",
-      "name": "adversarial__bilstm-attention__bert-attack",
+      "id": "234f4a5a",
+      "name": "surrogate_meta__bilstm-attention",
       "tags": [
-        "bert-attack",
-        "transfer",
         "bilstm-attention",
-        "attacks"
+        "models"
       ],
       "pipelines": [
-        "transfer",
+        "models",
         "downstream",
+        "stage",
         "__default__",
-        "attacks"
+        "reporting"
       ],
       "type": "data",
       "modular_pipelines": null,
       "node_extras": null,
-      "layer": "model_output",
-      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
     },
     {
-      "id": "70cc20bd",
-      "name": "adversarial__bilstm-attention__deepwordbug",
+      "id": "fcff5111",
+      "name": "surrogate_meta__deberta-base-ft-seed",
       "tags": [
-        "deepwordbug",
-        "transfer",
-        "bilstm-attention",
-        "attacks"
+        "models",
+        "deberta-base-ft-seed"
       ],
       "pipelines": [
-        "transfer",
+        "models",
         "downstream",
+        "stage",
         "__default__",
-        "attacks"
+        "reporting"
       ],
       "type": "data",
       "modular_pipelines": null,
       "node_extras": null,
-      "layer": "model_output",
-      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
     },
     {
-      "id": "b8d1c687",
-      "name": "adversarial__bilstm-attention__pwws",
+      "id": "1b570ad2",
+      "name": "surrogate_meta__electra-small-ft",
       "tags": [
-        "transfer",
-        "pwws",
-        "bilstm-attention",
-        "attacks"
+        "electra-small-ft",
+        "models"
       ],
       "pipelines": [
-        "transfer",
+        "models",
         "downstream",
+        "stage",
         "__default__",
-        "attacks"
+        "reporting"
       ],
       "type": "data",
       "modular_pipelines": null,
       "node_extras": null,
-      "layer": "model_output",
-      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
     },
     {
-      "id": "f50a2280",
-      "name": "adversarial__bilstm-attention__textfooler",
+      "id": "83648b04",
+      "name": "surrogate_meta__roberta-base-ft",
       "tags": [
-        "transfer",
-        "bilstm-attention",
-        "attacks",
-        "textfooler"
+        "models",
+        "roberta-base-ft"
       ],
       "pipelines": [
-        "transfer",
+        "models",
         "downstream",
+        "stage",
         "__default__",
-        "attacks"
+        "reporting"
       ],
       "type": "data",
       "modular_pipelines": null,
       "node_extras": null,
-      "layer": "model_output",
-      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+      "layer": "models",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "9b3eafbe",
+      "name": "assemble_surrogate_metadata",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "assemble_surrogate_metadata"
+    },
+    {
+      "id": "e91264c2",
+      "name": "surrogate_metadata_bundle",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": "io.memory_dataset.MemoryDataset"
     },
     {
       "id": "273a7c18",
       "name": "adversarial__bert-base-ft__bae",
       "tags": [
+        "bert-base-ft",
         "transfer",
         "bae",
-        "bert-base-ft",
         "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -767,15 +1271,15 @@
       "id": "2d40edb6",
       "name": "adversarial__bert-base-ft__bert-attack",
       "tags": [
+        "bert-base-ft",
         "bert-attack",
         "transfer",
-        "bert-base-ft",
         "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -789,14 +1293,14 @@
       "name": "adversarial__bert-base-ft__deepwordbug",
       "tags": [
         "deepwordbug",
+        "bert-base-ft",
         "transfer",
-        "attacks",
-        "bert-base-ft"
+        "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -809,15 +1313,15 @@
       "id": "667fb7cc",
       "name": "adversarial__bert-base-ft__pwws",
       "tags": [
-        "transfer",
         "pwws",
         "bert-base-ft",
+        "transfer",
         "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -830,15 +1334,120 @@
       "id": "52613b4b",
       "name": "adversarial__bert-base-ft__textfooler",
       "tags": [
+        "bert-base-ft",
+        "transfer",
+        "textfooler",
+        "attacks"
+      ],
+      "pipelines": [
+        "__default__",
+        "downstream",
+        "transfer",
+        "attacks"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "a92442d7",
+      "name": "adversarial__bilstm-attention__bae",
+      "tags": [
+        "bilstm-attention",
+        "transfer",
+        "bae",
+        "attacks"
+      ],
+      "pipelines": [
+        "__default__",
+        "downstream",
+        "transfer",
+        "attacks"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "95894134",
+      "name": "adversarial__bilstm-attention__bert-attack",
+      "tags": [
+        "bilstm-attention",
+        "bert-attack",
+        "transfer",
+        "attacks"
+      ],
+      "pipelines": [
+        "__default__",
+        "downstream",
+        "transfer",
+        "attacks"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "70cc20bd",
+      "name": "adversarial__bilstm-attention__deepwordbug",
+      "tags": [
+        "bilstm-attention",
+        "deepwordbug",
+        "transfer",
+        "attacks"
+      ],
+      "pipelines": [
+        "__default__",
+        "downstream",
+        "transfer",
+        "attacks"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "b8d1c687",
+      "name": "adversarial__bilstm-attention__pwws",
+      "tags": [
+        "bilstm-attention",
+        "pwws",
+        "transfer",
+        "attacks"
+      ],
+      "pipelines": [
+        "__default__",
+        "downstream",
+        "transfer",
+        "attacks"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
+    },
+    {
+      "id": "f50a2280",
+      "name": "adversarial__bilstm-attention__textfooler",
+      "tags": [
+        "bilstm-attention",
         "transfer",
         "attacks",
-        "bert-base-ft",
         "textfooler"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -857,9 +1466,9 @@
         "deberta-base-ft-seed"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -878,9 +1487,9 @@
         "deberta-base-ft-seed"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -899,9 +1508,9 @@
         "deberta-base-ft-seed"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -914,15 +1523,15 @@
       "id": "0ac1619b",
       "name": "adversarial__deberta-base-ft-seed__pwws",
       "tags": [
-        "transfer",
         "pwws",
+        "transfer",
         "attacks",
         "deberta-base-ft-seed"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -936,14 +1545,14 @@
       "name": "adversarial__deberta-base-ft-seed__textfooler",
       "tags": [
         "transfer",
+        "textfooler",
         "attacks",
-        "deberta-base-ft-seed",
-        "textfooler"
+        "deberta-base-ft-seed"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -957,14 +1566,14 @@
       "name": "adversarial__electra-small-ft__bae",
       "tags": [
         "transfer",
+        "electra-small-ft",
         "bae",
-        "attacks",
-        "electra-small-ft"
+        "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -979,13 +1588,13 @@
       "tags": [
         "bert-attack",
         "transfer",
-        "attacks",
-        "electra-small-ft"
+        "electra-small-ft",
+        "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -1000,13 +1609,13 @@
       "tags": [
         "deepwordbug",
         "transfer",
-        "attacks",
-        "electra-small-ft"
+        "electra-small-ft",
+        "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -1019,15 +1628,15 @@
       "id": "ab0aa67d",
       "name": "adversarial__electra-small-ft__pwws",
       "tags": [
-        "transfer",
         "pwws",
-        "attacks",
-        "electra-small-ft"
+        "transfer",
+        "electra-small-ft",
+        "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -1041,14 +1650,14 @@
       "name": "adversarial__electra-small-ft__textfooler",
       "tags": [
         "transfer",
-        "attacks",
         "electra-small-ft",
+        "attacks",
         "textfooler"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -1061,15 +1670,15 @@
       "id": "e52153e2",
       "name": "adversarial__roberta-base-ft__bae",
       "tags": [
+        "bae",
         "transfer",
         "roberta-base-ft",
-        "bae",
         "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -1082,15 +1691,15 @@
       "id": "fdb3b372",
       "name": "adversarial__roberta-base-ft__bert-attack",
       "tags": [
-        "transfer",
         "bert-attack",
+        "transfer",
         "roberta-base-ft",
         "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -1109,9 +1718,9 @@
         "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -1124,15 +1733,15 @@
       "id": "77ccf0fc",
       "name": "adversarial__roberta-base-ft__pwws",
       "tags": [
+        "pwws",
         "transfer",
         "roberta-base-ft",
-        "pwws",
         "attacks"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -1151,9 +1760,9 @@
         "textfooler"
       ],
       "pipelines": [
-        "transfer",
-        "downstream",
         "__default__",
+        "downstream",
+        "transfer",
         "attacks"
       ],
       "type": "data",
@@ -1169,8 +1778,8 @@
         "transfer"
       ],
       "pipelines": [
-        "transfer",
         "__default__",
+        "transfer",
         "downstream"
       ],
       "type": "task",
@@ -1183,12 +1792,15 @@
       "id": "c0b3abcd",
       "name": "adversarial_examples",
       "tags": [
+        "audit",
         "transfer"
       ],
       "pipelines": [
         "transfer",
+        "downstream",
+        "audit",
         "__default__",
-        "downstream"
+        "reporting"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -1197,44 +1809,60 @@
       "dataset_type": "pickle.pickle_dataset.PickleDataset"
     },
     {
-      "id": "3d21843d",
-      "name": "similarity_table",
-      "tags": [
-        "similarity",
-        "transfer"
-      ],
+      "id": "d367bd23",
+      "name": "build_model_validation_summary",
+      "tags": [],
       "pipelines": [
-        "reporting",
         "__default__",
-        "similarity",
-        "transfer",
-        "downstream",
-        "stage"
+        "reporting",
+        "downstream"
       ],
-      "type": "data",
+      "type": "task",
       "modular_pipelines": null,
       "node_extras": null,
-      "layer": "model_output",
-      "dataset_type": "pandas.parquet_dataset.ParquetDataset"
+      "parameters": {},
+      "full_name": "build_model_validation_summary"
     },
     {
-      "id": "df5b3cfe",
-      "name": "thresholds",
-      "tags": [
-        "similarity"
-      ],
+      "id": "84837a7c",
+      "name": "pub_model_validation_summary",
+      "tags": [],
       "pipelines": [
         "__default__",
-        "similarity",
-        "risk",
-        "downstream",
-        "stage"
+        "reporting",
+        "downstream"
       ],
       "type": "data",
       "modular_pipelines": null,
       "node_extras": null,
-      "layer": "model_output",
-      "dataset_type": "json.json_dataset.JSONDataset"
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.JSONDataset.MlflowJSONDataset"
+    },
+    {
+      "id": "c992e96c",
+      "name": "cka_matrices",
+      "tags": [
+        "similarity_audit",
+        "audit_finalization",
+        "similarity",
+        "audit"
+      ],
+      "pipelines": [
+        "risk",
+        "similarity_audit",
+        "downstream",
+        "stage",
+        "audit_finalization",
+        "similarity",
+        "__default__",
+        "reporting",
+        "audit"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "feature",
+      "dataset_type": "pickle.pickle_dataset.PickleDataset"
     },
     {
       "id": "3cdf509b",
@@ -1243,8 +1871,8 @@
         "transfer"
       ],
       "pipelines": [
-        "transfer",
         "__default__",
+        "transfer",
         "downstream"
       ],
       "type": "task",
@@ -1253,6 +1881,7 @@
       "parameters": {
         "transfer": {
           "target": "protectai/deberta-v3-base-prompt-injection-v2",
+          "benign_label": 0,
           "batch_size": 64,
           "max_seq_len": 512,
           "max_transferred_examples": 8
@@ -1265,31 +1894,14 @@
       "full_name": "evaluate_transfer"
     },
     {
-      "id": "85fc07f1",
-      "name": "params:transfer",
-      "tags": [
-        "transfer"
-      ],
-      "pipelines": [
-        "transfer",
-        "__default__",
-        "downstream"
-      ],
-      "type": "parameters",
-      "modular_pipelines": null,
-      "node_extras": null,
-      "layer": null,
-      "dataset_type": null
-    },
-    {
       "id": "93e2c3f6",
       "name": "transfer_results",
       "tags": [
         "transfer"
       ],
       "pipelines": [
-        "transfer",
         "__default__",
+        "transfer",
         "downstream"
       ],
       "type": "data",
@@ -1305,8 +1917,8 @@
         "transfer"
       ],
       "pipelines": [
-        "transfer",
         "__default__",
+        "transfer",
         "downstream"
       ],
       "type": "data",
@@ -1316,34 +1928,26 @@
       "dataset_type": "json.json_dataset.JSONDataset"
     },
     {
-      "id": "a20940e6",
-      "name": "plot_cka_heatmap",
-      "tags": [],
-      "pipelines": [
-        "reporting",
-        "downstream",
-        "__default__"
+      "id": "3d21843d",
+      "name": "similarity_table",
+      "tags": [
+        "similarity",
+        "transfer",
+        "similarity_audit"
       ],
-      "type": "task",
-      "modular_pipelines": null,
-      "node_extras": null,
-      "parameters": {},
-      "full_name": "plot_cka_heatmap"
-    },
-    {
-      "id": "6bc5358c",
-      "name": "fig_cka_heatmap",
-      "tags": [],
       "pipelines": [
-        "reporting",
+        "similarity_audit",
+        "transfer",
         "downstream",
+        "stage",
+        "similarity",
         "__default__"
       ],
       "type": "data",
       "modular_pipelines": null,
       "node_extras": null,
-      "layer": "reporting",
-      "dataset_type": "artifacts.mlflow_artifact_dataset.MatplotlibDataset.MlflowMatplotlibDataset"
+      "layer": "model_output",
+      "dataset_type": "pandas.parquet_dataset.ParquetDataset"
     },
     {
       "id": "860d31e3",
@@ -1352,8 +1956,8 @@
         "transfer"
       ],
       "pipelines": [
-        "transfer",
         "__default__",
+        "transfer",
         "downstream"
       ],
       "type": "task",
@@ -1366,12 +1970,130 @@
       "id": "abc2021e",
       "name": "master_results_table",
       "tags": [
+        "audit_finalization",
+        "audit",
         "transfer"
       ],
       "pipelines": [
-        "reporting",
-        "__default__",
+        "risk",
         "transfer",
+        "downstream",
+        "audit_finalization",
+        "audit",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.ParquetDataset.MlflowParquetDataset"
+    },
+    {
+      "id": "df5b3cfe",
+      "name": "thresholds",
+      "tags": [
+        "similarity"
+      ],
+      "pipelines": [
+        "risk",
+        "downstream",
+        "stage",
+        "similarity",
+        "__default__",
+        "reporting"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "model_output",
+      "dataset_type": "json.json_dataset.JSONDataset"
+    },
+    {
+      "id": "30e5f08e",
+      "name": "recompute_master_dbs",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity": {
+          "n_probe": 2000,
+          "max_seq_len": 512,
+          "pooling": "cls",
+          "cka": {
+            "mode": "minibatch",
+            "batch_size": 64
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        }
+      },
+      "full_name": "recompute_master_dbs"
+    },
+    {
+      "id": "795e7a0c",
+      "name": "master_results_corrected",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": null,
+      "dataset_type": "io.memory_dataset.MemoryDataset"
+    },
+    {
+      "id": "ac89242d",
+      "name": "recompute_risk_master_dbs",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "risk",
+        "downstream"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {
+        "similarity": {
+          "n_probe": 2000,
+          "max_seq_len": 512,
+          "pooling": "cls",
+          "cka": {
+            "mode": "minibatch",
+            "batch_size": 64
+          },
+          "dbs": {
+            "box": 1
+          },
+          "thresholds": {
+            "r1_quantile": 0.75,
+            "r2_quantile": 0.25
+          }
+        }
+      },
+      "full_name": "recompute_risk_master_dbs"
+    },
+    {
+      "id": "bb4af350",
+      "name": "risk_master_results_corrected",
+      "tags": [],
+      "pipelines": [
+        "__default__",
         "risk",
         "downstream"
       ],
@@ -1385,14 +2107,23 @@
       "id": "8bb4724c",
       "name": "surrogate_selection",
       "tags": [
-        "similarity"
+        "similarity_audit",
+        "audit_finalization",
+        "similarity",
+        "audit_reporting",
+        "audit"
       ],
       "pipelines": [
-        "__default__",
-        "similarity",
         "risk",
+        "similarity_audit",
         "downstream",
-        "stage"
+        "stage",
+        "audit_reporting",
+        "audit_finalization",
+        "similarity",
+        "__default__",
+        "reporting",
+        "audit"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -1401,12 +2132,82 @@
       "dataset_type": "json.json_dataset.JSONDataset"
     },
     {
-      "id": "667c3bb1",
+      "id": "847f9baa",
+      "name": "build_public_master_results_table",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "build_public_master_results_table"
+    },
+    {
+      "id": "85ca33e1",
+      "name": "pub_master_results_table",
+      "tags": [
+        "audit_reporting"
+      ],
+      "pipelines": [
+        "audit_reporting",
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": {
+        "stats": {
+          "rows": 50,
+          "columns": 8,
+          "file_size": 6884
+        },
+        "styles": null
+      },
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.CSVDataset.MlflowCSVDataset"
+    },
+    {
+      "id": "c03b4a88",
+      "name": "build_surrogate_summary_table",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "build_surrogate_summary_table"
+    },
+    {
+      "id": "974f6c71",
+      "name": "pub_surrogate_summary",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.CSVDataset.MlflowCSVDataset"
+    },
+    {
+      "id": "111bcb04",
       "name": "fit_regressors",
       "tags": [],
       "pipelines": [
-        "risk",
         "__default__",
+        "risk",
         "downstream"
       ],
       "type": "task",
@@ -1433,11 +2234,18 @@
     {
       "id": "dbb3b583",
       "name": "params:risk",
-      "tags": [],
+      "tags": [
+        "similarity_audit",
+        "audit_finalization",
+        "audit"
+      ],
       "pipelines": [
         "risk",
-        "__default__",
-        "downstream"
+        "similarity_audit",
+        "downstream",
+        "audit_finalization",
+        "audit",
+        "__default__"
       ],
       "type": "parameters",
       "modular_pipelines": null,
@@ -1450,9 +2258,8 @@
       "name": "regressors",
       "tags": [],
       "pipelines": [
-        "reporting",
-        "risk",
         "__default__",
+        "risk",
         "downstream"
       ],
       "type": "data",
@@ -1462,13 +2269,43 @@
       "dataset_type": "pickle.pickle_dataset.PickleDataset"
     },
     {
-      "id": "11c8dd13",
+      "id": "6166a2a0",
+      "name": "plot_cka_ranked",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "task",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "parameters": {},
+      "full_name": "plot_cka_ranked"
+    },
+    {
+      "id": "88893e42",
+      "name": "fig_cka_ranked",
+      "tags": [],
+      "pipelines": [
+        "__default__",
+        "reporting",
+        "downstream"
+      ],
+      "type": "data",
+      "modular_pipelines": null,
+      "node_extras": null,
+      "layer": "reporting",
+      "dataset_type": "artifacts.mlflow_artifact_dataset.MatplotlibDataset.MlflowMatplotlibDataset"
+    },
+    {
+      "id": "8dae4e13",
       "name": "plot_transfer_scatter",
       "tags": [],
       "pipelines": [
+        "__default__",
         "reporting",
-        "downstream",
-        "__default__"
+        "downstream"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -1479,11 +2316,14 @@
     {
       "id": "db2ca221",
       "name": "fig_transfer_scatter",
-      "tags": [],
+      "tags": [
+        "audit_reporting"
+      ],
       "pipelines": [
+        "audit_reporting",
+        "__default__",
         "reporting",
-        "downstream",
-        "__default__"
+        "downstream"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -1492,12 +2332,12 @@
       "dataset_type": "artifacts.mlflow_artifact_dataset.MatplotlibDataset.MlflowMatplotlibDataset"
     },
     {
-      "id": "bed892e9",
+      "id": "4f9c7e7e",
       "name": "run_ablation",
       "tags": [],
       "pipelines": [
-        "risk",
         "__default__",
+        "risk",
         "downstream"
       ],
       "type": "task",
@@ -1526,9 +2366,9 @@
       "name": "ablation_results",
       "tags": [],
       "pipelines": [
+        "__default__",
         "reporting",
         "risk",
-        "__default__",
         "downstream"
       ],
       "type": "data",
@@ -1538,42 +2378,58 @@
       "dataset_type": "artifacts.mlflow_artifact_dataset.JSONDataset.MlflowJSONDataset"
     },
     {
-      "id": "a73769e9",
-      "name": "plot_regression_ablation",
+      "id": "509c1814",
+      "name": "build_public_run_metrics",
       "tags": [],
       "pipelines": [
+        "__default__",
         "reporting",
-        "downstream",
-        "__default__"
+        "downstream"
       ],
       "type": "task",
       "modular_pipelines": null,
       "node_extras": null,
-      "parameters": {},
-      "full_name": "plot_regression_ablation"
+      "parameters": {
+        "attacks": {
+          "recipes": [
+            "deepwordbug",
+            "pwws",
+            "textfooler",
+            "bae",
+            "bert-attack"
+          ],
+          "semantic_encoder": "sentence-transformers",
+          "eval_set_size": 191,
+          "max_seq_len": 512,
+          "max_prompt_chars": 3200,
+          "query_budget": 6000,
+          "shard_size": 100000
+        }
+      },
+      "full_name": "build_public_run_metrics"
     },
     {
-      "id": "844e1a3b",
-      "name": "fig_regression_ablation",
+      "id": "e50324d5",
+      "name": "pub_run_metrics",
       "tags": [],
       "pipelines": [
+        "__default__",
         "reporting",
-        "downstream",
-        "__default__"
+        "downstream"
       ],
       "type": "data",
       "modular_pipelines": null,
       "node_extras": null,
       "layer": "reporting",
-      "dataset_type": "artifacts.mlflow_artifact_dataset.MatplotlibDataset.MlflowMatplotlibDataset"
+      "dataset_type": "artifacts.mlflow_artifact_dataset.JSONDataset.MlflowJSONDataset"
     },
     {
-      "id": "fce6af18",
+      "id": "95be5940",
       "name": "track_run_metrics",
       "tags": [],
       "pipelines": [
-        "risk",
         "__default__",
+        "risk",
         "downstream"
       ],
       "type": "task",
@@ -1587,8 +2443,8 @@
       "name": "run_metrics",
       "tags": [],
       "pipelines": [
-        "risk",
         "__default__",
+        "risk",
         "downstream"
       ],
       "type": "data",
@@ -1600,63 +2456,115 @@
   ],
   "edges": [
     {
+      "source": "795e7a0c",
+      "target": "8dae4e13"
+    },
+    {
+      "source": "7ab716a4",
+      "target": "157b764a"
+    },
+    {
+      "source": "85fc07f1",
+      "target": "3cdf509b"
+    },
+    {
+      "source": "a5e0f6c8",
+      "target": "157b764a"
+    },
+    {
+      "source": "95153150",
+      "target": "157b764a"
+    },
+    {
+      "source": "c0646b45",
+      "target": "157b764a"
+    },
+    {
+      "source": "f284aa9f",
+      "target": "157b764a"
+    },
+    {
+      "source": "30e5f08e",
+      "target": "795e7a0c"
+    },
+    {
+      "source": "6166a2a0",
+      "target": "88893e42"
+    },
+    {
+      "source": "e52153e2",
+      "target": "157b764a"
+    },
+    {
+      "source": "157b764a",
+      "target": "c0b3abcd"
+    },
+    {
+      "source": "795e7a0c",
+      "target": "847f9baa"
+    },
+    {
+      "source": "795e7a0c",
+      "target": "509c1814"
+    },
+    {
+      "source": "fdb3b372",
+      "target": "157b764a"
+    },
+    {
+      "source": "02410b8f",
+      "target": "9b3eafbe"
+    },
+    {
+      "source": "df5b3cfe",
+      "target": "95be5940"
+    },
+    {
+      "source": "85e11043",
+      "target": "4f9c7e7e"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "30e5f08e"
+    },
+    {
+      "source": "dbb3b583",
+      "target": "4f9c7e7e"
+    },
+    {
+      "source": "57413c99",
+      "target": "157b764a"
+    },
+    {
+      "source": "36147977",
+      "target": "157b764a"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "38aedcc3"
+    },
+    {
+      "source": "3861d1c9",
+      "target": "157b764a"
+    },
+    {
+      "source": "667fb7cc",
+      "target": "157b764a"
+    },
+    {
+      "source": "a526bcbb",
+      "target": "d367bd23"
+    },
+    {
+      "source": "f50a2280",
+      "target": "157b764a"
+    },
+    {
+      "source": "4f9c7e7e",
+      "target": "ba4b2fe1"
+    },
+    {
       "source": "0ac1619b",
-      "target": "157b764a"
-    },
-    {
-      "source": "a73769e9",
-      "target": "844e1a3b"
-    },
-    {
-      "source": "68871835",
-      "target": "157b764a"
-    },
-    {
-      "source": "abc2021e",
-      "target": "667c3bb1"
-    },
-    {
-      "source": "6620885a",
-      "target": "157b764a"
-    },
-    {
-      "source": "52613b4b",
-      "target": "157b764a"
-    },
-    {
-      "source": "3cdf509b",
-      "target": "93e2c3f6"
-    },
-    {
-      "source": "a669abb2",
-      "target": "157b764a"
-    },
-    {
-      "source": "e670fb12",
-      "target": "157b764a"
-    },
-    {
-      "source": "a20940e6",
-      "target": "6bc5358c"
-    },
-    {
-      "source": "95894134",
-      "target": "157b764a"
-    },
-    {
-      "source": "abc2021e",
-      "target": "bed892e9"
-    },
-    {
-      "source": "dc6633a2",
-      "target": "157b764a"
-    },
-    {
-      "source": "02cdda9d",
-      "target": "fce6af18"
-    },
-    {
-      "source": "da199001",
       "target": "157b764a"
     },
     {
@@ -1664,7 +2572,319 @@
       "target": "157b764a"
     },
     {
-      "source": "7ab716a4",
+      "source": "3fa904ad",
+      "target": "9b3eafbe"
+    },
+    {
+      "source": "111bcb04",
+      "target": "02cdda9d"
+    },
+    {
+      "source": "860d31e3",
+      "target": "abc2021e"
+    },
+    {
+      "source": "410fc0cf",
+      "target": "157b764a"
+    },
+    {
+      "source": "bb4af350",
+      "target": "95be5940"
+    },
+    {
+      "source": "fcff5111",
+      "target": "9b3eafbe"
+    },
+    {
+      "source": "7e09f027",
+      "target": "3cdf509b"
+    },
+    {
+      "source": "b8d1c687",
+      "target": "157b764a"
+    },
+    {
+      "source": "8bb4724c",
+      "target": "4f9c7e7e"
+    },
+    {
+      "source": "e5cd7d5f",
+      "target": "157b764a"
+    },
+    {
+      "source": "a92442d7",
+      "target": "157b764a"
+    },
+    {
+      "source": "a669abb2",
+      "target": "157b764a"
+    },
+    {
+      "source": "dc6633a2",
+      "target": "157b764a"
+    },
+    {
+      "source": "17a3809e",
+      "target": "662facac"
+    },
+    {
+      "source": "8dae4e13",
+      "target": "db2ca221"
+    },
+    {
+      "source": "68871835",
+      "target": "157b764a"
+    },
+    {
+      "source": "509c1814",
+      "target": "e50324d5"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "38aedcc3"
+    },
+    {
+      "source": "95894134",
+      "target": "157b764a"
+    },
+    {
+      "source": "99484125",
+      "target": "157b764a"
+    },
+    {
+      "source": "1afcb315",
+      "target": "157b764a"
+    },
+    {
+      "source": "9b3eafbe",
+      "target": "e91264c2"
+    },
+    {
+      "source": "3cdf509b",
+      "target": "93e2c3f6"
+    },
+    {
+      "source": "273a7c18",
+      "target": "157b764a"
+    },
+    {
+      "source": "234f4a5a",
+      "target": "9b3eafbe"
+    },
+    {
+      "source": "c0b3abcd",
+      "target": "3cdf509b"
+    },
+    {
+      "source": "75a1b589",
+      "target": "9b3eafbe"
+    },
+    {
+      "source": "a526bcbb",
+      "target": "860d31e3"
+    },
+    {
+      "source": "da199001",
+      "target": "157b764a"
+    },
+    {
+      "source": "bb4af350",
+      "target": "111bcb04"
+    },
+    {
+      "source": "ba4b2fe1",
+      "target": "509c1814"
+    },
+    {
+      "source": "ff9596b4",
+      "target": "157b764a"
+    },
+    {
+      "source": "4734aa1f",
+      "target": "ac89242d"
+    },
+    {
+      "source": "52613b4b",
+      "target": "157b764a"
+    },
+    {
+      "source": "7d804a86",
+      "target": "157b764a"
+    },
+    {
+      "source": "df5b3cfe",
+      "target": "6166a2a0"
+    },
+    {
+      "source": "1bd80fde",
+      "target": "157b764a"
+    },
+    {
+      "source": "63bb53d3",
+      "target": "157b764a"
+    },
+    {
+      "source": "a4a96eb9",
+      "target": "3cdf509b"
+    },
+    {
+      "source": "e4531676",
+      "target": "9b3eafbe"
+    },
+    {
+      "source": "847f9baa",
+      "target": "85ca33e1"
+    },
+    {
+      "source": "c2bc5378",
+      "target": "9b3eafbe"
+    },
+    {
+      "source": "ab0aa67d",
+      "target": "157b764a"
+    },
+    {
+      "source": "ac89242d",
+      "target": "bb4af350"
+    },
+    {
+      "source": "6d297261",
+      "target": "533f7b78"
+    },
+    {
+      "source": "5042f9f0",
+      "target": "157b764a"
+    },
+    {
+      "source": "e670fb12",
+      "target": "157b764a"
+    },
+    {
+      "source": "3d21843d",
+      "target": "860d31e3"
+    },
+    {
+      "source": "961b6053",
+      "target": "38aedcc3"
+    },
+    {
+      "source": "014ac4b5",
+      "target": "17a3809e"
+    },
+    {
+      "source": "df5b3cfe",
+      "target": "509c1814"
+    },
+    {
+      "source": "abc2021e",
+      "target": "30e5f08e"
+    },
+    {
+      "source": "6620885a",
+      "target": "157b764a"
+    },
+    {
+      "source": "2d40edb6",
+      "target": "157b764a"
+    },
+    {
+      "source": "c992e96c",
+      "target": "30e5f08e"
+    },
+    {
+      "source": "03a1a6c6",
+      "target": "157b764a"
+    },
+    {
+      "source": "b0fdcd7e",
+      "target": "157b764a"
+    },
+    {
+      "source": "ef58e216",
+      "target": "157b764a"
+    },
+    {
+      "source": "795e7a0c",
+      "target": "c03b4a88"
+    },
+    {
+      "source": "ba4b2fe1",
+      "target": "95be5940"
+    },
+    {
+      "source": "e529d9d3",
+      "target": "157b764a"
+    },
+    {
+      "source": "ff01caf8",
+      "target": "157b764a"
+    },
+    {
+      "source": "dbb3b583",
+      "target": "111bcb04"
+    },
+    {
+      "source": "e472da68",
+      "target": "157b764a"
+    },
+    {
+      "source": "e91264c2",
+      "target": "d367bd23"
+    },
+    {
+      "source": "38aedcc3",
+      "target": "e65a3713"
+    },
+    {
+      "source": "c0b3abcd",
+      "target": "509c1814"
+    },
+    {
+      "source": "795e7a0c",
+      "target": "6166a2a0"
+    },
+    {
+      "source": "85fc07f1",
+      "target": "38aedcc3"
+    },
+    {
+      "source": "83648b04",
+      "target": "9b3eafbe"
+    },
+    {
+      "source": "c992e96c",
+      "target": "ac89242d"
+    },
+    {
+      "source": "9d4defaf",
+      "target": "509c1814"
+    },
+    {
+      "source": "8bb4724c",
+      "target": "c03b4a88"
+    },
+    {
+      "source": "d367bd23",
+      "target": "84837a7c"
+    },
+    {
+      "source": "77ccf0fc",
+      "target": "157b764a"
+    },
+    {
+      "source": "95be5940",
+      "target": "006ae743"
+    },
+    {
+      "source": "3cdf509b",
+      "target": "5f0b3578"
+    },
+    {
+      "source": "8bb4724c",
+      "target": "6166a2a0"
+    },
+    {
+      "source": "70cc20bd",
       "target": "157b764a"
     },
     {
@@ -1672,19 +2892,19 @@
       "target": "157b764a"
     },
     {
-      "source": "abc2021e",
-      "target": "fce6af18"
+      "source": "1b570ad2",
+      "target": "9b3eafbe"
     },
     {
-      "source": "1afcb315",
+      "source": "32eb5e14",
       "target": "157b764a"
     },
     {
-      "source": "7e09f027",
-      "target": "3cdf509b"
+      "source": "2603c4e4",
+      "target": "157b764a"
     },
     {
-      "source": "03a1a6c6",
+      "source": "5499fe83",
       "target": "157b764a"
     },
     {
@@ -1696,236 +2916,40 @@
       "target": "157b764a"
     },
     {
-      "source": "410fc0cf",
-      "target": "157b764a"
+      "source": "bb4af350",
+      "target": "4f9c7e7e"
     },
     {
-      "source": "7d804a86",
-      "target": "157b764a"
-    },
-    {
-      "source": "3d21843d",
-      "target": "a20940e6"
-    },
-    {
-      "source": "32eb5e14",
-      "target": "157b764a"
-    },
-    {
-      "source": "fce6af18",
-      "target": "006ae743"
-    },
-    {
-      "source": "e529d9d3",
-      "target": "157b764a"
-    },
-    {
-      "source": "3d21843d",
-      "target": "860d31e3"
-    },
-    {
-      "source": "2d40edb6",
-      "target": "157b764a"
-    },
-    {
-      "source": "bed892e9",
-      "target": "ba4b2fe1"
-    },
-    {
-      "source": "ff01caf8",
-      "target": "157b764a"
-    },
-    {
-      "source": "8bb4724c",
-      "target": "bed892e9"
-    },
-    {
-      "source": "63bb53d3",
-      "target": "157b764a"
-    },
-    {
-      "source": "273a7c18",
-      "target": "157b764a"
-    },
-    {
-      "source": "df5b3cfe",
-      "target": "fce6af18"
-    },
-    {
-      "source": "70cc20bd",
-      "target": "157b764a"
-    },
-    {
-      "source": "11c8dd13",
-      "target": "db2ca221"
-    },
-    {
-      "source": "860d31e3",
-      "target": "abc2021e"
-    },
-    {
-      "source": "a92442d7",
-      "target": "157b764a"
-    },
-    {
-      "source": "dbb3b583",
-      "target": "667c3bb1"
+      "source": "7e39a93a",
+      "target": "9b3eafbe"
     },
     {
       "source": "02cdda9d",
-      "target": "a73769e9"
+      "target": "95be5940"
     },
     {
-      "source": "77ccf0fc",
-      "target": "157b764a"
+      "source": "d3e844b2",
+      "target": "38aedcc3"
     },
     {
-      "source": "fdb3b372",
-      "target": "157b764a"
+      "source": "85e11043",
+      "target": "38aedcc3"
     },
     {
-      "source": "dbb3b583",
-      "target": "bed892e9"
-    },
-    {
-      "source": "a4a96eb9",
-      "target": "3cdf509b"
-    },
-    {
-      "source": "abc2021e",
-      "target": "11c8dd13"
-    },
-    {
-      "source": "667c3bb1",
-      "target": "02cdda9d"
-    },
-    {
-      "source": "1bd80fde",
-      "target": "157b764a"
-    },
-    {
-      "source": "ba4b2fe1",
-      "target": "fce6af18"
-    },
-    {
-      "source": "e472da68",
-      "target": "157b764a"
-    },
-    {
-      "source": "157b764a",
-      "target": "c0b3abcd"
-    },
-    {
-      "source": "667fb7cc",
-      "target": "157b764a"
+      "source": "85e11043",
+      "target": "111bcb04"
     },
     {
       "source": "93e2c3f6",
       "target": "860d31e3"
     },
     {
-      "source": "3861d1c9",
-      "target": "157b764a"
+      "source": "abc2021e",
+      "target": "ac89242d"
     },
     {
-      "source": "85e11043",
-      "target": "667c3bb1"
-    },
-    {
-      "source": "95153150",
-      "target": "157b764a"
-    },
-    {
-      "source": "c0646b45",
-      "target": "157b764a"
-    },
-    {
-      "source": "3cdf509b",
-      "target": "5f0b3578"
-    },
-    {
-      "source": "ba4b2fe1",
-      "target": "a73769e9"
-    },
-    {
-      "source": "5499fe83",
-      "target": "157b764a"
-    },
-    {
-      "source": "ff9596b4",
-      "target": "157b764a"
-    },
-    {
-      "source": "e5cd7d5f",
-      "target": "157b764a"
-    },
-    {
-      "source": "2603c4e4",
-      "target": "157b764a"
-    },
-    {
-      "source": "a526bcbb",
-      "target": "860d31e3"
-    },
-    {
-      "source": "a5e0f6c8",
-      "target": "157b764a"
-    },
-    {
-      "source": "85e11043",
-      "target": "bed892e9"
-    },
-    {
-      "source": "b0fdcd7e",
-      "target": "157b764a"
-    },
-    {
-      "source": "f284aa9f",
-      "target": "157b764a"
-    },
-    {
-      "source": "36147977",
-      "target": "157b764a"
-    },
-    {
-      "source": "85fc07f1",
-      "target": "3cdf509b"
-    },
-    {
-      "source": "c0b3abcd",
-      "target": "3cdf509b"
-    },
-    {
-      "source": "ef58e216",
-      "target": "157b764a"
-    },
-    {
-      "source": "ab0aa67d",
-      "target": "157b764a"
-    },
-    {
-      "source": "e52153e2",
-      "target": "157b764a"
-    },
-    {
-      "source": "57413c99",
-      "target": "157b764a"
-    },
-    {
-      "source": "b8d1c687",
-      "target": "157b764a"
-    },
-    {
-      "source": "99484125",
-      "target": "157b764a"
-    },
-    {
-      "source": "f50a2280",
-      "target": "157b764a"
-    },
-    {
-      "source": "5042f9f0",
-      "target": "157b764a"
+      "source": "c03b4a88",
+      "target": "974f6c71"
     }
   ],
   "layers": [
@@ -1941,6 +2965,18 @@
     {
       "id": "attacks",
       "name": "attacks"
+    },
+    {
+      "id": "audit",
+      "name": "audit"
+    },
+    {
+      "id": "audit_finalization",
+      "name": "audit_finalization"
+    },
+    {
+      "id": "audit_reporting",
+      "name": "audit_reporting"
     },
     {
       "id": "bae",
@@ -2007,6 +3043,14 @@
       "name": "similarity"
     },
     {
+      "id": "similarity_audit",
+      "name": "similarity_audit"
+    },
+    {
+      "id": "similarity_audit_prepare",
+      "name": "similarity_audit_prepare"
+    },
+    {
       "id": "textfooler",
       "name": "textfooler"
     },
@@ -2041,6 +3085,14 @@
       "name": "models"
     },
     {
+      "id": "audit",
+      "name": "audit"
+    },
+    {
+      "id": "similarity_audit_prepare",
+      "name": "similarity_audit_prepare"
+    },
+    {
       "id": "data",
       "name": "data"
     },
@@ -2049,8 +3101,20 @@
       "name": "risk"
     },
     {
+      "id": "similarity_audit",
+      "name": "similarity_audit"
+    },
+    {
       "id": "attacks",
       "name": "attacks"
+    },
+    {
+      "id": "audit_reporting",
+      "name": "audit_reporting"
+    },
+    {
+      "id": "audit_finalization",
+      "name": "audit_finalization"
     },
     {
       "id": "stage",
@@ -2069,247 +3133,23 @@
       "outputs": [],
       "children": [
         {
-          "id": "2d40edb6",
+          "id": "410fc0cf",
           "type": "data"
         },
         {
-          "id": "dc6633a2",
-          "type": "data"
-        },
-        {
-          "id": "da199001",
-          "type": "data"
-        },
-        {
-          "id": "93e2c3f6",
-          "type": "data"
-        },
-        {
-          "id": "157b764a",
+          "id": "8dae4e13",
           "type": "task"
-        },
-        {
-          "id": "273a7c18",
-          "type": "data"
-        },
-        {
-          "id": "70cc20bd",
-          "type": "data"
-        },
-        {
-          "id": "a526bcbb",
-          "type": "data"
-        },
-        {
-          "id": "a92442d7",
-          "type": "data"
-        },
-        {
-          "id": "02cdda9d",
-          "type": "data"
-        },
-        {
-          "id": "77ccf0fc",
-          "type": "data"
-        },
-        {
-          "id": "a20940e6",
-          "type": "task"
-        },
-        {
-          "id": "a4a96eb9",
-          "type": "data"
-        },
-        {
-          "id": "85fc07f1",
-          "type": "parameters"
-        },
-        {
-          "id": "dbb3b583",
-          "type": "parameters"
-        },
-        {
-          "id": "fdb3b372",
-          "type": "data"
-        },
-        {
-          "id": "e529d9d3",
-          "type": "data"
-        },
-        {
-          "id": "bed892e9",
-          "type": "task"
-        },
-        {
-          "id": "df5b3cfe",
-          "type": "data"
-        },
-        {
-          "id": "1bd80fde",
-          "type": "data"
-        },
-        {
-          "id": "5f0b3578",
-          "type": "data"
-        },
-        {
-          "id": "8bb4724c",
-          "type": "data"
-        },
-        {
-          "id": "ff01caf8",
-          "type": "data"
         },
         {
           "id": "006ae743",
           "type": "data"
         },
         {
-          "id": "e472da68",
+          "id": "4734aa1f",
           "type": "data"
         },
         {
-          "id": "63bb53d3",
-          "type": "data"
-        },
-        {
-          "id": "860d31e3",
-          "type": "task"
-        },
-        {
-          "id": "3861d1c9",
-          "type": "data"
-        },
-        {
-          "id": "11c8dd13",
-          "type": "task"
-        },
-        {
-          "id": "ba4b2fe1",
-          "type": "data"
-        },
-        {
-          "id": "ff9596b4",
-          "type": "data"
-        },
-        {
-          "id": "5499fe83",
-          "type": "data"
-        },
-        {
-          "id": "e5cd7d5f",
-          "type": "data"
-        },
-        {
-          "id": "3cdf509b",
-          "type": "task"
-        },
-        {
-          "id": "85e11043",
-          "type": "parameters"
-        },
-        {
-          "id": "85fc07f1",
-          "type": "data"
-        },
-        {
-          "id": "dbb3b583",
-          "type": "data"
-        },
-        {
-          "id": "2603c4e4",
-          "type": "data"
-        },
-        {
-          "id": "a5e0f6c8",
-          "type": "data"
-        },
-        {
-          "id": "b0fdcd7e",
-          "type": "data"
-        },
-        {
-          "id": "f284aa9f",
-          "type": "data"
-        },
-        {
-          "id": "36147977",
-          "type": "data"
-        },
-        {
-          "id": "ef58e216",
-          "type": "data"
-        },
-        {
-          "id": "ab0aa67d",
-          "type": "data"
-        },
-        {
-          "id": "6bc5358c",
-          "type": "data"
-        },
-        {
-          "id": "e52153e2",
-          "type": "data"
-        },
-        {
-          "id": "57413c99",
-          "type": "data"
-        },
-        {
-          "id": "b8d1c687",
-          "type": "data"
-        },
-        {
-          "id": "99484125",
-          "type": "data"
-        },
-        {
-          "id": "f50a2280",
-          "type": "data"
-        },
-        {
-          "id": "667fb7cc",
-          "type": "data"
-        },
-        {
-          "id": "3d21843d",
-          "type": "data"
-        },
-        {
-          "id": "0ac1619b",
-          "type": "data"
-        },
-        {
-          "id": "68871835",
-          "type": "data"
-        },
-        {
-          "id": "95153150",
-          "type": "data"
-        },
-        {
-          "id": "c0646b45",
-          "type": "data"
-        },
-        {
-          "id": "6620885a",
-          "type": "data"
-        },
-        {
-          "id": "52613b4b",
-          "type": "data"
-        },
-        {
-          "id": "a669abb2",
-          "type": "data"
-        },
-        {
-          "id": "85e11043",
-          "type": "data"
-        },
-        {
-          "id": "e670fb12",
+          "id": "e65a3713",
           "type": "data"
         },
         {
@@ -2317,47 +3157,11 @@
           "type": "data"
         },
         {
-          "id": "95894134",
-          "type": "data"
+          "id": "d3e844b2",
+          "type": "parameters"
         },
         {
-          "id": "7ab716a4",
-          "type": "data"
-        },
-        {
-          "id": "594543f8",
-          "type": "data"
-        },
-        {
-          "id": "f1b89c2a",
-          "type": "data"
-        },
-        {
-          "id": "7e09f027",
-          "type": "data"
-        },
-        {
-          "id": "667c3bb1",
-          "type": "task"
-        },
-        {
-          "id": "1afcb315",
-          "type": "data"
-        },
-        {
-          "id": "03a1a6c6",
-          "type": "data"
-        },
-        {
-          "id": "db2ca221",
-          "type": "data"
-        },
-        {
-          "id": "6944e3b5",
-          "type": "data"
-        },
-        {
-          "id": "508399ad",
+          "id": "bb4af350",
           "type": "data"
         },
         {
@@ -2365,15 +3169,295 @@
           "type": "data"
         },
         {
-          "id": "410fc0cf",
+          "id": "b8d1c687",
           "type": "data"
         },
         {
-          "id": "a73769e9",
+          "id": "e5cd7d5f",
+          "type": "data"
+        },
+        {
+          "id": "88893e42",
+          "type": "data"
+        },
+        {
+          "id": "e670fb12",
+          "type": "data"
+        },
+        {
+          "id": "a92442d7",
+          "type": "data"
+        },
+        {
+          "id": "c03b4a88",
           "type": "task"
         },
         {
+          "id": "a669abb2",
+          "type": "data"
+        },
+        {
+          "id": "83648b04",
+          "type": "data"
+        },
+        {
+          "id": "dc6633a2",
+          "type": "data"
+        },
+        {
+          "id": "85e11043",
+          "type": "parameters"
+        },
+        {
+          "id": "dbb3b583",
+          "type": "parameters"
+        },
+        {
+          "id": "68871835",
+          "type": "data"
+        },
+        {
+          "id": "795e7a0c",
+          "type": "data"
+        },
+        {
+          "id": "99484125",
+          "type": "data"
+        },
+        {
+          "id": "1afcb315",
+          "type": "data"
+        },
+        {
+          "id": "111bcb04",
+          "type": "task"
+        },
+        {
+          "id": "157b764a",
+          "type": "task"
+        },
+        {
+          "id": "85fc07f1",
+          "type": "parameters"
+        },
+        {
+          "id": "a4a96eb9",
+          "type": "data"
+        },
+        {
+          "id": "e529d9d3",
+          "type": "data"
+        },
+        {
+          "id": "5f0b3578",
+          "type": "data"
+        },
+        {
+          "id": "9b3eafbe",
+          "type": "task"
+        },
+        {
+          "id": "db2ca221",
+          "type": "data"
+        },
+        {
+          "id": "da199001",
+          "type": "data"
+        },
+        {
+          "id": "1b570ad2",
+          "type": "data"
+        },
+        {
+          "id": "ff9596b4",
+          "type": "data"
+        },
+        {
+          "id": "ac89242d",
+          "type": "task"
+        },
+        {
+          "id": "7e39a93a",
+          "type": "data"
+        },
+        {
+          "id": "961b6053",
+          "type": "data"
+        },
+        {
+          "id": "17a3809e",
+          "type": "task"
+        },
+        {
+          "id": "8bb4724c",
+          "type": "data"
+        },
+        {
+          "id": "52613b4b",
+          "type": "data"
+        },
+        {
           "id": "7d804a86",
+          "type": "data"
+        },
+        {
+          "id": "c992e96c",
+          "type": "data"
+        },
+        {
+          "id": "1bd80fde",
+          "type": "data"
+        },
+        {
+          "id": "63bb53d3",
+          "type": "data"
+        },
+        {
+          "id": "ab0aa67d",
+          "type": "data"
+        },
+        {
+          "id": "85e11043",
+          "type": "data"
+        },
+        {
+          "id": "dbb3b583",
+          "type": "data"
+        },
+        {
+          "id": "974f6c71",
+          "type": "data"
+        },
+        {
+          "id": "508399ad",
+          "type": "data"
+        },
+        {
+          "id": "85fc07f1",
+          "type": "data"
+        },
+        {
+          "id": "6620885a",
+          "type": "data"
+        },
+        {
+          "id": "a526bcbb",
+          "type": "data"
+        },
+        {
+          "id": "2d40edb6",
+          "type": "data"
+        },
+        {
+          "id": "509c1814",
+          "type": "task"
+        },
+        {
+          "id": "e50324d5",
+          "type": "data"
+        },
+        {
+          "id": "03a1a6c6",
+          "type": "data"
+        },
+        {
+          "id": "b0fdcd7e",
+          "type": "data"
+        },
+        {
+          "id": "ef58e216",
+          "type": "data"
+        },
+        {
+          "id": "ff01caf8",
+          "type": "data"
+        },
+        {
+          "id": "014ac4b5",
+          "type": "data"
+        },
+        {
+          "id": "02410b8f",
+          "type": "data"
+        },
+        {
+          "id": "e472da68",
+          "type": "data"
+        },
+        {
+          "id": "6166a2a0",
+          "type": "task"
+        },
+        {
+          "id": "6d297261",
+          "type": "task"
+        },
+        {
+          "id": "7ab716a4",
+          "type": "data"
+        },
+        {
+          "id": "ba4b2fe1",
+          "type": "data"
+        },
+        {
+          "id": "a5e0f6c8",
+          "type": "data"
+        },
+        {
+          "id": "abc2021e",
+          "type": "data"
+        },
+        {
+          "id": "95153150",
+          "type": "data"
+        },
+        {
+          "id": "f284aa9f",
+          "type": "data"
+        },
+        {
+          "id": "d3e844b2",
+          "type": "data"
+        },
+        {
+          "id": "3d21843d",
+          "type": "data"
+        },
+        {
+          "id": "4734aa1f",
+          "type": "parameters"
+        },
+        {
+          "id": "77ccf0fc",
+          "type": "data"
+        },
+        {
+          "id": "3cdf509b",
+          "type": "task"
+        },
+        {
+          "id": "3fa904ad",
+          "type": "data"
+        },
+        {
+          "id": "860d31e3",
+          "type": "task"
+        },
+        {
+          "id": "9d4defaf",
+          "type": "parameters"
+        },
+        {
+          "id": "662facac",
+          "type": "data"
+        },
+        {
+          "id": "70cc20bd",
+          "type": "data"
+        },
+        {
+          "id": "f1b89c2a",
           "type": "data"
         },
         {
@@ -2381,19 +3465,151 @@
           "type": "data"
         },
         {
-          "id": "fce6af18",
+          "id": "2603c4e4",
+          "type": "data"
+        },
+        {
+          "id": "5499fe83",
+          "type": "data"
+        },
+        {
+          "id": "6944e3b5",
+          "type": "data"
+        },
+        {
+          "id": "533f7b78",
+          "type": "data"
+        },
+        {
+          "id": "fcff5111",
+          "type": "data"
+        },
+        {
+          "id": "7e09f027",
+          "type": "data"
+        },
+        {
+          "id": "30e5f08e",
           "type": "task"
+        },
+        {
+          "id": "d367bd23",
+          "type": "task"
+        },
+        {
+          "id": "84837a7c",
+          "type": "data"
+        },
+        {
+          "id": "02cdda9d",
+          "type": "data"
+        },
+        {
+          "id": "594543f8",
+          "type": "data"
+        },
+        {
+          "id": "38aedcc3",
+          "type": "task"
+        },
+        {
+          "id": "234f4a5a",
+          "type": "data"
+        },
+        {
+          "id": "961b6053",
+          "type": "parameters"
+        },
+        {
+          "id": "c0646b45",
+          "type": "data"
+        },
+        {
+          "id": "75a1b589",
+          "type": "data"
+        },
+        {
+          "id": "9d4defaf",
+          "type": "data"
+        },
+        {
+          "id": "e52153e2",
+          "type": "data"
+        },
+        {
+          "id": "4f9c7e7e",
+          "type": "task"
+        },
+        {
+          "id": "fdb3b372",
+          "type": "data"
+        },
+        {
+          "id": "95894134",
+          "type": "data"
+        },
+        {
+          "id": "85ca33e1",
+          "type": "data"
+        },
+        {
+          "id": "273a7c18",
+          "type": "data"
+        },
+        {
+          "id": "e91264c2",
+          "type": "data"
+        },
+        {
+          "id": "57413c99",
+          "type": "data"
+        },
+        {
+          "id": "e4531676",
+          "type": "data"
+        },
+        {
+          "id": "c2bc5378",
+          "type": "data"
+        },
+        {
+          "id": "93e2c3f6",
+          "type": "data"
+        },
+        {
+          "id": "36147977",
+          "type": "data"
+        },
+        {
+          "id": "df5b3cfe",
+          "type": "data"
+        },
+        {
+          "id": "3861d1c9",
+          "type": "data"
+        },
+        {
+          "id": "847f9baa",
+          "type": "task"
+        },
+        {
+          "id": "667fb7cc",
+          "type": "data"
         },
         {
           "id": "a4a96eb9",
           "type": "parameters"
         },
         {
-          "id": "abc2021e",
+          "id": "f50a2280",
           "type": "data"
         },
         {
-          "id": "844e1a3b",
+          "id": "95be5940",
+          "type": "task"
+        },
+        {
+          "id": "0ac1619b",
           "type": "data"
         }
       ]

@@ -1,0 +1,14 @@
+{
+  "code": "def build_model_validation_summary_node(\n    surrogate_registry: dict[str, Any],\n    surrogate_metadata_bundle: dict[str, dict[str, Any]],\n) -> dict[str, Any]:\n    \"\"\"Build the public model validation summary.\n\n    Args:\n        surrogate_registry: Saved surrogate registry.\n        surrogate_metadata_bundle: Merged metadata fragments from the catalog.\n\n    Returns:\n        Model validation summary for ``docs/artifacts/model_validation_summary.json``.\n    \"\"\"\n    return build_model_validation_summary(surrogate_registry, surrogate_metadata_bundle)\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/reporting/nodes.py",
+  "parameters": {},
+  "run_command": "kedro run --to-nodes='build_model_validation_summary'",
+  "inputs": [
+    "surrogate_registry",
+    "surrogate_metadata_bundle"
+  ],
+  "outputs": [
+    "pub_model_validation_summary"
+  ],
+  "preview": null
+}

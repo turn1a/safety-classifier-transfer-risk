@@ -1,0 +1,13 @@
+{
+  "code": "def build_public_target_audit_summary(target_audit_summary: dict[str, Any]) -> dict[str, Any]:\n    \"\"\"Publish the finalized corrected target-audit summary without rewriting its analyses.\n\n    Args:\n        target_audit_summary: Stable finalized audit summary from the catalog.\n\n    Returns:\n        Strict JSON-safe copy of the full finalized summary.\n    \"\"\"\n    summary = publish_safe_audit_summary(target_audit_summary)\n    logger.info(\n        \"Prepared public target-audit summary: %d source successes and %d true target flips\",\n        summary[\"full_cohort\"][\"source_successful\"],\n        summary[\"full_cohort\"][\"true_target_flips\"],\n    )\n    return summary\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/audit_reporting/nodes.py",
+  "parameters": {},
+  "run_command": "kedro run --to-nodes='build_public_target_audit_summary'",
+  "inputs": [
+    "target_audit_summary"
+  ],
+  "outputs": [
+    "pub_target_audit_summary"
+  ],
+  "preview": null
+}

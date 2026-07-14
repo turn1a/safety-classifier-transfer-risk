@@ -3,27 +3,37 @@ project:
   output-dir: _site
   render:
     - index.qmd
+    - paper.qmd
     - pipeline.qmd
   resources:
     - pipeline-viz/**
+    - artifacts/**
 
 website:
-  title: "safety-classifier-transfer-risk"
-  description: "Measuring adversarial transferability risk for text safety classifiers."
+  title: "Text Safety Transfer Risk"
+  description: "A reproducible study of CKA-guided surrogate selection and adversarial transfer against a public prompt-injection detector."
+  site-url: "https://turn1a.github.io/safety-classifier-transfer-risk/"
+  repo-url: "https://github.com/turn1a/safety-classifier-transfer-risk"
+  repo-subdir: docs
+  repo-actions: [source]
+  open-graph: true
+  twitter-card: true
   reader-mode: true
   navbar:
     left:
       - href: index.qmd
+        text: Overview
+      - href: paper.qmd
         text: Paper
       - href: pipeline.qmd
-        text: Pipeline
+        text: Implementation
     right:
       - icon: github
         href: https://github.com/turn1a/safety-classifier-transfer-risk
         aria-label: GitHub
   page-footer:
-    left: "MIT licensed. Built with Kedro + Quarto."
-    right: "© 2026 Aspen Hazel Olszewska"
+    left: "MIT licensed. Built with Kedro and Quarto."
+    right: "[Source](https://github.com/turn1a/safety-classifier-transfer-risk) · © 2026 Aspen Hazel Olszewska"
 
 format:
   html:
@@ -33,9 +43,7 @@ format:
     code-copy: true
     code-overflow: wrap
 
-# Cells are not executed at render time; numbers and tables that come from a run are
-# written in from the run's catalog artifacts (the similarity stage is complete; the
-# attack-transfer results are filled when the sweep finishes). This keeps the GitHub
-# Pages build a pure render with no data or Python dependency.
+# Rendering reads site source, figures, and catalog-generated public artifacts. It does not execute
+# model, attack, cloud, or data-collection work.
 execute:
   freeze: auto

@@ -1,0 +1,22 @@
+{
+  "code": "def assemble_surrogate_metadata(**meta_fragments: dict[str, Any]) -> dict[str, dict[str, Any]]:\n    \"\"\"Merge catalog-wired surrogate metadata fragments by surrogate name.\n\n    Args:\n        **meta_fragments: One metadata dict per surrogate; Kedro wires each\n            ``surrogate_meta__{name}`` catalog entry to a ``meta_{name}`` argument.\n\n    Returns:\n        Mapping ``surrogate -> metadata fragment``.\n    \"\"\"\n    name_by_param = {\n        f\"meta_{spec['name'].replace('-', '_')}\": spec[\"name\"] for spec in surrogate_specs()\n    }\n    return {name_by_param[key]: value for key, value in meta_fragments.items()}\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/reporting/nodes.py",
+  "parameters": {},
+  "run_command": "kedro run --to-nodes='assemble_surrogate_metadata'",
+  "inputs": [
+    "surrogate_meta__deberta-base-pi-v1",
+    "surrogate_meta__deberta-small-pi-v2",
+    "surrogate_meta__deepset-deberta-injection",
+    "surrogate_meta__llama-prompt-guard-86m",
+    "surrogate_meta__llama-prompt-guard-22m",
+    "surrogate_meta__bert-base-ft",
+    "surrogate_meta__roberta-base-ft",
+    "surrogate_meta__electra-small-ft",
+    "surrogate_meta__deberta-base-ft-seed",
+    "surrogate_meta__bilstm-attention"
+  ],
+  "outputs": [
+    "surrogate_metadata_bundle"
+  ],
+  "preview": null
+}

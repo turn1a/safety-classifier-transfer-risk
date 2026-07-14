@@ -1,0 +1,13 @@
+{
+  "code": "def build_public_master_results_table(master_results_corrected: pd.DataFrame) -> pd.DataFrame:\n    \"\"\"Export the 50-row public master results table.\n\n    Args:\n        master_results_corrected: Corrected master table from :func:`recompute_master_dbs`.\n\n    Returns:\n        Public master table for ``docs/artifacts/master_results_table.csv``.\n    \"\"\"\n    return export_public_master_table(master_results_corrected)\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/reporting/nodes.py",
+  "parameters": {},
+  "run_command": "kedro run --to-nodes='build_public_master_results_table'",
+  "inputs": [
+    "master_results_corrected"
+  ],
+  "outputs": [
+    "pub_master_results_table"
+  ],
+  "preview": null
+}

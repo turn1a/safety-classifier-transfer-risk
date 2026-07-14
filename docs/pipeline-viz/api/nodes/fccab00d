@@ -1,0 +1,13 @@
+{
+  "code": "def extract_training_split(task_splits: Mapping[str, pd.DataFrame]) -> pd.DataFrame:\n    \"\"\"Copy the saved training dataframe into the dedicated CKA input artifact.\n\n    Args:\n        task_splits: Persisted mapping of task-split dataframes.\n\n    Returns:\n        Independent dataframe containing only the training rows.\n\n    Raises:\n        ValueError: If the saved mapping has no training dataframe.\n    \"\"\"\n    try:\n        training_split = task_splits[\"train\"]\n    except KeyError as error:\n        msg = \"task_splits must contain a saved train split\"\n        raise ValueError(msg) from error\n\n    extracted_split = training_split.copy()\n    logger.info(\"Prepared dedicated training CKA input with %d rows\", len(extracted_split))\n    return extracted_split\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/similarity_audit_prepare/nodes.py",
+  "parameters": {},
+  "run_command": "kedro run --to-nodes='extract_training_split'",
+  "inputs": [
+    "task_splits"
+  ],
+  "outputs": [
+    "training_split"
+  ],
+  "preview": null
+}

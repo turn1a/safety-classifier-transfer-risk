@@ -5,9 +5,9 @@
       "name": "build_canonical_dataset",
       "tags": [],
       "pipelines": [
-        "stage",
+        "data",
         "__default__",
-        "data"
+        "stage"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -56,54 +56,54 @@
       "name": "raw_deepset",
       "tags": [],
       "pipelines": [
-        "stage",
+        "data",
         "__default__",
-        "data"
+        "stage"
       ],
       "type": "data",
       "modular_pipelines": null,
       "node_extras": null,
       "layer": "raw",
-      "dataset_type": "huggingface.hugging_face_dataset.HFDataset"
+      "dataset_type": "io.memory_dataset.MemoryDataset"
     },
     {
       "id": "b33736fd",
       "name": "raw_jackhhao",
       "tags": [],
       "pipelines": [
-        "stage",
+        "data",
         "__default__",
-        "data"
+        "stage"
       ],
       "type": "data",
       "modular_pipelines": null,
       "node_extras": null,
       "layer": "raw",
-      "dataset_type": "huggingface.hugging_face_dataset.HFDataset"
+      "dataset_type": "io.memory_dataset.MemoryDataset"
     },
     {
       "id": "92cc0247",
       "name": "raw_lakera",
       "tags": [],
       "pipelines": [
-        "stage",
+        "data",
         "__default__",
-        "data"
+        "stage"
       ],
       "type": "data",
       "modular_pipelines": null,
       "node_extras": null,
       "layer": "raw",
-      "dataset_type": "huggingface.hugging_face_dataset.HFDataset"
+      "dataset_type": "io.memory_dataset.MemoryDataset"
     },
     {
       "id": "84e86f23",
       "name": "params:data",
       "tags": [],
       "pipelines": [
-        "stage",
+        "data",
         "__default__",
-        "data"
+        "stage"
       ],
       "type": "parameters",
       "modular_pipelines": null,
@@ -119,20 +119,13 @@
       ],
       "pipelines": [
         "similarity",
-        "stage",
         "__default__",
+        "stage",
         "data"
       ],
       "type": "data",
       "modular_pipelines": null,
-      "node_extras": {
-        "stats": {
-          "rows": 2947,
-          "columns": 3,
-          "file_size": 986532
-        },
-        "styles": null
-      },
+      "node_extras": null,
       "layer": "primary",
       "dataset_type": "pandas.parquet_dataset.ParquetDataset"
     },
@@ -141,9 +134,11 @@
       "name": "dataset_audit",
       "tags": [],
       "pipelines": [
+        "downstream",
+        "data",
         "stage",
         "__default__",
-        "data"
+        "reporting"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -155,35 +150,42 @@
       "id": "85e11043",
       "name": "params:seed",
       "tags": [
-        "deepwordbug",
-        "bert-attack",
-        "bae",
-        "pwws",
-        "deberta-small-pi-v2",
-        "deberta-base-ft-seed",
-        "electra-small-ft",
-        "deberta-base-pi-v1",
-        "deepset-deberta-injection",
         "models",
-        "textfooler",
-        "roberta-base-ft",
-        "bilstm-attention",
-        "llama-prompt-guard-22m",
         "llama-prompt-guard-86m",
-        "similarity",
+        "similarity_audit",
         "attacks",
-        "bert-base-ft"
+        "deberta-base-ft-seed",
+        "pwws",
+        "llama-prompt-guard-22m",
+        "bert-base-ft",
+        "bert-attack",
+        "audit",
+        "electra-small-ft",
+        "textfooler",
+        "deepwordbug",
+        "deberta-base-pi-v1",
+        "bae",
+        "roberta-base-ft",
+        "deepset-deberta-injection",
+        "bilstm-attention",
+        "audit_finalization",
+        "similarity",
+        "deberta-small-pi-v2"
       ],
       "pipelines": [
-        "data",
-        "__default__",
-        "similarity",
-        "risk",
-        "downstream",
         "models",
+        "risk",
+        "similarity_audit",
+        "smoke",
         "attacks",
+        "data",
         "stage",
-        "smoke"
+        "downstream",
+        "audit_finalization",
+        "similarity",
+        "__default__",
+        "reporting",
+        "audit"
       ],
       "type": "parameters",
       "modular_pipelines": null,
@@ -196,9 +198,9 @@
       "name": "split_dataset",
       "tags": [],
       "pipelines": [
-        "stage",
+        "data",
         "__default__",
-        "data"
+        "stage"
       ],
       "type": "task",
       "modular_pipelines": null,
@@ -247,30 +249,34 @@
       "id": "8289686f",
       "name": "task_splits",
       "tags": [
-        "deepwordbug",
-        "bert-attack",
-        "bae",
-        "pwws",
-        "deberta-small-pi-v2",
-        "deberta-base-ft-seed",
-        "electra-small-ft",
-        "deberta-base-pi-v1",
-        "deepset-deberta-injection",
         "models",
-        "textfooler",
-        "roberta-base-ft",
-        "bilstm-attention",
-        "llama-prompt-guard-22m",
         "llama-prompt-guard-86m",
         "attacks",
-        "bert-base-ft"
+        "deberta-base-ft-seed",
+        "pwws",
+        "llama-prompt-guard-22m",
+        "bert-base-ft",
+        "bert-attack",
+        "audit",
+        "electra-small-ft",
+        "similarity_audit_prepare",
+        "textfooler",
+        "deepwordbug",
+        "deberta-base-pi-v1",
+        "bae",
+        "roberta-base-ft",
+        "deepset-deberta-injection",
+        "bilstm-attention",
+        "deberta-small-pi-v2"
       ],
       "pipelines": [
-        "data",
-        "__default__",
         "models",
         "attacks",
-        "stage"
+        "data",
+        "stage",
+        "audit",
+        "__default__",
+        "similarity_audit_prepare"
       ],
       "type": "data",
       "modular_pipelines": null,
@@ -281,7 +287,7 @@
   ],
   "edges": [
     {
-      "source": "84e86f23",
+      "source": "21d22ec4",
       "target": "69c62486"
     },
     {
@@ -289,35 +295,35 @@
       "target": "8289686f"
     },
     {
-      "source": "b33736fd",
-      "target": "349b977c"
-    },
-    {
-      "source": "92cc0247",
-      "target": "349b977c"
-    },
-    {
       "source": "349b977c",
       "target": "21d22ec4"
-    },
-    {
-      "source": "85e11043",
-      "target": "69c62486"
-    },
-    {
-      "source": "21d22ec4",
-      "target": "69c62486"
-    },
-    {
-      "source": "84e86f23",
-      "target": "349b977c"
     },
     {
       "source": "349b977c",
       "target": "014ac4b5"
     },
     {
+      "source": "84e86f23",
+      "target": "69c62486"
+    },
+    {
+      "source": "92cc0247",
+      "target": "349b977c"
+    },
+    {
       "source": "021a8ebe",
+      "target": "349b977c"
+    },
+    {
+      "source": "b33736fd",
+      "target": "349b977c"
+    },
+    {
+      "source": "85e11043",
+      "target": "69c62486"
+    },
+    {
+      "source": "84e86f23",
       "target": "349b977c"
     }
   ],
@@ -334,6 +340,18 @@
     {
       "id": "attacks",
       "name": "attacks"
+    },
+    {
+      "id": "audit",
+      "name": "audit"
+    },
+    {
+      "id": "audit_finalization",
+      "name": "audit_finalization"
+    },
+    {
+      "id": "audit_reporting",
+      "name": "audit_reporting"
     },
     {
       "id": "bae",
@@ -400,6 +418,14 @@
       "name": "similarity"
     },
     {
+      "id": "similarity_audit",
+      "name": "similarity_audit"
+    },
+    {
+      "id": "similarity_audit_prepare",
+      "name": "similarity_audit_prepare"
+    },
+    {
       "id": "textfooler",
       "name": "textfooler"
     },
@@ -434,6 +460,14 @@
       "name": "models"
     },
     {
+      "id": "audit",
+      "name": "audit"
+    },
+    {
+      "id": "similarity_audit_prepare",
+      "name": "similarity_audit_prepare"
+    },
+    {
       "id": "data",
       "name": "data"
     },
@@ -442,8 +476,20 @@
       "name": "risk"
     },
     {
+      "id": "similarity_audit",
+      "name": "similarity_audit"
+    },
+    {
       "id": "attacks",
       "name": "attacks"
+    },
+    {
+      "id": "audit_reporting",
+      "name": "audit_reporting"
+    },
+    {
+      "id": "audit_finalization",
+      "name": "audit_finalization"
     },
     {
       "id": "stage",
@@ -462,7 +508,39 @@
       "outputs": [],
       "children": [
         {
+          "id": "8289686f",
+          "type": "data"
+        },
+        {
+          "id": "69c62486",
+          "type": "task"
+        },
+        {
+          "id": "84e86f23",
+          "type": "data"
+        },
+        {
+          "id": "85e11043",
+          "type": "data"
+        },
+        {
+          "id": "014ac4b5",
+          "type": "data"
+        },
+        {
+          "id": "349b977c",
+          "type": "task"
+        },
+        {
           "id": "92cc0247",
+          "type": "data"
+        },
+        {
+          "id": "84e86f23",
+          "type": "parameters"
+        },
+        {
+          "id": "021a8ebe",
           "type": "data"
         },
         {
@@ -474,40 +552,8 @@
           "type": "data"
         },
         {
-          "id": "8289686f",
-          "type": "data"
-        },
-        {
-          "id": "85e11043",
-          "type": "data"
-        },
-        {
           "id": "85e11043",
           "type": "parameters"
-        },
-        {
-          "id": "84e86f23",
-          "type": "parameters"
-        },
-        {
-          "id": "84e86f23",
-          "type": "data"
-        },
-        {
-          "id": "014ac4b5",
-          "type": "data"
-        },
-        {
-          "id": "021a8ebe",
-          "type": "data"
-        },
-        {
-          "id": "69c62486",
-          "type": "task"
-        },
-        {
-          "id": "349b977c",
-          "type": "task"
         }
       ]
     }

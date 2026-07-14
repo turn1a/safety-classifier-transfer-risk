@@ -1,0 +1,7 @@
+# Post-hoc target-outcome audit: re-evaluate the frozen target on saved attack texts.
+audit:
+  # Match attacks-stage eval-set construction for source attribution.
+  eval_set_size: 191
+  max_prompt_chars: 3200
+  injection_label: 1
+  excluded_training_source: jackhhao/jailbreak-classification

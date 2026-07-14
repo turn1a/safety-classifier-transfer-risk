@@ -1,0 +1,8 @@
+{
+  "type": "artifacts.mlflow_artifact_dataset.CSVDataset.MlflowCSVDataset",
+  "filepath": "<workspace>/docs/artifacts/training_probe_similarity.csv",
+  "run_command": "kedro run --to-outputs=pub_training_probe_similarity",
+  "preview": null,
+  "preview_type": null,
+  "stats": null
+}

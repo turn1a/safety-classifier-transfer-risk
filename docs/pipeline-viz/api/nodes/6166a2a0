@@ -1,0 +1,15 @@
+{
+  "code": "def plot_cka_ranked(\n    master_results_corrected: pd.DataFrame,\n    surrogate_selection: dict[str, Any],\n    thresholds: dict[str, float],\n) -> Figure:\n    \"\"\"Render a ranked two-panel CKA/DBS view with M1/M2/middle encoding.\n\n    Args:\n        master_results_corrected: Corrected master table.\n        surrogate_selection: Saved M1/M2 selection bands.\n        thresholds: Calibrated ``{\"r1\", \"r2\"}`` thresholds.\n\n    Returns:\n        Matplotlib figure for ``docs/figures/fig_cka_ranked.png``.\n    \"\"\"\n    summary = _surrogate_level_table(master_results_corrected)\n    summary[\"similarity_group\"] = _similarity_groups(summary, surrogate_selection)\n    summary = summary.sort_values(\"mean_cka\").reset_index(drop=True)\n    fig, axes = plt.subplots(1, 2, figsize=(10, 6), sharey=True, layout=\"constrained\")\n    y_positions = np.arange(len(summary))\n    for ax, metric, title in zip(\n        axes,\n        (\"mean_cka\", \"dbs\"),\n        (\"mean CKA: r2 dotted / r1 dashed\", \"corrected DBS\"),\n        strict=True,\n    ):\n        colors = [_GROUP_COLORS[group] for group in summary[\"similarity_group\"]]\n        bars = ax.barh(y_positions, summary[metric], color=colors, alpha=0.85)\n        for bar, group in zip(bars, summary[\"similarity_group\"], strict=True):\n            bar.set_hatch(_GROUP_HATCHES[group])\n        ax.set(title=title, xlabel=title, yticks=y_positions, yticklabels=summary[\"surrogate\"])\n        ax.set_xlim(0.0, 1.0)\n    axes[0].set_xlabel(\"mean CKA\")\n    axes[0].axvline(thresholds[\"r1\"], color=\"#e76f51\", linestyle=\"--\", linewidth=1.2)\n    axes[0].axvline(thresholds[\"r2\"], color=\"#6d597a\", linestyle=\":\", linewidth=1.5)\n    legend_handles = [\n        Patch(\n            facecolor=_GROUP_COLORS[group],\n            hatch=_GROUP_HATCHES[group],\n            label=group,\n            alpha=0.85,\n        )\n        for group in (\"M1\", \"middle\", \"M2\")\n    ]\n    axes[0].legend(handles=legend_handles, loc=\"lower right\", title=\"similarity group\")\n    fig.suptitle(\"Target-vs-surrogate similarity (ranked by mean CKA)\")\n    return fig\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/reporting/nodes.py",
+  "parameters": {},
+  "run_command": "kedro run --to-nodes='plot_cka_ranked'",
+  "inputs": [
+    "master_results_corrected",
+    "surrogate_selection",
+    "thresholds"
+  ],
+  "outputs": [
+    "fig_cka_ranked"
+  ],
+  "preview": null
+}

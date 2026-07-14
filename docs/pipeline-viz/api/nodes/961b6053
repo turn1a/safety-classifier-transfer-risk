@@ -1,0 +1,19 @@
+{
+  "parameters": {
+    "reporting": {
+      "manifest": {
+        "schema_version": "1.0",
+        "experiment_commit": "5af7330",
+        "uv_lock_sha256": "fed6bd35da2963e19ac5fe00ab14fff0937120bb2c92e132741256cfc1de8f36",
+        "hardware": {
+          "instance_type": "r8g.48xlarge",
+          "vcpus": 192,
+          "architecture": "Graviton4",
+          "pricing_model": "spot",
+          "victim_backend": "torch on ARM"
+        },
+        "completion_note": "Most attack shards ran on a 192-vCPU Graviton4 spot instance; final shard reductions and reporting completed locally."
+      }
+    }
+  }
+}

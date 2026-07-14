@@ -224,6 +224,61 @@ surrogate_selection:
     kedro-viz:
       layer: model_output
 
+# --- training-only CKA input preparation (explicit; local) -----------------
+# The preparation pipeline owns task_splits deserialization for training-only CKA. It persists
+# only the train dataframe here, so the CKA pipeline cannot deserialize evaluation rows.
+training_split:
+  type: pandas.ParquetDataset
+  filepath: data/05_model_input/training_split.parquet
+  metadata:
+    kedro-viz:
+      layer: model_input
+
+# --- training-only similarity sensitivity (explicit; local) ----------------
+# This post-hoc probe samples only the dedicated training dataframe. Its artifacts never
+# overwrite original CKA outputs and remain local data-layer datasets.
+training_probe_set:
+  type: pandas.ParquetDataset
+  filepath: data/05_model_input/training_probe_set.parquet
+  metadata:
+    kedro-viz:
+      layer: model_input
+
+"training_cka__{surrogate}":
+  type: pickle.PickleDataset
+  filepath: data/04_feature/training_cka_{surrogate}.pkl
+  metadata:
+    kedro-viz:
+      layer: feature
+
+training_cka_matrices:
+  type: pickle.PickleDataset
+  filepath: data/04_feature/training_cka_matrices.pkl
+  metadata:
+    kedro-viz:
+      layer: feature
+
+training_similarity_table:
+  type: pandas.ParquetDataset
+  filepath: data/07_model_output/training_probe_similarity_table.parquet
+  metadata:
+    kedro-viz:
+      layer: model_output
+
+training_similarity_thresholds:
+  type: json.JSONDataset
+  filepath: data/07_model_output/training_probe_similarity_thresholds.json
+  metadata:
+    kedro-viz:
+      layer: model_output
+
+training_surrogate_selection:
+  type: json.JSONDataset
+  filepath: data/07_model_output/training_probe_surrogate_selection.json
+  metadata:
+    kedro-viz:
+      layer: model_output
+
 # --- attacks stage ---------------------------------------------------------
 # Each (surrogate, recipe, shard) attack node writes one shard partition; a reduce node per
 # cell concatenates the shards into adversarial.<surrogate>__<recipe>. Both are boundary
@@ -262,6 +317,42 @@ transfer_results:
     kedro-viz:
       layer: model_output
 
+# --- audit stage (explicit; excluded from __default__) ---------------------
+target_audit_raw_cells:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/target_audit_cells.parquet
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+target_audit_raw_sources:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/target_audit_sources.parquet
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+target_audit_raw_context:
+  type: json.JSONDataset
+  filepath: data/08_reporting/target_audit_summary.json
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+target_audit_cells:
+  type: pandas.ParquetDataset
+  filepath: data/08_reporting/target_audit_cells_corrected.parquet
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+target_audit_summary:
+  type: json.JSONDataset
+  filepath: data/08_reporting/target_audit_summary_corrected.json
+  metadata:
+    kedro-viz:
+      layer: reporting
+
 master_results_table:
   type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
   dataset:
@@ -272,8 +363,19 @@ master_results_table:
     kedro-viz:
       layer: model_output
 
-# A few worked transfer cases (surrogate AND frozen target both flip to benign), selected by the
-# transfer node so the write-up can show a real before/after example without loading any model.
+# Separate corrected copy used by the risk stage; the original master remains immutable.
+risk_master_results_corrected:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: pandas.ParquetDataset
+    filepath: data/07_model_output/risk_master_results_corrected.parquet
+  artifact_path: tables
+  metadata:
+    kedro-viz:
+      layer: model_output
+
+# A few worked source-success cases whose frozen target prediction is benign on perturbed text.
+# The transfer stage does not evaluate target originals, so these do not establish target flips.
 # Non-boundary: always local, never routed to S3.
 transferred_examples:
   type: json.JSONDataset
@@ -312,11 +414,81 @@ run_metrics:
       layer: model_output
 
 # --- reporting stage -------------------------------------------------------
-fig_cka_heatmap:
+pub_master_results_table:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: pandas.CSVDataset
+    filepath: docs/artifacts/master_results_table.csv
+  artifact_path: tables
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+pub_surrogate_summary:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: pandas.CSVDataset
+    filepath: docs/artifacts/surrogate_summary.csv
+  artifact_path: tables
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+pub_dataset_audit:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: json.JSONDataset
+    filepath: docs/artifacts/dataset_audit.json
+  artifact_path: results
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+pub_model_validation_summary:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: json.JSONDataset
+    filepath: docs/artifacts/model_validation_summary.json
+  artifact_path: results
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+pub_run_metrics:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: json.JSONDataset
+    filepath: docs/artifacts/run_metrics.json
+  artifact_path: results
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+pub_results_manifest:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: json.JSONDataset
+    filepath: docs/artifacts/results_manifest.json
+  artifact_path: results
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+pub_qualitative_examples:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: json.JSONDataset
+    filepath: docs/artifacts/qualitative_examples.json
+  artifact_path: results
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+fig_cka_ranked:
   type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
   dataset:
     type: matplotlib.MatplotlibDataset
-    filepath: data/08_reporting/fig_cka_heatmap.png
+    filepath: docs/figures/fig_cka_ranked.png
   artifact_path: figures
   metadata:
     kedro-viz:
@@ -326,18 +498,80 @@ fig_transfer_scatter:
   type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
   dataset:
     type: matplotlib.MatplotlibDataset
-    filepath: data/08_reporting/fig_transfer_scatter.png
+    filepath: docs/figures/fig_transfer_scatter.png
   artifact_path: figures
   metadata:
     kedro-viz:
       layer: reporting
 
-fig_regression_ablation:
+# --- audit reporting stage (explicit; target-free) -------------------------
+pub_target_audit_cells:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: pandas.CSVDataset
+    filepath: docs/artifacts/target_audit_cells.csv
+  artifact_path: tables
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+pub_target_audit_sources:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: pandas.CSVDataset
+    filepath: docs/artifacts/target_audit_sources.csv
+  artifact_path: tables
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+pub_target_audit_summary:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: json.JSONDataset
+    filepath: docs/artifacts/target_audit_summary.json
+  artifact_path: results
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+fig_true_flip_scatter:
   type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
   dataset:
     type: matplotlib.MatplotlibDataset
-    filepath: data/08_reporting/fig_regression_ablation.png
+    filepath: docs/figures/fig_true_flip_scatter.png
   artifact_path: figures
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+fig_true_flip_ablation:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: matplotlib.MatplotlibDataset
+    filepath: docs/figures/fig_true_flip_ablation.png
+  artifact_path: figures
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+# --- training-only similarity sensitivity (explicit; public) ---------------
+pub_training_probe_similarity:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: pandas.CSVDataset
+    filepath: docs/artifacts/training_probe_similarity.csv
+  artifact_path: tables
+  metadata:
+    kedro-viz:
+      layer: reporting
+
+pub_training_probe_similarity_sensitivity:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: json.JSONDataset
+    filepath: docs/artifacts/training_probe_similarity_sensitivity.json
+  artifact_path: results
   metadata:
     kedro-viz:
       layer: reporting

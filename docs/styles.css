@@ -1,19 +1,102 @@
-/* Minor tweaks on top of the cosmo theme. */
+/* Small, theme-aware adjustments on top of the Quarto theme. */
 
 .navbar-brand {
   font-weight: 600;
 }
 
-/* Slightly tighter code blocks for the method walk-throughs. */
 pre code {
   font-size: 0.85em;
 }
 
-/* Pipeline graph: break out of the content column to span the full viewport width. */
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin: 1.75rem 0 2.25rem;
+}
+
+.metric-card {
+  min-height: 8.5rem;
+  padding: 1rem;
+  border: 1px solid var(--bs-border-color, currentColor);
+  border-radius: 0.55rem;
+  background-color: transparent;
+  box-shadow: 0 1px 3px rgb(0 0 0 / 8%);
+}
+
+.metric-value {
+  margin: 0 0 0.45rem;
+  color: var(--bs-emphasis-color, currentColor);
+  font-size: clamp(1.35rem, 2vw, 1.85rem);
+  font-weight: 650;
+  line-height: 1.1;
+}
+
+.metric-label {
+  margin: 0;
+  color: var(--bs-secondary-color, inherit);
+  font-size: 0.88rem;
+  line-height: 1.35;
+}
+
+.hero-figure {
+  margin: 1.5rem auto 2rem;
+}
+
+.hero-figure img {
+  display: block;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin: 1.25rem 0 1.75rem;
+}
+
+.action-link {
+  display: inline-block;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--bs-border-color, currentColor);
+  border-radius: 0.4rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.action-link:hover,
+.action-link:focus-visible {
+  border-color: currentColor;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+/* Pipeline graph fills the full-page content container. */
 .viz-frame {
   display: block;
-  width: 100vw;
-  margin-left: calc(50% - 50vw);
-  height: 90vh;
+  width: 100%;
+  height: min(90vh, 58rem);
   border: 0;
+}
+
+@media (max-width: 900px) {
+  .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .viz-frame {
+    height: 72vh;
+  }
+}
+
+@media (max-width: 540px) {
+  .metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-card {
+    min-height: 0;
+  }
 }

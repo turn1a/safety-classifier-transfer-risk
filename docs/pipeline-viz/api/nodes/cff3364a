@@ -1,5 +1,5 @@
 {
-  "type": "datasets.hub_model_dataset.HuggingFaceHubModelDataset",
+  "type": "io.memory_dataset.MemoryDataset",
   "filepath": null,
   "run_command": null,
   "preview": null,

@@ -1,0 +1,79 @@
+# Static Kedro-viz only needs dataset identities and graph wiring. Stub remote sources so
+# `just viz-build` never resolves Hub metadata, downloads a model, or accesses a dataset.
+raw_deepset:
+  type: MemoryDataset
+  metadata:
+    kedro-viz:
+      layer: raw
+
+raw_jackhhao:
+  type: MemoryDataset
+  metadata:
+    kedro-viz:
+      layer: raw
+
+raw_lakera:
+  type: MemoryDataset
+  metadata:
+    kedro-viz:
+      layer: raw
+
+target_model:
+  type: MemoryDataset
+  metadata:
+    kedro-viz:
+      layer: raw
+
+"hub__deberta-base-pi-v1":
+  type: MemoryDataset
+  metadata:
+    kedro-viz:
+      layer: raw
+
+"hub__deberta-small-pi-v2":
+  type: MemoryDataset
+  metadata:
+    kedro-viz:
+      layer: raw
+
+"hub__deepset-deberta-injection":
+  type: MemoryDataset
+  metadata:
+    kedro-viz:
+      layer: raw
+
+"hub__llama-prompt-guard-86m":
+  type: MemoryDataset
+  metadata:
+    kedro-viz:
+      layer: raw
+
+"hub__llama-prompt-guard-22m":
+  type: MemoryDataset
+  metadata:
+    kedro-viz:
+      layer: raw
+
+"hub__bert-base-ft":
+  type: MemoryDataset
+  metadata:
+    kedro-viz:
+      layer: raw
+
+"hub__roberta-base-ft":
+  type: MemoryDataset
+  metadata:
+    kedro-viz:
+      layer: raw
+
+"hub__electra-small-ft":
+  type: MemoryDataset
+  metadata:
+    kedro-viz:
+      layer: raw
+
+"hub__deberta-base-ft-seed":
+  type: MemoryDataset
+  metadata:
+    kedro-viz:
+      layer: raw

@@ -1,0 +1,8 @@
+{
+  "type": "artifacts.mlflow_artifact_dataset.ParquetDataset.MlflowParquetDataset",
+  "filepath": "<workspace>/data/07_model_output/risk_master_results_corrected.parquet",
+  "run_command": "kedro run --to-outputs=risk_master_results_corrected",
+  "preview": null,
+  "preview_type": null,
+  "stats": null
+}

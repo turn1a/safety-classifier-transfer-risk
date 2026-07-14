@@ -1,0 +1,60 @@
+{
+  "target": "protectai/deberta-v3-base-prompt-injection-v2",
+  "models": [
+    {
+      "name": "deberta-base-pi-v1",
+      "kind": "pretrained",
+      "num_params": 184423682
+    },
+    {
+      "name": "deberta-small-pi-v2",
+      "kind": "pretrained",
+      "num_params": 141896450
+    },
+    {
+      "name": "deepset-deberta-injection",
+      "kind": "pretrained",
+      "num_params": 184423682
+    },
+    {
+      "name": "llama-prompt-guard-86m",
+      "kind": "pretrained",
+      "num_params": 278810882
+    },
+    {
+      "name": "llama-prompt-guard-22m",
+      "kind": "pretrained",
+      "num_params": 70830722
+    },
+    {
+      "name": "bert-base-ft",
+      "kind": "finetune",
+      "val_accuracy": 0.9728813559322034,
+      "num_params": 109483778
+    },
+    {
+      "name": "roberta-base-ft",
+      "kind": "finetune",
+      "val_accuracy": 0.9694915254237289,
+      "num_params": 124647170
+    },
+    {
+      "name": "electra-small-ft",
+      "kind": "finetune",
+      "val_accuracy": 0.9559322033898305,
+      "num_params": 13549314
+    },
+    {
+      "name": "deberta-base-ft-seed",
+      "kind": "finetune",
+      "val_accuracy": 0.9728813559322034,
+      "num_params": 184423682
+    },
+    {
+      "name": "bilstm-attention",
+      "kind": "bilstm",
+      "val_accuracy": 0.8949152542372881,
+      "num_params": 4202371
+    }
+  ]
+}

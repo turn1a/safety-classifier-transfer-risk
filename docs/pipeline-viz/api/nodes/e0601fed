@@ -1,0 +1,8 @@
+{
+  "type": "pickle.pickle_dataset.PickleDataset",
+  "filepath": "<workspace>/data/04_feature/training_cka_deberta-base-pi-v1.pkl",
+  "run_command": "kedro run --to-outputs=training_cka__deberta-base-pi-v1",
+  "preview": null,
+  "preview_type": null,
+  "stats": null
+}

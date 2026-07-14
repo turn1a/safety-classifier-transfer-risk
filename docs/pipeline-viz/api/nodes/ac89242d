@@ -1,0 +1,32 @@
+{
+  "code": "def recompute_risk_master_dbs(\n    master_results_table: pd.DataFrame,\n    cka_matrices: dict[str, Any],\n    params_similarity: dict[str, Any],\n) -> pd.DataFrame:\n    \"\"\"Recompute DBS for the risk stage from saved CKA matrices.\n\n    Args:\n        master_results_table: Original saved transfer-stage master table.\n        cka_matrices: Saved target-vs-surrogate CKA matrices.\n        params_similarity: Similarity-stage parameters supplying ``dbs.box``.\n\n    Returns:\n        A separate corrected master table for regression, ablation, and run metrics.\n    \"\"\"\n    box = int(params_similarity[\"dbs\"][\"box\"])\n    corrected = apply_corrected_dbs(master_results_table, cka_matrices, box=box)\n    logger.info(\"Prepared corrected DBS risk input for %d rows (box=%d)\", len(corrected), box)\n    return corrected\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/risk/nodes.py",
+  "parameters": {
+    "similarity": {
+      "n_probe": 2000,
+      "max_seq_len": 512,
+      "pooling": "cls",
+      "cka": {
+        "mode": "minibatch",
+        "batch_size": 64
+      },
+      "dbs": {
+        "box": 1
+      },
+      "thresholds": {
+        "r1_quantile": 0.75,
+        "r2_quantile": 0.25
+      }
+    }
+  },
+  "run_command": "kedro run --to-nodes='recompute_risk_master_dbs'",
+  "inputs": [
+    "master_results_table",
+    "cka_matrices",
+    "params:similarity"
+  ],
+  "outputs": [
+    "risk_master_results_corrected"
+  ],
+  "preview": null
+}

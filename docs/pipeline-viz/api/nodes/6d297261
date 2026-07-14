@@ -1,0 +1,11 @@
+{
+  "code": "def build_qualitative_examples() -> list[dict[str, Any]]:\n    \"\"\"Build the redacted qualitative audit for public release.\n\n    Returns:\n        Fixed safe audit records for ``docs/artifacts/qualitative_examples.json``.\n    \"\"\"\n    return build_redacted_qualitative_audit()\n",
+  "filepath": "risk-transfer/src/transfer_risk/pipelines/reporting/nodes.py",
+  "parameters": {},
+  "run_command": "kedro run --to-nodes='build_qualitative_examples'",
+  "inputs": [],
+  "outputs": [
+    "pub_qualitative_examples"
+  ],
+  "preview": null
+}

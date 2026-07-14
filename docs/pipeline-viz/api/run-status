@@ -1,11 +1,120 @@
 {
-  "nodes": {},
-  "datasets": {},
+  "nodes": {
+    "7a47232b": {
+      "duration": 0.0025028750533238053,
+      "status": "success",
+      "error": null
+    },
+    "95878ab5": {
+      "duration": 0.0014958340907469392,
+      "status": "success",
+      "error": null
+    },
+    "922ad991": {
+      "duration": 0.0012866250472143292,
+      "status": "success",
+      "error": null
+    },
+    "a6770ee6": {
+      "duration": 0.0004790419479832053,
+      "status": "success",
+      "error": null
+    },
+    "52225615": {
+      "duration": 1.110329999937676,
+      "status": "success",
+      "error": null
+    },
+    "e3b6387b": {
+      "duration": 0.0102893749717623,
+      "status": "success",
+      "error": null
+    },
+    "9ffd855c": {
+      "duration": 0.007843125029467046,
+      "status": "success",
+      "error": null
+    }
+  },
+  "datasets": {
+    "51e72f0f": {
+      "name": "target_audit_cells",
+      "size": 9977,
+      "status": "success",
+      "error": null
+    },
+    "2daddf26": {
+      "name": "pub_target_audit_cells",
+      "size": 6050,
+      "status": "success",
+      "error": null
+    },
+    "d08090be": {
+      "name": "target_audit_raw_sources",
+      "size": 10443,
+      "status": "success",
+      "error": null
+    },
+    "93c61392": {
+      "name": "pub_target_audit_sources",
+      "size": 14366,
+      "status": "success",
+      "error": null
+    },
+    "148d7559": {
+      "name": "target_audit_summary",
+      "size": 24566,
+      "status": "success",
+      "error": null
+    },
+    "75d025c7": {
+      "name": "pub_target_audit_summary",
+      "size": 24566,
+      "status": "success",
+      "error": null
+    },
+    "533f7b78": {
+      "name": "pub_qualitative_examples",
+      "size": 680,
+      "status": "success",
+      "error": null
+    },
+    "85ca33e1": {
+      "name": "pub_master_results_table",
+      "size": 6884,
+      "status": "success",
+      "error": null
+    },
+    "db2ca221": {
+      "name": "fig_transfer_scatter",
+      "size": 64406,
+      "status": "success",
+      "error": null
+    },
+    "8bb4724c": {
+      "name": "surrogate_selection",
+      "size": 279,
+      "status": "success",
+      "error": null
+    },
+    "514400f2": {
+      "name": "fig_true_flip_ablation",
+      "size": 36186,
+      "status": "success",
+      "error": null
+    },
+    "57e7ad69": {
+      "name": "fig_true_flip_scatter",
+      "size": 56549,
+      "status": "success",
+      "error": null
+    }
+  },
   "pipeline": {
-    "run_id": "d4a6d28a-1f1f-48d6-85f3-c274bc1bd2c8",
-    "start_time": "2026-06-18T18:56:59.641574+00:00",
-    "end_time": "2026-06-18T18:56:59.646582+00:00",
-    "duration": 0.005008,
+    "run_id": "59936874-cc75-49cb-a47b-b1540d13103a",
+    "start_time": "2026-07-14T13:13:49.513057+00:00",
+    "end_time": "2026-07-14T13:13:50.964362+00:00",
+    "duration": 1.451305,
     "status": "success",
     "error": null
   }
