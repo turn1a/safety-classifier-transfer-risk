@@ -1,8 +1,8 @@
-| Analysis | Models | Flips / target injections | Pooled (%) | CKA versus macro flip rho | Exact p |
+| Analysis | Models | [Flips / target injections](guide.qmd#target-baseline){.term-help} | [Pooled (%)](guide.qmd#pooled){.term-help} | [CKA versus macro flip rho](guide.qmd#rho){.term-help} | [Exact p](guide.qmd#exact-p){.term-help} |
 | :--- | ---: | ---: | ---: | ---: | ---: |
 | Original probe, full cohort | 10 | 1,054 / 4,009 | 26.3 | 0.830 | 0.0047 |
 | Known source excluded | 10 | 982 / 3,158 | 31.1 | 0.903 | 0.00081 |
 | Training-only probe, full cohort | 10 | 1,054 / 4,009 | 26.3 | 0.818 | 0.0058 |
 | BiLSTM excluded, saved outcomes | 9 | 998 / 3,410 | 29.3 | 0.800 | 0.014 |
 
-: Original association and post-hoc sensitivities on saved outcomes. {#tbl-sensitivities}
+: Original association and post-hoc sensitivities on saved outcomes. {#tbl-sensitivities tbl-colwidths="[30,7,23,11,17,12]"}

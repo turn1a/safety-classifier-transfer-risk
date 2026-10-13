@@ -28,10 +28,14 @@ jobs:
           lfs: true
       - name: Set up Quarto
         uses: quarto-dev/quarto-actions/setup@v2
+        with:
+          version: 1.9.38
       # No Python execution in the site yet. When posts gain executable cells,
       # add uv setup + `uv sync` and point QUARTO_PYTHON at .venv/bin/python.
       - name: Render
         run: quarto render docs
+      - name: Check paper exports
+        run: test -s docs/_site/paper.html && test -s docs/_site/paper.pdf
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:

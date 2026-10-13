@@ -1,0 +1,32 @@
+<dl class="metric-definitions">
+<dt id="target">Target</dt>
+<dd>The classifier being evaluated. Here it is ProtectAI's DeBERTa-v3-base prompt-injection detector v2. Source attacks are generated against other classifiers; the target is evaluated afterward.</dd>
+<dt id="surrogate">Surrogate</dt>
+<dd>A classifier used to generate source attacks. The study compares ten surrogates with one frozen target, including pretrained detectors and locally trained models.</dd>
+<dt id="verified-flip">Verified target flip</dt>
+<dd>A successful source attack for which the target predicts injection on the original and benign on the perturbation. This verifies a prediction change. Meaning preservation and downstream evasion were not established.</dd>
+<dt id="cka">CKA</dt>
+<dd>Centered Kernel Alignment compares hidden representations on a shared set of inputs. The reported mean averages all target-surrogate layer pairs. Larger values indicate greater representational similarity on that probe.</dd>
+<dt id="dbs">DBS</dt>
+<dd>Diagonal Box Similarity averages selected CKA cells near the matrix diagonal. Selection depends on matrix shape; it includes every cell for the target-BiLSTM pair. The paper illustrates the selector.</dd>
+<dt id="groups">M1, middle, and M2</dt>
+<dd>M1 contains the three highest-CKA surrogates and M2 the three lowest under the empirical quartile rule. Four models form the middle group. These groups describe the designed pool.</dd>
+<dt id="source-success">Source success</dt>
+<dd>TextAttack records a successful source attack when the surrogate predicts the positive class on the original and benign after perturbation. Only source-success records enter the target audit.</dd>
+<dt id="target-baseline">Target injection baseline</dt>
+<dd>The target predicts injection on the original input of a successful source attack. These records form the denominator for the verified flip rate. Repeated originals count once per attack record.</dd>
+<dt id="macro">Macro rate</dt>
+<dd>The unweighted mean of a surrogate's defined recipe-level verified flip rates. Each recipe receives equal weight, even when its source-success cohort is small. This is the outcome used for the CKA association.</dd>
+<dt id="pooled">Pooled rate</dt>
+<dd>Total verified flips divided by successful source-attack records with target injection baselines. For the full study, 1,054 / 4,009 = 26.3%. It conditions on source success and the original target prediction.</dd>
+<dt id="yield">Procedure yield</dt>
+<dd>Verified flips divided by all attempted source evaluations, including baseline misses and failed attacks. For the full study, 1,054 / 9,550 = 11.0%. Failed-source perturbations were not target-audited.</dd>
+<dt id="rho">Spearman rho</dt>
+<dd>A rank correlation. Positive rho means larger values of one variable tend to accompany larger values of the other within the observed pool. It does not establish causation or prediction on new models.</dd>
+<dt id="exact-p">Exact p-value</dt>
+<dd>The fraction of enumerated assignments at least as extreme as the observed statistic under the stated exchangeability null. It conditions on the designed surrogate pool. Three-versus-three group assignments have a minimum p of 0.05.</dd>
+<dt id="percentage-points">Percentage points</dt>
+<dd>The absolute difference between two percentages. M1's 47.3% and M2's 14.3% macro means differ by 33.1 percentage points when calculated before display rounding.</dd>
+<dt id="sensitivity">Post-hoc sensitivity</dt>
+<dd>A recalculation that changes a cohort, probe, or included surrogate after the experiment. These checks assess dependence on specific choices. They do not repair saved model predictions or establish external validation.</dd>
+</dl>

@@ -6,6 +6,10 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Added
 
+- A study guide with model cards, dataset links, metric definitions, and public artifact descriptions. Marked terms show definitions on hover or keyboard focus and link to the guide on touch devices. Figures open in a larger view.
+
+- A PDF export of the same manuscript using Quarto's bundled Typst compiler, with no model execution or TeX installation.
+
 - An explicit `paper_reporting` stage that generates manuscript table includes, an outcome diagram, an annotated cell heatmap, a probe comparison, a synthetic DBS selector diagram, and a nine-transformer sensitivity from public aggregates and configuration without model inference or attacks.
 
 - Commit hooks requiring the checker and a Codex read-through for authored prose, including Quarto `.qmd`, plus a commit-message register check. The reader model is pinned in `.register-model`; failed and incomplete reads block approval. Diagram labels are checked independently of VL visual branding.

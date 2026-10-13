@@ -1,4 +1,4 @@
-| Recipe | Source successes | Flips / target injections | Pooled verified rate (%) |
+| Recipe | [Source successes](guide.qmd#source-success){.term-help} | [Flips / target injections](guide.qmd#target-baseline){.term-help} | [Pooled verified rate (%)](guide.qmd#pooled){.term-help} |
 | :--- | ---: | ---: | ---: |
 | bae | 892 | 325 / 830 | 39.2 |
 | bert-attack | 1,097 | 242 / 1,002 | 24.2 |
@@ -6,4 +6,4 @@
 | pwws | 830 | 221 / 773 | 28.6 |
 | textfooler | 942 | 189 / 855 | 22.1 |
 
-: Audited outcome totals by attack recipe. {#tbl-recipe-results}
+: Audited outcome totals by attack recipe. {#tbl-recipe-results tbl-colwidths="[20,20,30,30]"}

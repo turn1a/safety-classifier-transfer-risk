@@ -1,5 +1,5 @@
 ---
-title: "Audited transfer between text safety classifiers"
+title: "Attack transfer between text safety classifiers"
 author: "Aspen Hazel Olszewska"
 date: "2026-07-14"
 date-modified: "2026-10-13"
@@ -8,40 +8,53 @@ toc: true
 toc-depth: 2
 ---
 
-This study measures the relationship between representational similarity and attack transfer to `protectai/deberta-v3-base-prompt-injection-v2`. It compares ten surrogates with the target through linear CKA, applies five adapted TextAttack recipes to every surrogate, and audits target predictions on originals and perturbations. The target model was archived and no longer maintained as of July 2026.
+::: {.study-lead}
+An attack that changes one classifier's prediction may also change another's. This study asks whether classifiers with more similar hidden representations show more attack transfer to a frozen [prompt-injection detector](https://huggingface.co/protectai/deberta-v3-base-prompt-injection-v2). It compares ten [surrogates](guide.qmd#surrogate){.term-help} under five adapted TextAttack recipes and checks target predictions on both originals and perturbations.
+:::
+
+::: {.action-row}
+[Read the paper](paper.qmd){.action-link}
+[Download the paper (PDF)](paper.pdf){.action-link}
+[Open the study guide](guide.qmd){.action-link}
+[Browse the code](https://github.com/turn1a/safety-classifier-transfer-risk){.action-link}
+:::
 
 ::: {.metric-grid aria-label="Audited results"}
 <div class="metric-card">
 <p class="metric-value">26.3%</p>
-<p class="metric-label">1,054 verified flips / 4,009 successful records with target injection baselines</p>
+<p class="metric-label"><a class="term-help" href="guide.html#pooled">Pooled verified flip rate</a><br>1,054 flips / 4,009 source-success records with target injection baselines</p>
+</div>
+<div class="metric-card">
+<p class="metric-value">11.0%</p>
+<p class="metric-label"><a class="term-help" href="guide.html#yield">Yield across all attempts</a><br>The same 1,054 flips / 9,550 attempted source evaluations</p>
 </div>
 <div class="metric-card">
 <p class="metric-value">ρ = 0.830</p>
-<p class="metric-label">CKA versus surrogate macro flip rate, exact p = 0.0047, ten models</p>
+<p class="metric-label"><a class="term-help" href="guide.html#rho">CKA association</a><br>Ten surrogate macro rates; exact p = 0.0047 within this designed pool</p>
 </div>
 <div class="metric-card">
 <p class="metric-value">33.1 pp</p>
-<p class="metric-label">M1 minus M2; p = 0.05, the minimum for three versus three</p>
-</div>
-<div class="metric-card">
-<p class="metric-value">ρ = 0.800</p>
-<p class="metric-label">BiLSTM-excluded sensitivity, exact p = 0.014, nine transformers</p>
+<p class="metric-label"><a class="term-help" href="guide.html#groups">M1 minus M2</a><br>p = 0.05; three versus three cannot meet the strict p &lt; 0.05 rule</p>
 </div>
 :::
 
-## Audited outcomes
+::: {.study-status}
+The reported numbers come from completed model and attack runs. Tables, figures, and statistical summaries were recalculated from saved outputs. The model implementation used for those runs has padding and initialization defects; [tested code corrections](recomputation.md) have not been evaluated in a replacement experiment.
+:::
+
+## How transfer was counted
 
 ::: {.hero-figure}
-![Verified injection-to-benign outcomes by surrogate and recipe. Each cell shows its percentage and the exact flip count divided by successful records with target injection baselines.](figures/fig_recipe_heatmap.png){fig-alt="A ten-surrogate by five-recipe heatmap shows conditional audited rates and their exact denominators." width=100%}
+![Source eligibility, successful attacks, and the original target predictions that define the verified flip denominator.](figures/fig_audit_flow.png){fig-alt="The audit starts with 9,550 source evaluations, records 4,362 source successes, and separates all four target prediction transitions, including 1,054 injection-to-benign changes." width=100%}
 :::
 
-The sweep has 9,550 attempted source evaluations over 191 distinct positive test inputs. It skips 950 baseline source misses, leaving 8,600 eligible attempts and 4,362 successes. The audit finds 1,054 verified injection-to-benign changes among 4,009 successful records with target-positive originals, a pooled conditional rate of 26.3%. The counts refer to attack records: originals repeat across models and recipes. The target-positive baseline comprises 167 distinct originals.
+The sweep has 9,550 attempted source evaluations over 191 distinct positive test inputs. It skips 950 baseline source misses, leaving 8,600 eligible attempts and 4,362 [source successes](guide.qmd#source-success){.term-help}. The audit finds 1,054 [verified injection-to-benign changes](guide.qmd#verified-flip){.term-help} among 4,009 successful records with target-positive originals, a pooled conditional rate of 26.3%. The counts refer to attack records: originals repeat across models and recipes. The target-positive baseline comprises 167 distinct originals.
 
 The historical conditional target-benign metric is 1,398 / 4,362 = 32.0%. It includes 344 records whose original and perturbation are both target-benign. The [target audit summary](artifacts/target_audit_summary.json) separates these transitions. Verified prediction changes do not establish semantic preservation or operational evasion.
 
 ## Study design
 
-The deduplicated corpus contains 2,947 rows, with a positive label that mixes prompt-injection and jailbreak-style material. Every surrogate receives every recipe. Similarity groups organize the subsequent analysis; attack generation uses no target prediction feedback.
+The deduplicated corpus combines [deepset prompt injections](https://huggingface.co/datasets/deepset/prompt-injections), [jackhhao jailbreak classification](https://huggingface.co/datasets/jackhhao/jailbreak-classification), and [Lakera Gandalf examples](https://huggingface.co/datasets/Lakera/gandalf_ignore_instructions). Its 2,947 rows use a positive label that mixes prompt-injection and jailbreak-style material. Every surrogate receives every recipe. Similarity groups organize the subsequent analysis; attack generation uses no target prediction feedback. The [study guide](guide.qmd) links all models and explains the source labels.
 
 ```{mermaid}
 flowchart TD
@@ -57,13 +70,23 @@ flowchart TD
 
 The evaluator needs target weights and hidden representations for CKA. This is an evaluation among public local classifiers, without an opaque-service access constraint. Originals are clipped to 3,200 characters before search; 13 of the 191 inputs exceed that limit. Subsequent model tokenizers apply their own 512-token windows.
 
+## Outcomes by model and recipe
+
+::: {.hero-figure}
+![Verified injection-to-benign outcomes by surrogate and recipe. Each cell shows its percentage and the exact flip count divided by successful records with target injection baselines.](figures/fig_recipe_heatmap.png){fig-alt="A ten-surrogate by five-recipe heatmap shows conditional audited rates and their exact denominators." width=100%}
+:::
+
+::: {.reader-note}
+Click the heatmap to enlarge it. Rates condition on successful source attacks and a target injection baseline, so different cells have different denominators. Model identifiers link to their descriptions in the paper's [surrogate result table](paper.qmd#tbl-surrogate-results).
+:::
+
 ## Association and sensitivities
 
 Across ten surrogate macro summaries, mean CKA has Spearman rho = 0.830 and exact two-sided p = 0.0047 under an exchangeability null for the designed pool. M1 and M2 means are 47.3% and 14.3%, a 33.1-percentage-point difference. The one-sided enumeration has only 20 allocations and cannot meet the project's strict p < 0.05 rule.
 
 Excluding the known shared source `jackhhao/jailbreak-classification` gives rho = 0.903 and p = 0.00081. The training-only CKA probe gives rho = 0.818 and p = 0.0058 against unchanged outcomes. Both M1 and M2 membership sets remain unchanged. These are post-hoc within-pool sensitivities, without external validation or established decontamination.
 
-The historical BiLSTM includes padding in its recurrent computation, attention, and pooled representations. Its output can depend on batch companions. Excluding its saved cells gives rho = 0.800 and p = 0.014 among nine transformers. This sensitivity does not correct the model's saved outcomes. Padding and fresh-head seeding fixes are on `codex/methodology-recompute`. Main retains the historical model implementation. No replacement experiment was run.
+The historical BiLSTM includes padding in its recurrent computation, attention, and pooled representations. Its output can depend on batch companions. Excluding its saved cells gives rho = 0.800 and p = 0.014 among nine transformers. This [sensitivity](guide.qmd#sensitivity){.term-help} does not correct the model's saved outcomes. Padding and fresh-head seeding fixes are on the [correction branch](https://github.com/turn1a/safety-classifier-transfer-risk/tree/codex/methodology-recompute). The reported predictions and attacks were produced with the historical implementation; no replacement experiment was run.
 
 ## Implementation and local reanalysis
 
@@ -82,10 +105,13 @@ This study measures bounded classifier transfer behavior and does not certify ro
 ## Paper and artifacts
 
 ::: {.action-row}
-[Read the paper](paper.qmd){.action-link}
 [Inspect the implementation](pipeline.qmd){.action-link}
 [Open target audit summary](artifacts/target_audit_summary.json){.action-link}
 [Open pool sensitivity](artifacts/surrogate_excluded_sensitivity.json){.action-link}
 :::
 
 The primary aggregate artifacts are [target audit cells](artifacts/target_audit_cells.csv), [source aggregates](artifacts/target_audit_sources.csv), [training-probe similarity](artifacts/training_probe_similarity.csv), and the [results manifest](artifacts/results_manifest.json). The [historical conditional table](artifacts/master_results_table.csv) remains secondary. Raw prompts, perturbations, private matrices, and checkpoints are excluded from the public site.
+
+::: {.term-definitions-hidden aria-hidden="true"}
+{{< include _includes/metric-definitions.qmd >}}
+:::

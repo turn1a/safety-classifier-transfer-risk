@@ -8,15 +8,41 @@ bibliography: references.bib
 link-citations: true
 toc: true
 toc-depth: 2
+number-sections: true
+format-links: false
+date-format: long
+format:
+  html: default
+  typst:
+    toc: false
+    papersize: a4
+    fontsize: 10pt
+    citeproc: true
+    filters:
+      - _filters/public-links.lua
+    margin:
+      x: 18mm
+      y: 20mm
 abstract: |
   This study evaluates representational similarity and attack transfer for a public prompt-injection detector, ten surrogates, and five adapted TextAttack recipes. A balanced 2,000-prompt probe supplies layer-wise linear Centered Kernel Alignment (CKA). The sweep produces 4,362 successful source-attack records from 8,600 eligible attempts. A target audit finds 1,054 injection-to-benign prediction changes among 4,009 successful records with target injection baselines, a pooled conditional rate of 26.3%. Across ten surrogate summaries, mean CKA and the macro verified flip rate have Spearman rho = 0.830 and exact two-sided p = 0.0047 under an exchangeability null for the designed pool. The high- versus low-CKA group difference is 33.1 percentage points, but the three-versus-three enumeration cannot satisfy the project's strict p < 0.05 criterion. Source exclusion and a training-only probe preserve the positive association. The implementation audit identifies historical BiLSTM padding dependence and fresh-head initialization preceding the training seed. No experiment was rerun with these fixes. Excluding the historical BiLSTM gives rho = 0.800 and p = 0.014 over nine transformers. These exploratory results concern conditional prediction changes under the implemented recipes. They do not establish semantic preservation, an externally validated selection rule, or operational evasion. Public aggregates support reanalysis without new attacks or target inference.
 ---
+
+::: {.content-visible when-format="html"}
+::: {.action-row}
+[Download the paper (PDF)](paper.pdf){.action-link}
+[Open the study guide](guide.qmd){.action-link}
+:::
+
+::: {.reader-note}
+Table headers link to metric definitions and show help on hover or keyboard focus. Click a figure to open a larger view.
+:::
+:::
 
 ## Introduction
 
 A text safety classifier can be evaluated through attacks developed against an accessible surrogate. When a perturbation changes the surrogate's prediction, applying it to a separate target tests whether that prediction change transfers. Prompt-injection detection is one application of this procedure: a detector classifies untrusted text before it enters a language-model workflow [@owasp-llm01-2025]. The research question here is whether representational similarity is associated with a higher conditional rate of verified target injection-to-benign outcomes within a fixed surrogate pool.
 
-The target is `protectai/deberta-v3-base-prompt-injection-v2`, an English detector whose model card was marked archived and no longer maintained as of July 2026 [@protectai-2024]. The study adapts the CKA-guided selection workflow of Cox and Bunzel [@cox-bunzel-2025] to text classification. Every surrogate receives every attack recipe; the similarity groups organize the analysis of those outcomes. The target is available locally to the evaluator, including its hidden representations. Attack generation queries source models only.
+The target is [`protectai/deberta-v3-base-prompt-injection-v2`](https://huggingface.co/protectai/deberta-v3-base-prompt-injection-v2), an English detector whose model card was marked archived and no longer maintained as of July 2026 [@protectai-2024]. The study adapts the CKA-guided selection workflow of Cox and Bunzel [@cox-bunzel-2025] to text classification. Every surrogate receives every attack recipe; the similarity groups organize the analysis of those outcomes. The target is available locally to the evaluator, including its hidden representations. Attack generation queries source models only.
 
 The target audit distinguishes a verified prediction change from a benign prediction on perturbed text without an original target baseline. Recipe-level outcomes are aggregated to one analysis unit per surrogate, and permutation probabilities state their designed-pool assumption. Published counts, tables, figures, and sensitivity outputs permit inspection of the measurements without releasing prompt text.
 
@@ -32,7 +58,7 @@ Cox and Bunzel propose selecting high- and low-similarity surrogates for transfe
 
 ### Corpus and held-out evaluation
 
-The canonical corpus combines `deepset/prompt-injections`, `jackhhao/jailbreak-classification`, and `Lakera/gandalf_ignore_instructions` [@deepset-prompt-injections; @jackhhao-jailbreak-classification; @lakera-gandalf-ignore-instructions]. Deepset provides numeric labels, jackhhao provides `benign` and `jailbreak` labels, and Lakera contributes positive examples. The canonical positive label therefore includes both prompt injections and jailbreak-style material.
+The canonical corpus combines [`deepset/prompt-injections`](https://huggingface.co/datasets/deepset/prompt-injections), [`jackhhao/jailbreak-classification`](https://huggingface.co/datasets/jackhhao/jailbreak-classification), and [`Lakera/gandalf_ignore_instructions`](https://huggingface.co/datasets/Lakera/gandalf_ignore_instructions) [@deepset-prompt-injections; @jackhhao-jailbreak-classification; @lakera-gandalf-ignore-instructions]. Deepset provides numeric labels, jackhhao provides `benign` and `jailbreak` labels, and Lakera contributes positive examples. The canonical positive label therefore includes both prompt injections and jailbreak-style material.
 
 Text normalization lowercases and collapses whitespace for exact deduplication. No rows fail the three-character minimum. Removing 21 duplicates leaves 2,947 rows, with no recorded cross-source exact overlaps. A seeded stratified 80/10/10 split produces the partitions in @tbl-data. The 191 positive test examples are all used in each surrogate-recipe cell. Their source composition is 101 Lakera, 63 jackhhao, and 27 deepset examples; these counts describe distinct evaluation inputs.
 
@@ -45,7 +71,7 @@ Text normalization lowercases and collapses whitespace for exact deduplication. 
 | Test | 295 | 191 | 104 |
 | Attack evaluation inputs | 191 | 191 | 0 |
 
-: Corpus preparation and saved split counts. {#tbl-data}
+: Corpus preparation and saved split counts. {#tbl-data tbl-colwidths="[35,15,25,25]"}
 
 The post-deduplication source counts are 1,286 jackhhao, 999 Lakera, and 662 deepset rows, as recorded in the [dataset audit](artifacts/dataset_audit.json). The target card lists jackhhao among its training sources. Its complete training mixture and record identifiers are unavailable, so record-level decontamination was not established.
 
@@ -59,22 +85,22 @@ Source attacks pass canonical class 1 to every recipe and use each model's nativ
 
 | Surrogate identifier | Model or backbone | Preparation | Validation accuracy (%) |
 | --- | --- | --- | ---: |
-| `deberta-base-pi-v1` | `protectai/deberta-v3-base-prompt-injection` | Pretrained detector | Not measured |
-| `deberta-small-pi-v2` | `protectai/deberta-v3-small-prompt-injection-v2` | Pretrained detector | Not measured |
-| `deepset-deberta-injection` | `deepset/deberta-v3-base-injection` | Pretrained detector | Not measured |
-| `llama-prompt-guard-86m` | `meta-llama/Llama-Prompt-Guard-2-86M` | Pretrained detector | Not measured |
-| `llama-prompt-guard-22m` | `meta-llama/Llama-Prompt-Guard-2-22M` | Pretrained detector | Not measured |
-| `bert-base-ft` | `bert-base-uncased` | Local fine-tune | 97.3 |
-| `roberta-base-ft` | `roberta-base` | Local fine-tune | 96.9 |
-| `electra-small-ft` | `google/electra-small-discriminator` | Local fine-tune | 95.6 |
-| `deberta-base-ft-seed` | `microsoft/deberta-v3-base` | Local fine-tune | 97.3 |
-| `bilstm-attention` | Two-layer bidirectional LSTM with attention | Local training | 89.5 |
+| `deberta-base-pi-v1` | [`protectai/deberta-v3-base-prompt-injection`](https://huggingface.co/protectai/deberta-v3-base-prompt-injection) | Pretrained detector | Not measured |
+| `deberta-small-pi-v2` | [`protectai/deberta-v3-small-prompt-injection-v2`](https://huggingface.co/protectai/deberta-v3-small-prompt-injection-v2) | Pretrained detector | Not measured |
+| `deepset-deberta-injection` | [`deepset/deberta-v3-base-injection`](https://huggingface.co/deepset/deberta-v3-base-injection) | Pretrained detector | Not measured |
+| `llama-prompt-guard-86m` | [`meta-llama/Llama-Prompt-Guard-2-86M`](https://huggingface.co/meta-llama/Llama-Prompt-Guard-2-86M) | Pretrained detector | Not measured |
+| `llama-prompt-guard-22m` | [`meta-llama/Llama-Prompt-Guard-2-22M`](https://huggingface.co/meta-llama/Llama-Prompt-Guard-2-22M) | Pretrained detector | Not measured |
+| `bert-base-ft` | [`bert-base-uncased`](https://huggingface.co/google-bert/bert-base-uncased) | Local fine-tune | 97.3 |
+| `roberta-base-ft` | [`roberta-base`](https://huggingface.co/FacebookAI/roberta-base) | Local fine-tune | 96.9 |
+| `electra-small-ft` | [`google/electra-small-discriminator`](https://huggingface.co/google/electra-small-discriminator) | Local fine-tune | 95.6 |
+| `deberta-base-ft-seed` | [`microsoft/deberta-v3-base`](https://huggingface.co/microsoft/deberta-v3-base) | Local fine-tune | 97.3 |
+| `bilstm-attention` | [Two-layer bidirectional LSTM with attention](https://github.com/turn1a/safety-classifier-transfer-risk/blob/main/src/transfer_risk/pipelines/models/bilstm.py) | Local training | 89.5 |
 
-: Complete surrogate pool. Identifiers refer to the configured and saved models. {#tbl-models}
+: Complete surrogate pool. Detector links identify pretrained models; local fine-tune links identify their starting backbones. Local checkpoints are not published. {#tbl-models tbl-colwidths="[24,40,20,16]"}
 
 Transformer fine-tuning uses AdamW with learning rate $2\times10^{-5}$, batch size 32, three epochs, a 512-token limit, gradient norm clipping at 1, and linear learning-rate decay after 6% warmup. The final checkpoint is retained; validation does not select an epoch. The BiLSTM uses lowercase regex word tokens, a training-only vocabulary capped at 20,000 entries, 128-dimensional embeddings, hidden width 256 per direction, two recurrent layers, dropout 0.3, AdamW at $10^{-3}$, batch size 64, and five epochs.
 
-The historical BiLSTM processes padding through its recurrence and attention and includes padded positions in representation means. Its outputs can therefore depend on other sequences in a batch. This is an implementation defect affecting that surrogate's source attacks and CKA. Main retains the original model code and measurements. The `codex/methodology-recompute` branch masks padding for new training and preserves the historical computation when loading an archived checkpoint. Its corrected implementation has synthetic local tests, but no corrected BiLSTM experiment was run.
+The historical BiLSTM processes padding through its recurrence and attention and includes padded positions in representation means. Its outputs can therefore depend on other sequences in a batch. This is an implementation defect affecting that surrogate's source attacks and CKA. The reported measurements use this historical implementation. The [`codex/methodology-recompute` branch](https://github.com/turn1a/safety-classifier-transfer-risk/tree/codex/methodology-recompute) masks padding for new training and preserves the historical computation when loading an archived checkpoint. Its corrected implementation has synthetic local tests, but no corrected BiLSTM experiment was run.
 
 ## Method
 
@@ -264,7 +290,13 @@ Public CSV and JSON files preserve full numerical precision. Narrative rates are
 
 Mean CKA is positively associated with macro conditional verified target injection-to-benign rates in the designed ten-model pool. The association persists in saved-outcome source, probe, and nine-transformer sensitivities. The audit supplies original target baselines and separates 1,054 verified flips from 344 unchanged benign outcomes included in the historical metric. The group design cannot meet the strict selection criterion, and conditional transfer differs from attack yield. The result supports a bounded exploratory account of classifier prediction changes under the implemented attack suite; semantic validity, fresh retraining reproducibility, and validation on independent targets remain unresolved.
 
-## References
+## References {.unnumbered}
+
+::: {.content-visible when-format="html"}
+::: {.term-definitions-hidden aria-hidden="true"}
+{{< include _includes/metric-definitions.qmd >}}
+:::
+:::
 
 ::: {#refs}
 :::

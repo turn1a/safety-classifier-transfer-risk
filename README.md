@@ -12,6 +12,8 @@ The historical BiLSTM has batch-dependent padding behavior. A saved-outcome sens
 
 - [Overview](https://turn1a.github.io/safety-classifier-transfer-risk/)
 - [Paper](https://turn1a.github.io/safety-classifier-transfer-risk/paper.html)
+- [Paper PDF](https://turn1a.github.io/safety-classifier-transfer-risk/paper.pdf)
+- [Study guide: models, datasets, and metrics](https://turn1a.github.io/safety-classifier-transfer-risk/guide.html)
 - [Implementation](https://turn1a.github.io/safety-classifier-transfer-risk/pipeline.html)
 - [Target audit summary](docs/artifacts/target_audit_summary.json)
 - [Target audit cells](docs/artifacts/target_audit_cells.csv)

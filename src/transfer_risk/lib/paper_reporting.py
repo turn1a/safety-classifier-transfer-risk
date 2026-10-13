@@ -163,7 +163,7 @@ def render_surrogate_table(summary: Mapping[str, Any], attempts_per_surrogate: i
         pooled = 100 * row["true_target_flips"] / denominator if denominator else None
         formatted.append(
             [
-                f"`{name}`",
+                f"[`{name}`](guide.qmd#model-{name})",
                 group,
                 f"{row['mean_cka']:.3f}",
                 f"{row['dbs']:.3f}",
@@ -178,19 +178,20 @@ def render_surrogate_table(summary: Mapping[str, Any], attempts_per_surrogate: i
         _markdown_table(
             [
                 "Surrogate",
-                "Group",
-                "CKA",
-                "DBS",
-                "Source successes",
-                "Flips / target injections",
-                "Macro (%)",
-                "Pooled (%)",
-                "Yield (%)",
+                "[Group](guide.qmd#groups){.term-help}",
+                "[CKA](guide.qmd#cka){.term-help}",
+                "[DBS](guide.qmd#dbs){.term-help}",
+                "[Source successes](guide.qmd#source-success){.term-help}",
+                "[Flips / target injections](guide.qmd#target-baseline){.term-help}",
+                "[Macro (%)](guide.qmd#macro){.term-help}",
+                "[Pooled (%)](guide.qmd#pooled){.term-help}",
+                "[Yield (%)](guide.qmd#yield){.term-help}",
             ],
             formatted,
             left_columns=2,
         )
-        + "\n: Surrogate-level results, ordered by original mean CKA. {#tbl-surrogate-results}\n"
+        + "\n: Surrogate-level results, ordered by original mean CKA. "
+        '{#tbl-surrogate-results tbl-colwidths="[24,7,7,7,12,16,9,9,9]"}\n'
     )
 
 
@@ -211,10 +212,16 @@ def render_recipe_table(cells: pd.DataFrame) -> str:
         )
     return (
         _markdown_table(
-            ["Recipe", "Source successes", "Flips / target injections", "Pooled verified rate (%)"],
+            [
+                "Recipe",
+                "[Source successes](guide.qmd#source-success){.term-help}",
+                "[Flips / target injections](guide.qmd#target-baseline){.term-help}",
+                "[Pooled verified rate (%)](guide.qmd#pooled){.term-help}",
+            ],
             rows,
         )
-        + "\n: Audited outcome totals by attack recipe. {#tbl-recipe-results}\n"
+        + "\n: Audited outcome totals by attack recipe. "
+        '{#tbl-recipe-results tbl-colwidths="[20,20,30,30]"}\n'
     )
 
 
@@ -276,13 +283,13 @@ def render_sensitivity_table(
             [
                 "Analysis",
                 "Models",
-                "Flips / target injections",
-                "Pooled (%)",
-                "CKA versus macro flip rho",
-                "Exact p",
+                "[Flips / target injections](guide.qmd#target-baseline){.term-help}",
+                "[Pooled (%)](guide.qmd#pooled){.term-help}",
+                "[CKA versus macro flip rho](guide.qmd#rho){.term-help}",
+                "[Exact p](guide.qmd#exact-p){.term-help}",
             ],
             rows,
         )
         + "\n: Original association and post-hoc sensitivities on saved outcomes. "
-        "{#tbl-sensitivities}\n"
+        '{#tbl-sensitivities tbl-colwidths="[30,7,23,11,17,12]"}\n'
     )

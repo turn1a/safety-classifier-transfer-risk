@@ -145,6 +145,8 @@ Fresh transformer heads were initialized before the historical training seed was
 
 `paper_reporting` is an explicit target-free stage consuming public aggregates only. It publishes four manuscript table includes, an outcome diagram, a cell heatmap, a probe comparison, and the pool-excluded sensitivity through MLflow-wrapped catalog entries. `just paper-report` runs it without model loading or experiment execution. Commit hooks require both language passes for changed prose, including `.qmd`, and check commit messages. Personal-project diagrams use their own visual style.
 
+The Quarto site renders the same manuscript as HTML and PDF. A study guide links model cards, dataset sources, metric definitions, and aggregate evidence. Definition links remain usable without JavaScript; browser help supports hover and keyboard focus. The bundled Typst compiler creates the PDF locally without model execution or a TeX installation.
+
 These corrections do not establish exact fresh reproduction of the historical run. Immutable Hub revisions and a target-weight fingerprint across inference stages were not retained. The mixed label, training overlap, success conditioning, semantic validity, and designed-pool assumptions remain limitations. [Recomputation notes](docs/recomputation.md) document the defects, possible effects, and the requirement for isolated output paths before any rerun.
 
 ## Architecture and artifact policy

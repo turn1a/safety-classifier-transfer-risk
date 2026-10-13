@@ -1,0 +1,302 @@
+/* Typography, result cards, and accessible metric help for the study site. */
+
+:root {
+  --study-ink: #243746;
+  --study-blue: #365f7c;
+  --study-muted: #52616d;
+  --study-border: #d7e0e6;
+  --study-surface: #f3f6f8;
+}
+
+body {
+  color: var(--study-ink);
+  line-height: 1.65;
+}
+
+.navbar {
+  border-bottom: 1px solid var(--study-border);
+  background-color: #fff;
+}
+
+.navbar a,
+.navbar .navbar-brand {
+  color: var(--study-ink);
+}
+
+.navbar .nav-link.active {
+  color: var(--study-blue);
+  text-decoration: underline;
+  text-underline-offset: 0.35em;
+}
+
+#title-block-header .title {
+  max-width: 100%;
+  font-size: clamp(1.85rem, 2.5vw, 2.3rem);
+  font-weight: 650;
+  line-height: 1.15;
+  letter-spacing: -0.025em;
+}
+
+#title-block-header .quarto-title-meta {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+#title-block-header {
+  padding-bottom: 1rem;
+  border-bottom: 1px solid var(--study-border);
+}
+
+.study-lead {
+  font-size: 1.1rem;
+  line-height: 1.7;
+}
+
+.study-status {
+  margin: 1.5rem 0;
+  padding: 1rem 1.2rem;
+  border-left: 3px solid var(--study-blue);
+  border-radius: 0 0.35rem 0.35rem 0;
+  background: var(--study-surface);
+  font-size: 0.95rem;
+}
+
+.study-status p:last-child {
+  margin-bottom: 0;
+}
+
+a {
+  color: var(--study-blue);
+  text-underline-offset: 0.15em;
+}
+
+main a,
+main :not(pre) > code {
+  overflow-wrap: anywhere;
+}
+
+.table-scroll {
+  max-width: 100%;
+  margin-bottom: 1rem;
+  overflow-x: auto;
+}
+
+.table-scroll:focus-visible {
+  outline: 2px solid var(--study-blue);
+  outline-offset: 3px;
+}
+
+.quarto-float-tbl > div,
+mjx-container[display="true"] {
+  max-width: 100%;
+  overflow-x: auto;
+}
+
+a:focus-visible,
+button:focus-visible {
+  outline: 2px solid var(--study-blue);
+  outline-offset: 3px;
+}
+
+a.term-help {
+  color: inherit;
+  text-decoration: underline dotted;
+  text-underline-offset: 0.25em;
+  cursor: help;
+}
+
+.metric-tooltip {
+  position: fixed;
+  z-index: 1100;
+  width: min(22rem, calc(100vw - 24px));
+  padding: 0.85rem 1rem;
+  border: 1px solid var(--study-border);
+  border-radius: 0.4rem;
+  background: #fff;
+  color: var(--study-ink);
+  box-shadow: 0 3px 14px rgb(25 45 60 / 14%);
+  font-size: 0.88rem;
+  line-height: 1.5;
+}
+
+.metric-tooltip[hidden],
+.term-definitions-hidden {
+  display: none;
+}
+
+.metric-tooltip strong {
+  display: block;
+  margin-bottom: 0.3rem;
+}
+
+.metric-tooltip p {
+  margin: 0;
+}
+
+.metric-definitions dt {
+  margin-top: 1.25rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid var(--study-border);
+  scroll-margin-top: 6rem;
+}
+
+.metric-definitions dd {
+  margin: 0.35rem 0 1rem;
+}
+
+td [id^="model-"] {
+  scroll-margin-top: 6rem;
+}
+
+table {
+  font-variant-numeric: tabular-nums;
+}
+
+td code {
+  overflow-wrap: anywhere;
+  white-space: normal;
+}
+
+.reader-note {
+  color: var(--study-muted);
+  font-size: 0.9rem;
+}
+
+.navbar-brand {
+  font-weight: 600;
+}
+
+pre code {
+  font-size: 0.85em;
+}
+
+.quarto-float table {
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.quarto-float table code {
+  color: inherit;
+  background: transparent;
+}
+
+#tbl-surrogate-results th:first-child,
+#tbl-surrogate-results td:first-child {
+  width: 24%;
+  text-align: left;
+}
+
+.metric-grid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.8rem;
+  margin: 1.75rem 0 2.25rem;
+}
+
+.metric-card {
+  min-height: 8.5rem;
+  padding: 1rem;
+  border: 1px solid var(--study-border);
+  border-radius: 0.55rem;
+  background-color: transparent;
+  border-top: 3px solid var(--study-blue);
+}
+
+.metric-value {
+  margin: 0 0 0.45rem;
+  color: var(--study-ink);
+  font-size: clamp(1.35rem, 2vw, 1.85rem);
+  font-weight: 650;
+  line-height: 1.1;
+}
+
+.metric-label {
+  margin: 0;
+  color: var(--study-muted);
+  font-size: 0.88rem;
+  line-height: 1.35;
+}
+
+.hero-figure {
+  margin: 1.5rem auto 2rem;
+}
+
+.hero-figure img {
+  display: block;
+  max-width: 100%;
+  margin: 0 auto;
+}
+
+.action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin: 1.25rem 0 1.75rem;
+}
+
+.action-row p {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin: 0;
+}
+
+.action-link {
+  display: inline-block;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--bs-border-color, currentColor);
+  border-radius: 0.4rem;
+  color: inherit;
+  text-decoration: none;
+}
+
+.action-link:hover,
+.action-link:focus-visible {
+  border-color: currentColor;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 0.15em;
+}
+
+.action-link:first-child {
+  border-color: var(--study-blue);
+  background: var(--study-blue);
+  color: #fff;
+}
+
+.action-link:first-child:hover,
+.action-link:first-child:focus-visible {
+  background: #29495f;
+  color: #fff;
+}
+
+/* Pipeline graph fills the full-page content container. */
+.viz-frame {
+  display: block;
+  width: 100%;
+  height: min(90vh, 58rem);
+  border: 0;
+}
+
+@media (max-width: 900px) {
+  .metric-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .viz-frame {
+    height: 72vh;
+  }
+}
+
+@media (max-width: 540px) {
+  #title-block-header .quarto-title-meta {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .metric-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .metric-card {
+    min-height: 0;
+  }
+}

@@ -4,11 +4,13 @@ project:
   render:
     - index.qmd
     - paper.qmd
+    - guide.qmd
     - pipeline.qmd
     - recomputation.md
   resources:
     - pipeline-viz/**
     - artifacts/**
+    - metric-help.js
 
 website:
   title: "Text safety transfer risk"
@@ -21,11 +23,15 @@ website:
   twitter-card: true
   reader-mode: true
   navbar:
+    background: "#ffffff"
+    foreground: "#243746"
     left:
       - href: index.qmd
         text: Overview
       - href: paper.qmd
         text: Paper
+      - href: guide.qmd
+        text: Study guide
       - href: pipeline.qmd
         text: Implementation
       - href: recomputation.md
@@ -36,15 +42,17 @@ website:
         aria-label: GitHub
   page-footer:
     left: "MIT licensed. Built with Kedro and Quarto."
-    right: "[Source](https://github.com/turn1a/safety-classifier-transfer-risk) · © 2026 Aspen Hazel Olszewska"
+    right: "[Source](https://github.com/turn1a/safety-classifier-transfer-risk) · © 2026 [Aspen Hazel Olszewska](https://github.com/turn1a)"
 
 format:
   html:
     theme: cosmo
-    css: styles.css
+    css: site.css
     toc: true
     code-copy: true
     code-overflow: wrap
+    lightbox: true
+    include-after-body: _includes/metric-help.html
 
 # Rendering reads site source, figures, and catalog-generated public artifacts. It does not execute
 # model, attack, cloud, or data-collection work.

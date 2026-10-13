@@ -1,14 +1,14 @@
-| Surrogate | Group | CKA | DBS | Source successes | Flips / target injections | Macro (%) | Pooled (%) | Yield (%) |
+| Surrogate | [Group](guide.qmd#groups){.term-help} | [CKA](guide.qmd#cka){.term-help} | [DBS](guide.qmd#dbs){.term-help} | [Source successes](guide.qmd#source-success){.term-help} | [Flips / target injections](guide.qmd#target-baseline){.term-help} | [Macro (%)](guide.qmd#macro){.term-help} | [Pooled (%)](guide.qmd#pooled){.term-help} | [Yield (%)](guide.qmd#yield){.term-help} |
 | :--- | :--- | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
-| `deberta-base-ft-seed` | M1 | 0.475 | 0.705 | 305 | 140 / 246 | 55.7 | 56.9 | 14.7 |
-| `deepset-deberta-injection` | M1 | 0.454 | 0.593 | 132 | 67 / 124 | 53.5 | 54.0 | 7.0 |
-| `deberta-small-pi-v2` | M1 | 0.451 | 0.611 | 652 | 217 / 643 | 32.8 | 33.7 | 22.7 |
-| `bert-base-ft` | Middle | 0.445 | 0.625 | 377 | 113 / 318 | 35.0 | 35.5 | 11.8 |
-| `electra-small-ft` | Middle | 0.430 | 0.555 | 278 | 115 / 238 | 47.1 | 48.3 | 12.0 |
-| `roberta-base-ft` | Middle | 0.428 | 0.629 | 418 | 150 / 353 | 44.0 | 42.5 | 15.7 |
-| `llama-prompt-guard-86m` | Middle | 0.417 | 0.566 | 596 | 87 / 576 | 15.1 | 15.1 | 9.1 |
-| `llama-prompt-guard-22m` | M2 | 0.412 | 0.585 | 626 | 18 / 612 | 2.9 | 2.9 | 1.9 |
-| `deberta-base-pi-v1` | M2 | 0.329 | 0.512 | 320 | 91 / 300 | 30.0 | 30.3 | 9.5 |
-| `bilstm-attention` | M2 | 0.259 | 0.259 | 658 | 56 / 599 | 10.0 | 9.3 | 5.9 |
+| [`deberta-base-ft-seed`](guide.qmd#model-deberta-base-ft-seed) | M1 | 0.475 | 0.705 | 305 | 140 / 246 | 55.7 | 56.9 | 14.7 |
+| [`deepset-deberta-injection`](guide.qmd#model-deepset-deberta-injection) | M1 | 0.454 | 0.593 | 132 | 67 / 124 | 53.5 | 54.0 | 7.0 |
+| [`deberta-small-pi-v2`](guide.qmd#model-deberta-small-pi-v2) | M1 | 0.451 | 0.611 | 652 | 217 / 643 | 32.8 | 33.7 | 22.7 |
+| [`bert-base-ft`](guide.qmd#model-bert-base-ft) | Middle | 0.445 | 0.625 | 377 | 113 / 318 | 35.0 | 35.5 | 11.8 |
+| [`electra-small-ft`](guide.qmd#model-electra-small-ft) | Middle | 0.430 | 0.555 | 278 | 115 / 238 | 47.1 | 48.3 | 12.0 |
+| [`roberta-base-ft`](guide.qmd#model-roberta-base-ft) | Middle | 0.428 | 0.629 | 418 | 150 / 353 | 44.0 | 42.5 | 15.7 |
+| [`llama-prompt-guard-86m`](guide.qmd#model-llama-prompt-guard-86m) | Middle | 0.417 | 0.566 | 596 | 87 / 576 | 15.1 | 15.1 | 9.1 |
+| [`llama-prompt-guard-22m`](guide.qmd#model-llama-prompt-guard-22m) | M2 | 0.412 | 0.585 | 626 | 18 / 612 | 2.9 | 2.9 | 1.9 |
+| [`deberta-base-pi-v1`](guide.qmd#model-deberta-base-pi-v1) | M2 | 0.329 | 0.512 | 320 | 91 / 300 | 30.0 | 30.3 | 9.5 |
+| [`bilstm-attention`](guide.qmd#model-bilstm-attention) | M2 | 0.259 | 0.259 | 658 | 56 / 599 | 10.0 | 9.3 | 5.9 |
 
-: Surrogate-level results, ordered by original mean CKA. {#tbl-surrogate-results}
+: Surrogate-level results, ordered by original mean CKA. {#tbl-surrogate-results tbl-colwidths="[24,7,7,7,12,16,9,9,9]"}
