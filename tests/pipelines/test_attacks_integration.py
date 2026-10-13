@@ -27,6 +27,7 @@ from transfer_risk.modeling import load_transformer  # noqa: E402
 from transfer_risk.pipelines.attacks.runner import (  # noqa: E402
     DynamicPadHuggingFaceModelWrapper,
     ONNXModelWrapper,
+    build_wrapper,
     run_recipe,
 )
 
@@ -226,3 +227,81 @@ def test_dynamic_pad_wrapper_matches_stock_logits() -> None:
     assert dyn.shape == stock.shape
     assert (dyn.argmax(-1) == stock.argmax(-1)).all()
     assert float(np.abs(dyn - stock).max()) < 1e-5
+
+
+def test_dynamic_pad_wrapper_respects_configured_token_window() -> None:
+    """Torch victims use the same explicit truncation window as target evaluation."""
+    from tokenizers import Tokenizer, models, pre_tokenizers  # noqa: PLC0415
+    from transformers import (  # noqa: PLC0415
+        BertConfig,
+        BertForSequenceClassification,
+        PreTrainedTokenizerFast,
+    )
+
+    words = ["[UNK]", "[PAD]", "alpha", "beta", "gamma", "delta", "epsilon"]
+    backend = Tokenizer(models.WordLevel(vocab=dict(zip(words, range(len(words)), strict=True))))
+    backend.pre_tokenizer = pre_tokenizers.Whitespace()
+    pad = "[PAD]"
+    tokenizer = PreTrainedTokenizerFast(
+        tokenizer_object=backend, model_max_length=512, pad_token=pad
+    )
+    with torch.random.fork_rng():
+        torch.manual_seed(0)
+        model = BertForSequenceClassification(
+            BertConfig(
+                vocab_size=len(words),
+                hidden_size=16,
+                num_hidden_layers=1,
+                num_attention_heads=2,
+                intermediate_size=32,
+                num_labels=2,
+                max_position_embeddings=512,
+            )
+        ).eval()
+    wrapper = DynamicPadHuggingFaceModelWrapper(model, tokenizer, max_seq_len=3)
+    with torch.no_grad():
+        expected = model(
+            **tokenizer(
+                ["alpha beta gamma delta epsilon"],
+                max_length=3,
+                truncation=True,
+                padding=True,
+                return_tensors="pt",
+            )
+        ).logits
+    actual = wrapper(["alpha beta gamma delta epsilon"])
+    torch.testing.assert_close(actual, expected)
+
+
+@pytest.mark.parametrize("attack_limit, expected_length", [(None, 16), (3, 3)])
+def test_bilstm_wrapper_respects_configured_token_window(
+    tmp_path: Path, attack_limit: int | None, expected_length: int
+) -> None:
+    """An explicit limit truncates inputs; omitting it preserves the saved BiLSTM window."""
+    from transfer_risk.datasets.surrogate_model_dataset import (  # noqa: PLC0415
+        SurrogateModelDataset,
+    )
+    from transfer_risk.pipelines.models.bilstm import BiLSTMClassifier  # noqa: PLC0415
+
+    model = BiLSTMClassifier(4, 8, 4, 1, 0.0).eval()
+    config = {
+        "vocab": {"<pad>": 0, "<unk>": 1, "alpha": 2, "beta": 3},
+        "embed_dim": 8,
+        "hidden_dim": 4,
+        "num_layers": 1,
+        "dropout": 0.0,
+        "max_seq_len": 16,
+    }
+    dataset = SurrogateModelDataset(filepath=str(tmp_path / "victim"))
+    dataset.save({"kind": "bilstm", "model": model, "config": config})
+    kwargs = {} if attack_limit is None else {"max_seq_len": attack_limit}
+    wrapper = build_wrapper(
+        {"kind": "bilstm", "source": dataset.load()}, torch.device("cpu"), **kwargs
+    )
+    seen = []
+    hook = wrapper.model.register_forward_pre_hook(lambda _model, inputs: seen.append(inputs[0]))
+    try:
+        wrapper([" ".join(["alpha", "beta"] * 10)])
+    finally:
+        hook.remove()
+    assert seen[0].shape == (1, expected_length)

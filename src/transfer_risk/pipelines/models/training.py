@@ -61,6 +61,11 @@ def _train_transformer(
         _NaNLossError: if any training step yields a non-finite loss.
     """
     torch.manual_seed(seed)
+    # Hub loading initializes new task heads before this seed is set. Reinitialize
+    # only modules outside the pretrained backbone so their weights use this seed.
+    for name, module in model.named_children():
+        if name != model.base_model_prefix:
+            module.apply(model._init_weights)
     batch_size, max_seq_len = cfg["batch_size"], cfg["max_seq_len"]
     model = model.to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=cfg["lr"])
@@ -199,6 +204,7 @@ def train_bilstm(
         params["hidden_dim"],
         params["num_layers"],
         params["dropout"],
+        padding_policy=params.get("padding_policy", "masked"),
     ).to(device)
     optimizer = torch.optim.AdamW(model.parameters(), lr=params["lr"])
     generator = torch.Generator().manual_seed(seed)
@@ -223,6 +229,7 @@ def train_bilstm(
         "num_layers": params["num_layers"],
         "dropout": params["dropout"],
         "max_seq_len": max_len,
+        "padding_policy": model.padding_policy,
     }
     bundle = {"kind": "bilstm", "model": model, "config": config}
     meta = {

@@ -40,8 +40,9 @@ class SurrogateModelDataset(FsspecModelDirDataset):
     def _write_dir(self, data: Any, dest: Path) -> None:
         """Write a transformer (``save_pretrained``) or BiLSTM (state dict + config) bundle."""
         if data["kind"] == "bilstm":
+            config = {**data["config"], "padding_policy": data["model"].padding_policy}
             torch.save(data["model"].state_dict(), dest / _STATE)
-            (dest / _CONFIG).write_text(json.dumps(data["config"]))
+            (dest / _CONFIG).write_text(json.dumps(config))
         else:
             data["model"].save_pretrained(dest)
             data["tokenizer"].save_pretrained(dest)

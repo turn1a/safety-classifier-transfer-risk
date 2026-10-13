@@ -10,6 +10,7 @@ remote (``memory://``) that must be materialised to a local cache.
 import json
 from pathlib import Path
 
+import pytest
 import torch
 
 from transfer_risk.datasets.surrogate_model_dataset import SurrogateModelDataset
@@ -26,6 +27,7 @@ _CONFIG = {
 
 
 def _reconstruct(path: str) -> BiLSTMClassifier:
+    """Reconstruct a checkpoint with the same historical-policy fallback as inference."""
     config = json.loads((Path(path) / "config.json").read_text())
     model = BiLSTMClassifier(
         len(config["vocab"]),
@@ -33,6 +35,7 @@ def _reconstruct(path: str) -> BiLSTMClassifier:
         config["hidden_dim"],
         config["num_layers"],
         config["dropout"],
+        padding_policy=config.get("padding_policy", "legacy_unmasked"),
     )
     model.load_state_dict(torch.load(Path(path) / "model.pt", map_location="cpu"))
     return model.eval()
@@ -71,3 +74,19 @@ def test_bilstm_remote_round_trip_materializes(tmp_path: Path) -> None:
 
 def test_missing_checkpoint_does_not_exist(tmp_path: Path) -> None:
     assert not SurrogateModelDataset(filepath=str(tmp_path / "absent")).exists()
+
+
+@pytest.mark.parametrize("padding_policy", ["masked", "legacy_unmasked"])
+def test_bilstm_padding_policy_survives_save_load(tmp_path: Path, padding_policy: str) -> None:
+    """A saved new model must not reload with a different padding computation."""
+    model = BiLSTMClassifier(
+        len(_CONFIG["vocab"]), 8, 4, 1, 0.0, padding_policy=padding_policy
+    ).eval()
+    dataset = SurrogateModelDataset(filepath=str(tmp_path / "policy-checkpoint"))
+    dataset.save({"kind": "bilstm", "model": model, "config": _CONFIG})
+    restored = _reconstruct(dataset.load())
+    assert restored.padding_policy == padding_policy
+    ids = torch.tensor([[2, 3, 1], [2, 0, 0]])
+    with torch.no_grad():
+        torch.testing.assert_close(restored(ids), model(ids))
+    assert "padding_policy" not in _CONFIG

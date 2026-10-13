@@ -94,7 +94,9 @@ def attack_shard(  # noqa: PLR0913 (a generated per-shard node: catalog inputs +
         # checkpoint (the box's aarch64 onnxruntime cannot run transformer ONNX attention).
         # build_wrapper returns a BiLSTMModelWrapper for kind ``bilstm``, else loads the checkpoint
         # and wraps it as a HuggingFaceModelWrapper.
-        wrapper = build_wrapper({"kind": kind, "source": victim_path}, torch.device("cpu"))
+        wrapper = build_wrapper(
+            {"kind": kind, "source": victim_path}, torch.device("cpu"), max_seq_len=max_seq_len
+        )
     return run_recipe(
         wrapper,
         recipe,

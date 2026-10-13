@@ -63,11 +63,19 @@ class BiLSTMModelWrapper(ModelWrapper):  # type: ignore[misc]  # ModelWrapper is
     Historical predictions depend on the padding introduced by each query batch.
     """
 
-    def __init__(self, source: str, device: torch.device) -> None:
-        """Load the BiLSTM checkpoint at ``source`` onto ``device`` in eval mode."""
+    def __init__(
+        self, source: str, device: torch.device, *, max_seq_len: int | None = None
+    ) -> None:
+        """Load a BiLSTM with the requested attack window.
+
+        Args:
+            source: Saved checkpoint directory.
+            device: Victim inference device.
+            max_seq_len: Attack word-token limit, or the saved limit when omitted.
+        """
         config = json.loads((Path(source) / "config.json").read_text())
         self.vocab = config["vocab"]
-        self.max_len = config["max_seq_len"]
+        self.max_len = config["max_seq_len"] if max_seq_len is None else max_seq_len
         self.device = device
         self.model = BiLSTMClassifier(
             len(self.vocab),
@@ -75,6 +83,7 @@ class BiLSTMModelWrapper(ModelWrapper):  # type: ignore[misc]  # ModelWrapper is
             config["hidden_dim"],
             config["num_layers"],
             config["dropout"],
+            padding_policy=config.get("padding_policy", "legacy_unmasked"),
         )
         self.model.load_state_dict(torch.load(Path(source) / "model.pt", map_location=device))
         self.model.to(device).eval()
@@ -146,16 +155,18 @@ class DynamicPadHuggingFaceModelWrapper(HuggingFaceModelWrapper):  # type: ignor
     inherited ``get_grad`` method is unused.
     """
 
+    def __init__(self, model: Any, tokenizer: Any, *, max_seq_len: int = 512) -> None:
+        """Wrap a classifier with the configured maximum token length."""
+        super().__init__(model, tokenizer)
+        self.max_seq_len = max_seq_len
+
     def __call__(self, text_input_list: list[str]) -> Any:
         """Tokenise with dynamic padding, run the victim under inference_mode, return logits."""
-        max_length = (
-            512 if self.tokenizer.model_max_length == int(1e30) else self.tokenizer.model_max_length
-        )
         inputs_dict = self.tokenizer(
             text_input_list,
             add_special_tokens=True,
             padding=True,
-            max_length=max_length,
+            max_length=self.max_seq_len,
             truncation=True,
             return_tensors="pt",
         )
@@ -172,21 +183,22 @@ def build_wrapper(
     device: torch.device,
     *,
     onnx_dir: str | None = None,
-    max_seq_len: int = 256,
+    max_seq_len: int | None = None,
 ) -> ModelWrapper:
     """Build a TextAttack ``ModelWrapper`` for one surrogate manifest entry.
 
-    With ``onnx_dir`` set (and the surrogate not the BiLSTM), the victim is served from the
-    exported graph at ``{onnx_dir}/model.onnx`` via :class:`ONNXModelWrapper`, tokenising to
-    ``max_seq_len``; otherwise the torch checkpoint is loaded. The BiLSTM is tiny and always
-    stays on torch, using its own trained window from its checkpoint config.
+    With ``onnx_dir`` set, transformer queries use its exported graph. Otherwise they
+    use the torch checkpoint. An explicit ``max_seq_len`` sets either backend's token
+    window. When omitted, transformers use 512 tokens and the BiLSTM uses its saved
+    word-token window. The BiLSTM always uses torch.
     """
     if entry["kind"] == "bilstm":
-        return BiLSTMModelWrapper(entry["source"], device)
+        return BiLSTMModelWrapper(entry["source"], device, max_seq_len=max_seq_len)
+    transformer_limit = 512 if max_seq_len is None else max_seq_len
     if onnx_dir is not None:
-        return ONNXModelWrapper(f"{onnx_dir}/model.onnx", onnx_dir, max_seq_len=max_seq_len)
+        return ONNXModelWrapper(f"{onnx_dir}/model.onnx", onnx_dir, max_seq_len=transformer_limit)
     model, tokenizer = load_transformer(entry["source"], device)
-    return DynamicPadHuggingFaceModelWrapper(model, tokenizer)
+    return DynamicPadHuggingFaceModelWrapper(model, tokenizer, max_seq_len=transformer_limit)
 
 
 def run_recipe(

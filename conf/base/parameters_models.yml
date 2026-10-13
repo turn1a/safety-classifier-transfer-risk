@@ -51,6 +51,8 @@ models:
     epochs: 3
     max_seq_len: 512 # train + ONNX-trace at the full window the sweep attacks over
   bilstm:
+    # Historical checkpoints without this field retain legacy_unmasked behavior on load.
+    padding_policy: masked
     embed_dim: 128
     hidden_dim: 256
     num_layers: 2

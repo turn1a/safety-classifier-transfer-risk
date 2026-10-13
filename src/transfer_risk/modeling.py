@@ -164,6 +164,7 @@ def _bilstm_representations(
         config["hidden_dim"],
         config["num_layers"],
         config["dropout"],
+        padding_policy=config.get("padding_policy", "legacy_unmasked"),
     )
     model.load_state_dict(torch.load(Path(source) / "model.pt", map_location=device))
     model.to(device).eval()
