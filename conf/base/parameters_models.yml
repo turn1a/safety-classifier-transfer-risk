@@ -1,21 +1,11 @@
-# Models stage. The surrogate layer is model-agnostic. Adding a transformer surrogate is two
-# entries: one here ({name, kind}) so the pipeline generates its train/materialise + ONNX
-# nodes, and a matching `hub.{name}` (or `target_model`) source in catalog.yml that holds the
-# HuggingFace repo id — the catalog owns where every model comes from (SPEC.md §5). The BiLSTM
-# has no Hub source. Final M1/M2 membership is decided empirically from computed CKA.
+# Models stage. Adding a transformer surrogate requires a {name, kind} entry here and a matching hub.{name} source in catalog.yml. The catalog records the Hub repository identifier. The BiLSTM has no Hub source.
 #
 # kind:
-#   pretrained — already a prompt-injection classifier; materialised from its Hub source as-is.
-#   finetune   — a base backbone (Hub source loads with num_labels: 2) fine-tuned on the task.
-#   bilstm     — the from-scratch non-transformer floor.
+#   pretrained: Materialize an existing classifier from its Hub source.
+#   finetune: Load a base backbone with num_labels: 2 and fine-tune it on the canonical task.
+#   bilstm: Train the non-transformer comparator from scratch.
 #
-# victim: onnx — opt this transformer into its ONNX graph (onnx.{name}) as the attack victim, ~2-3x
-#   faster per query on CPU. The DEFAULT victim is the torch checkpoint (surrogate.{name}): the cloud
-#   box's aarch64 onnxruntime fails transformer attention with a "MatMul dimension mismatch" on the
-#   fused attention nodes — DeBERTa-v2 disentangled attention (HF transformers #18237) and the
-#   standard BERT/RoBERTa/ELECTRA graphs alike — while torch runs them correctly. Set victim: onnx
-#   only where that model's ONNX victim is verified to work (e.g. an x86_64/macOS dev box). The ONNX
-#   graph is still exported either way (CKA and similarity are unaffected).
+# victim: onnx selects the exported ONNX graph for source attacks. The default uses the Torch checkpoint. The ARM64 cloud run encountered "MatMul dimension mismatch" errors in fused ONNX attention nodes for DeBERTa and the standard BERT, RoBERTa, and ELECTRA graphs. Verify the ONNX backend on the execution platform before selecting it. Graphs are exported with either backend; CKA extraction is unchanged.
 models:
   target: protectai/deberta-v3-base-prompt-injection-v2 # provenance label; loaded via target_model
   surrogates:
@@ -39,10 +29,10 @@ models:
       kind: finetune
     - name: electra-small-ft
       kind: finetune
-    # Same backbone as the target's base, a different seed — the CKA sanity anchor (~0.9).
+    # Shares the target's DeBERTa-v3-base backbone; similarity is measured on the probe.
     - name: deberta-base-ft-seed
       kind: finetune
-    # The deliberate non-transformer floor of the similarity range.
+    # Non-transformer comparator trained from scratch.
     - name: bilstm-attention
       kind: bilstm
   finetune:

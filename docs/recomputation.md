@@ -1,6 +1,6 @@
 # Implementation defects and deferred recomputation
 
-The October 2026 review separates saved-data corrections from implementation fixes requiring new experiment outcomes. All paper measurements describe the historical execution. Main retains the model and attack implementation used for that execution, including the defects below. Its aggregate reductions, manuscript tables, figures, and statistical summaries have been checked and recalculated locally. The separate `codex/methodology-recompute` branch contains future-execution fixes with synthetic regression tests. No replacement training or attack sweep has been performed.
+The paper reports results from the completed model and attack runs. The implementation used for those runs has the defects listed below. Aggregate reductions, manuscript tables, figures, and statistical summaries have been checked and recalculated locally from saved outputs. Main includes corrected reporting and retains the historical model and attack code. The separate [`codex/methodology-recompute` branch](https://github.com/turn1a/safety-classifier-transfer-risk/tree/codex/methodology-recompute) contains corrections with synthetic regression tests. No replacement training or attack sweep has been performed.
 
 ## Findings and possible effects
 

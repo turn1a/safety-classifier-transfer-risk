@@ -1,0 +1,70 @@
+---
+title: "Study guide"
+description: "Model cards, dataset sources, metric definitions, and a guide to the published evidence."
+toc: true
+toc-depth: 2
+---
+
+The study asks whether representational similarity is associated with attack transfer between text classifiers. It compares ten surrogates with a fixed prompt-injection detector. The [paper](paper.qmd) gives the method and analysis.
+
+## Reading the results
+
+A source attack first changes a surrogate's prediction. The target audit then compares the target's predictions on the original and perturbed input. A verified flip requires the target to predict injection before perturbation and benign afterward. The 1,054 verified flips give two different rates: 26.3% among the 4,009 source-success records with target injection baselines, and 11.0% of all 9,550 attempted source evaluations. Originals repeat across attack records; the study uses 191 distinct positive test inputs.
+
+The CKA association uses ten surrogate macro rates, with equal weight for each defined recipe rate. It has rho = 0.830 and exact p = 0.0047 under a designed-pool exchangeability null. The 33.1-percentage-point M1 versus M2 contrast has p = 0.05, the minimum for three-versus-three enumeration, and cannot satisfy the project's strict p < 0.05 rule. This limits the evidence for surrogate selection.
+
+The reported outcomes come from the completed model and attack runs. Tables, figures, and statistical summaries were recalculated from saved outputs. The historical model implementation has padding and initialization defects. The [correction branch](https://github.com/turn1a/safety-classifier-transfer-risk/tree/codex/methodology-recompute) has local synthetic tests, but its corrected models have not been trained or attacked. [Recomputation notes](recomputation.md) explain which results could change.
+
+## Datasets
+
+The three sources contribute 2,947 rows after exact deduplication. The links open their public dataset pages. Counts below describe the saved study corpus, which may differ from the current upstream datasets.
+
+| Dataset | Rows after deduplication | Labels used in this study | Interpretation |
+| --- | ---: | --- | --- |
+| [deepset/prompt-injections](https://huggingface.co/datasets/deepset/prompt-injections) | 662 | Numeric benign and injection labels | Prompt-injection examples and benign text |
+| [jackhhao/jailbreak-classification](https://huggingface.co/datasets/jackhhao/jailbreak-classification) | 1,286 | `benign` → 0, `jailbreak` → 1 | Jailbreak-style positives; also named as a target training source |
+| [Lakera/gandalf_ignore_instructions](https://huggingface.co/datasets/Lakera/gandalf_ignore_instructions) | 999 | Every retained row → 1 | Positive examples from Gandalf instruction-override attempts |
+
+The combined positive label mixes prompt injections and jailbreaks, while the target model card excludes jailbreak detection from its stated scope. Shared use of jackhhao creates a contamination concern. Record-level decontamination against the target's complete training mixture was unavailable. See the [corpus and split table](paper.qmd#tbl-data) and [dataset audit](artifacts/dataset_audit.json).
+
+## Target model
+
+The target is [ProtectAI DeBERTa-v3-base prompt-injection v2](https://huggingface.co/protectai/deberta-v3-base-prompt-injection-v2). Its card specifies English prompt-injection detection, class 0 for benign, and class 1 for injection. The model was archived and no longer maintained as of July 2026. Evaluation uses the largest classifier logit, with no fitted confidence threshold.
+
+## Surrogate models
+
+The five pretrained detectors retain their existing weights. The four local transformer classifiers were fine-tuned on the study's canonical training split. Their links identify the starting backbones; the resulting local checkpoints are not published. The BiLSTM was trained from scratch and has no Hub model card.
+
+| Identifier in figures and tables | Model card or implementation | Preparation |
+| --- | --- | --- |
+| <span id="model-deberta-base-pi-v1">`deberta-base-pi-v1`</span> | [ProtectAI DeBERTa-v3-base prompt-injection v1](https://huggingface.co/protectai/deberta-v3-base-prompt-injection) | Pretrained detector |
+| <span id="model-deberta-small-pi-v2">`deberta-small-pi-v2`</span> | [ProtectAI DeBERTa-v3-small prompt-injection v2](https://huggingface.co/protectai/deberta-v3-small-prompt-injection-v2) | Pretrained detector |
+| <span id="model-deepset-deberta-injection">`deepset-deberta-injection`</span> | [deepset DeBERTa-v3-base injection detector](https://huggingface.co/deepset/deberta-v3-base-injection) | Pretrained detector |
+| <span id="model-llama-prompt-guard-86m">`llama-prompt-guard-86m`</span> | [Meta Llama Prompt Guard 2, 86M](https://huggingface.co/meta-llama/Llama-Prompt-Guard-2-86M) | Pretrained detector |
+| <span id="model-llama-prompt-guard-22m">`llama-prompt-guard-22m`</span> | [Meta Llama Prompt Guard 2, 22M](https://huggingface.co/meta-llama/Llama-Prompt-Guard-2-22M) | Pretrained detector |
+| <span id="model-bert-base-ft">`bert-base-ft`</span> | [BERT-base uncased backbone](https://huggingface.co/google-bert/bert-base-uncased) | Local fine-tune |
+| <span id="model-roberta-base-ft">`roberta-base-ft`</span> | [RoBERTa-base backbone](https://huggingface.co/FacebookAI/roberta-base) | Local fine-tune |
+| <span id="model-electra-small-ft">`electra-small-ft`</span> | [ELECTRA-small discriminator backbone](https://huggingface.co/google/electra-small-discriminator) | Local fine-tune |
+| <span id="model-deberta-base-ft-seed">`deberta-base-ft-seed`</span> | [Microsoft DeBERTa-v3-base backbone](https://huggingface.co/microsoft/deberta-v3-base) | Local fine-tune |
+| <span id="model-bilstm-attention">`bilstm-attention`</span> | [BiLSTM and attention implementation](https://github.com/turn1a/safety-classifier-transfer-risk/blob/main/src/transfer_risk/pipelines/models/bilstm.py) | Local training |
+
+The [paper's model table](paper.qmd#tbl-models) gives the available local validation accuracies and training settings. The [model validation summary](artifacts/model_validation_summary.json) records saved metadata. The historical BiLSTM's padding defect affects its predictions and CKA; the nine-transformer sensitivity removes its saved cells from the association analysis.
+
+## Metrics and terms
+
+Marked terms on the site show these definitions on hover or keyboard focus. Following a term's link opens its definition here, including on touch devices. Press Escape to dismiss a floating definition. Click a figure to open a larger view.
+
+{{< include _includes/metric-definitions.qmd >}}
+
+## Public evidence
+
+| Artifact | What it contains |
+| --- | --- |
+| [Target audit cells](artifacts/target_audit_cells.csv) | Aggregate counts and rates for the 50 surrogate-recipe cells |
+| [Target audit summary](artifacts/target_audit_summary.json) | Target baselines, verified transitions, macro summaries, exact associations, and source exclusion |
+| [Source aggregates](artifacts/target_audit_sources.csv) | Successful attack records grouped by their original dataset source |
+| [Training-probe similarity](artifacts/training_probe_similarity.csv) | Training-only CKA and DBS summaries for the same saved models |
+| [Nine-transformer sensitivity](artifacts/surrogate_excluded_sensitivity.json) | Saved-outcome counts and association after excluding the historical BiLSTM |
+| [Results manifest](artifacts/results_manifest.json) | Run scope and original cloud execution provenance |
+
+CSV and JSON artifacts retain full numerical precision for reanalysis. The paper and site round displayed values. Raw originals, perturbations, private CKA matrices, and model checkpoints are excluded from the public artifacts. The [implementation page](pipeline.qmd) explains the catalog and pipeline boundaries.

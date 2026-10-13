@@ -115,3 +115,4 @@ infra/                           # Terraform cloud sweep documentation
 - Use straight quotes where practical. Do not use rhetorical em or en dashes.
 - Do not claim target prediction changes from the historical conditional target-benign metric. Use verified target injection-to-benign terminology only when an audit baseline is present.
 - Keep measurement and certification language to one sentence per research document.
+- The site publishes HTML and a PDF from `docs/paper.qmd`. Keep the study guide's model and dataset links consistent with configuration, and distinguish starting backbones from unpublished local checkpoints. Check the rendered site and PDF when changing their presentation.
