@@ -44,11 +44,12 @@ RECIPES = {
 }
 
 # Candidate-query batch size for the goal function, read from ``params:attacks``
-# (``query_batch_size``). Batching more candidates per forward amortises the model-weight stream and
-# cuts wall time without changing any prediction (it does not affect the masked per-example logits).
+# (``query_batch_size``). Larger batches reduce per-query overhead and increase memory use.
+# Historical BiLSTM predictions depend on batch padding; transformer logits can differ within
+# floating-point tolerance across tensor shapes.
 # It is also the dominant memory knob: a batch-128 forward through a deberta-v3-base victim at 512
 # tokens peaks ~14.5 GB resident per worker (DeBERTa's disentangled attention materialises content-
-# and position-score tensors), versus ~8 GB at 32 — so a smaller batch lets the sweep fan out across
+# and position-score tensors), versus ~8 GB at 32, so a smaller batch lets the sweep fan out across
 # more cores without OOM. Used as the default when the param is absent.
 _QUERY_BATCH_SIZE = 32
 
@@ -58,9 +59,8 @@ class BiLSTMModelWrapper(ModelWrapper):  # type: ignore[misc]  # ModelWrapper is
 
     Loads the from-scratch BiLSTM (its ``config.json`` carries the vocab and shape) and
     exposes the ``text -> class-probability`` callable TextAttack's goal function needs.
-    Unlike the deleted subenv script, this wraps the real ``BiLSTMClassifier`` rather
-    than re-declaring a copy, so the attacked model is byte-identical to the one trained
-    and measured upstream.
+    Uses the same classifier implementation as training and representation extraction.
+    Historical predictions depend on the padding introduced by each query batch.
     """
 
     def __init__(self, source: str, device: torch.device) -> None:
@@ -139,14 +139,11 @@ class ONNXModelWrapper(ModelWrapper):  # type: ignore[misc]  # ModelWrapper is u
 
 
 class DynamicPadHuggingFaceModelWrapper(HuggingFaceModelWrapper):  # type: ignore[misc]
-    """Pad each batch to its longest sequence, not a fixed 512 — a result-preserving speedup.
+    """Pad each batch to its longest truncated sequence.
 
-    TextAttack's wrapper always pads to 512 tokens, so every victim query pays full-window cost,
-    even though the eval set is mostly short prompts (median ~24 tokens). Padding to the batch's
-    longest sequence gives byte-identical logits (the attention mask zeroes pad positions) at a
-    fraction of the compute for short inputs (DeBERTa attention is ~O(seq^2)). The forward also runs
-    under ``torch.inference_mode`` (cheaper than ``no_grad``). Only ``__call__`` differs from the
-    parent; ``get_grad`` is inherited and unused (every recipe here is black-box).
+    Short inputs reduce the tensor sizes used for victim queries. Forward calls use
+    ``torch.inference_mode``. The configured recipes query classifier scores, so the
+    inherited ``get_grad`` method is unused.
     """
 
     def __call__(self, text_input_list: list[str]) -> Any:

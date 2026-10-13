@@ -33,6 +33,7 @@ src/transfer_risk/
 │   ├── data models similarity attacks transfer risk reporting
 │   ├── audit                    # target inference plus audit finalization
 │   ├── audit_reporting          # target-free public audit report
+│   ├── paper_reporting          # public-aggregate manuscript tables and figures
 │   ├── similarity_audit_prepare # saved training split boundary
 │   └── similarity_audit         # serial training-only CKA sensitivity
 ├── pipeline_registry.py
@@ -43,7 +44,7 @@ tests/                           # pure and pipeline tests
 infra/                           # Terraform cloud sweep documentation
 ```
 
-`__default__` contains the original measurement chain. `audit`, `audit_finalization`, `audit_reporting`, `similarity_audit_prepare`, and `similarity_audit` are explicit stages outside it.
+`__default__` contains the original measurement chain. `audit`, `audit_finalization`, `audit_reporting`, `paper_reporting`, `similarity_audit_prepare`, and `similarity_audit` are explicit stages outside it.
 
 ## Pure core and Kedro nodes
 
@@ -57,6 +58,7 @@ infra/                           # Terraform cloud sweep documentation
 - `audit` performs frozen-target inference on deduplicated successful-source originals and perturbations. It emits raw aggregate cells, source aggregates, and non-text context.
 - `audit_finalization` recomputes corrected DBS and final summaries from saved aggregates without target inference.
 - `audit_reporting` must remain target-free. It publishes aggregate-only cells, source rows, summaries, and figures.
+- `paper_reporting` reads public aggregates only. It generates manuscript tables, explanatory figures, and the BiLSTM-excluded sensitivity without model, prompt, attack, or checkpoint inputs.
 - `similarity_audit_prepare` materializes the saved training split. `similarity_audit` runs serially on MPS, recomputes CKA over a training-only probe, and creates no attacks or training.
 - Every public artifact must be catalog-owned and wrapped in `MlflowArtifactDataset`. Do not publish raw prompts, perturbations, model checkpoints, or private CKA matrices.
 - `qualitative_examples.json` is a redacted audit artifact. It may contain only surrogate, recipe, edit count, categorical label, change summary, and audit note. Do not quote, paraphrase, or recreate underlying prompt text in public documentation.
@@ -93,6 +95,10 @@ infra/                           # Terraform cloud sweep documentation
 - `just lint` and `just type` must pass for source changes.
 - Tests assert behavioral invariants. CKA tests cover self-similarity, rotation, and scaling. DBS tests cover diagonal and full-box behavior. Audit tests cover aggregate-only output and target-free reporting.
 - The coverage gate applies to `transfer_risk.lib`; heavy model and attack nodes use focused pipeline tests.
+- Commits require both register passes for changed Markdown, Quarto source, text, and SVG labels, plus a commit-message pass. `just register --all` runs the full authored-prose check. The language checker and rules come from `~/dev/vl-branding`; the independent reader uses Codex and the model pinned in `.register-model`. Failed or incomplete reads block approval. This personal project uses independent visual styling.
+- Main preserves the historical model and attack implementation, including unmasked BiLSTM padding and uncontrolled fresh-head initialization. Corrected saved-data reductions and reporting belong on main. Changes requiring retraining or new attacks belong on `codex/methodology-recompute` until a separate rerun supplies replacement evidence.
+- On the recomputation branch, new BiLSTMs use masked padding and historical configs without `padding_policy` load with `legacy_unmasked`. Initialize fresh transformer task heads after the derived seed and respect configured token limits. Never report synthetic regression tests as corrected experiment outcomes.
+- A rerun requires an isolated worktree and separate catalog output paths. Existing ignored checkpoints and attack files do not change when Git branches change; `--only-missing-outputs` can reuse defective historical models.
 
 ## Reproducibility and provenance
 

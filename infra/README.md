@@ -2,7 +2,7 @@
 
 The cloud path runs the expensive TextAttack sweep on one ARM Graviton spot instance. Downstream transfer aggregation, target auditing, risk summaries, reporting, and MLflow run locally after the attack partitions are available. The infrastructure is plain Terraform and a bootstrap script.
 
-The catalog owns where boundary artifacts live. Under `--env cloud`, eval splits, surrogate checkpoints, ONNX graphs, and adversarial partitions resolve to S3 through `${globals:...}`. The instance reads and writes those datasets through Kedro. Project data is not copied through ad hoc sync commands, and the instance does not need Hugging Face access.
+The catalog owns the paths used for boundary artifacts. Under `--env cloud`, eval splits, surrogate checkpoints, ONNX graphs, and adversarial partitions resolve to S3 through `${globals:...}`. The instance reads and writes those datasets through Kedro. Project data is not copied through ad hoc sync commands, and the instance does not need Hugging Face access.
 
 ## Default infrastructure and completed production run
 
@@ -10,7 +10,7 @@ Terraform defaults create a spot `c8g.16xlarge`, an ARM Graviton4 instance with 
 
 The completed production sweep used an ARM64 `r8g.48xlarge` Graviton4 spot instance with 192 vCPUs. Final shard reductions, target audit, risk calculations, figures, and reporting completed locally. The public results manifest records this completed-run provenance.
 
-`terraform apply` creates an S3 exchange bucket, a least-privilege instance role and instance profile, an egress-only security group, and the configured spot instance. The box clones the configured repository ref, installs the cloud dependency group, runs the attack pipeline with `ParallelRunner` and `--only-missing-outputs`, then self-terminates.
+`terraform apply` creates an S3 exchange bucket, a least-privilege instance role and instance profile, an egress-only security group, and the configured spot instance. The instance clones the configured repository ref, installs the cloud dependency group, runs the attack pipeline with `ParallelRunner` and `--only-missing-outputs`, then self-terminates.
 
 ## One-time AWS setup
 
@@ -31,17 +31,17 @@ just cloud-finish
 just cloud-down
 ```
 
-`cloud-stage` creates the bucket and stages catalog boundary artifacts. `cloud-up` provisions the configured instance and starts the attack sweep. `cloud-finish` runs local downstream stages against the cloud partitions. `cloud-down` removes the created resources after downstream outputs are safe locally.
+`cloud-stage` creates the bucket and stages catalog boundary artifacts. `cloud-up` provisions the configured instance and starts the attack sweep. `cloud-finish` runs local downstream stages against the cloud partitions. `cloud-down` removes the created resources after downstream outputs have been persisted locally.
 
 Resume is catalog-driven. `--only-missing-outputs` skips persisted partitions after an interruption or spot reclaim.
 
 ## Cost and sizing
 
-The Terraform default is a sizing starting point, not a cost estimate for the completed production run. Spot prices, availability, runtime, region, selected instance type, and reruns determine cost. Review current AWS pricing and the Terraform plan before provisioning.
+The Terraform default is an initial sizing configuration. It is not a cost estimate for the completed production run. Spot prices, availability, runtime, region, selected instance type, and reruns determine cost. Review current AWS pricing and the Terraform plan before provisioning.
 
 ## Security controls
 
-The instance role is scoped to the exchange bucket and SSM Session Manager core. Access uses SSM rather than an inbound SSH rule. The security group is egress-only and IMDSv2 is required. The staged instance holds no Hugging Face token and receives models through catalog-owned S3 artifacts.
+The instance role is scoped to the exchange bucket and SSM Session Manager core. Access uses SSM. The security group has no inbound SSH rule. The security group is egress-only and IMDSv2 is required. The staged instance holds no Hugging Face token and receives models through catalog-owned S3 artifacts.
 
 ## ONNX and torch behavior
 

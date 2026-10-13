@@ -50,3 +50,5 @@ infra/.terraform/
 infra/terraform.tfvars
 *.tfstate
 *.tfstate.*
+# Local register read-through log and content hashes.
+.register-cache/

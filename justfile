@@ -11,7 +11,7 @@ aws_region := "eu-central-1"
 
 default: check
 
-# Install dependencies and the pre-commit / pre-push hooks.
+# Install dependencies and the pre-commit, commit-message, and pre-push hooks.
 install:
     uv sync
     uv run pre-commit install --install-hooks
@@ -47,6 +47,10 @@ hooks:
     uv run pre-commit run --all-files --hook-stage pre-commit
     uv run pre-commit run --all-files --hook-stage pre-push
 
+# Check authored Markdown, Quarto source, and diagram labels with both register passes.
+register *paths:
+    uv run python -m transfer_risk.scripts.register_gate {{paths}}
+
 # Run a Kedro pipeline (default: the full chain). e.g. `just run --pipeline smoke`.
 run *args:
     uv run kedro run {{args}}
@@ -58,6 +62,10 @@ audit-target *args:
 
 refresh-target-audit *args:
     uv run kedro run --pipeline audit_finalization {{args}}
+
+# Recalculate training-probe summaries from saved matrices without representation inference.
+refresh-training-summary:
+    uv run kedro run --pipeline similarity_audit --nodes reduce_training_similarity,calibrate_training_thresholds,select_training_surrogates,build_public_training_probe_similarity,build_training_probe_sensitivity_summary
 
 # Publish saved target-audit aggregates without loading the frozen target or running attacks.
 audit-report *args:
@@ -95,6 +103,10 @@ viz-build:
 # Render the Quarto site to docs/_site (needs the `quarto` CLI on PATH).
 docs:
     quarto render docs
+
+# Regenerate manuscript tables and figures from public aggregates only.
+paper-report:
+    uv run kedro run --pipeline paper_reporting
 
 # Live-preview the Quarto site.
 docs-preview:

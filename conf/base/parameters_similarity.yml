@@ -6,7 +6,7 @@ similarity:
   max_seq_len: 512        # token window for the CKA reps; matches the attack/transfer window
   pooling: cls            # cls | mean (hidden-state pooling)
   cka:
-    mode: minibatch       # linear | minibatch
+    # Inference batch size only. CKA uses full-probe, globally centered activations.
     batch_size: 64
   dbs:
     box: 1                # diagonal-box half-width

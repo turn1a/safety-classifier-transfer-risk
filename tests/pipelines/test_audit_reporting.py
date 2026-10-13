@@ -266,7 +266,7 @@ def test_true_flip_scatter_has_exact_annotation_points_labels_and_legend() -> No
         if collection.get_label() == "surrogate macro true flip rate"
     )
 
-    assert "Spearman rho = 0.83; exact-enumeration two-sided p = 0.0047; n = 10" in annotation_text
+    assert "Spearman rho = 0.830; exact-enumeration two-sided p = 0.0047; n = 10" in annotation_text
     assert "exchangeability null" in " ".join(text.get_text() for text in figure.texts).lower()
     assert "true target flip rate" in axis.get_ylabel().lower()
     assert {collection.get_label() for collection in recipe_collections} == set(_RECIPES)
@@ -328,8 +328,8 @@ def test_true_flip_ablation_has_all_points_floor_annotation_and_group_encoding()
     m1, m2 = axis.collections[:2]
 
     assert "+33.1 pp" in annotation_text
-    assert "exact one-sided p = .05" in annotation_text
-    assert "1/20 floor; strict p < .05 rule not met" in annotation_text
+    assert "exact one-sided p = 0.05" in annotation_text
+    assert "1/20 floor; strict p < 0.05 unattainable" in annotation_text
     assert len(m1.get_offsets()) + len(m2.get_offsets()) == 6
     assert m1.get_offsets()[:, 1].tolist() == pytest.approx(
         [_MACRO_RATES[surrogate] for surrogate in _M1]

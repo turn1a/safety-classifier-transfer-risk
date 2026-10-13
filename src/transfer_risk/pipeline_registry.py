@@ -24,6 +24,7 @@ _EXCLUDED_FROM_DEFAULT = (
     "audit_reporting",
     "similarity_audit_prepare",
     "similarity_audit",
+    "paper_reporting",
 )
 _STAGE = ("data", "models", "similarity")
 _DOWNSTREAM = ("transfer", "risk", "reporting")

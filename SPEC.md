@@ -1,14 +1,14 @@
 # Original implementation protocol and audited results
 
-This document preserves the original implementation protocol for `safety-classifier-transfer-risk` and records the audited behavior that later replaced incomplete outcome definitions. It is an implementation history, not a preregistration. The current research narrative is in [docs/paper.qmd](docs/paper.qmd); this file describes scope, data flow, measurement definitions, and deviations from the original plan.
+This document preserves the original implementation protocol for `safety-classifier-transfer-risk` and records the audited behavior that later replaced incomplete outcome definitions. It records implementation history and does not constitute a preregistration. The current research narrative is in [docs/paper.qmd](docs/paper.qmd); this file describes scope, data flow, measurement definitions, and deviations from the original plan.
 
 ## Purpose and boundary
 
 The project measures whether adversarial text perturbations generated against surrogate classifiers can produce target injection-to-benign outcomes for a public prompt-injection detector. It uses CKA to rank surrogates, attacks those surrogates with TextAttack, audits the frozen target on original and perturbed texts, and compares outcomes with the similarity ordering.
 
-This project measures bounded transfer behavior for a named target, designed surrogate pool, data mixture, and attack suite. It does not certify robustness.
+This project measures bounded transfer behavior for the specified target, designed pool, data mixture, and attack suite and does not certify robustness.
 
-The target is [`protectai/deberta-v3-base-prompt-injection-v2`](https://huggingface.co/ProtectAI/deberta-v3-base-prompt-injection-v2), a public detector whose model card defines 0 as benign and 1 as injection-detected. The project was archived and no longer maintained as of July 2026. It is retained as a fixed historical target.
+The target is [`protectai/deberta-v3-base-prompt-injection-v2`](https://huggingface.co/ProtectAI/deberta-v3-base-prompt-injection-v2), a public detector whose model card defines 0 as benign and 1 as injection-detected. The target model was archived and no longer maintained as of July 2026. It is retained as a fixed historical target.
 
 Vassilev derives theoretical limits for finite security controls in [IEEE Security & Privacy](https://doi.org/10.1109/MSEC.2026.3678214). Cox and Bunzel provide the CKA-guided selection framework, and Klause and Bunzel provide DBS context.
 
@@ -42,12 +42,12 @@ DBS uses the union of Bresenham-centered diagonal boxes over the rectangular lay
 
 Original thresholds are quartiles of the ten-surrogate mean-CKA pool:
 
-- r1 = 0.4497817638.
-- r2 = 0.4134581293.
+- r1 = 0.450 (rounded).
+- r2 = 0.413 (rounded).
 - M1: `deberta-base-ft-seed`, `deepset-deberta-injection`, `deberta-small-pi-v2`.
 - M2: `llama-prompt-guard-22m`, `deberta-base-pi-v1`, `bilstm-attention`.
 
-The thresholds are calibrated and evaluated on the same designed pool. They are a descriptive selection rule, not a holdout selection procedure.
+Membership uses the unrounded scores and thresholds. Calibration and outcome analysis use the same designed pool; no held-out selection validation was performed.
 
 ## Source attacks and the original conditional outcome
 
@@ -57,7 +57,7 @@ Source success means the source surrogate changes from the canonical positive la
 
 `conditional target-benign rate = target_perturbed_benign / source_successful`
 
-This is P[target benign on perturbed prompt | source success]. The pooled historical value is 1,398 / 4,362 = 0.3204951857. It remains valid as a conditional target-benign estimand, while it is not a verified target prediction change because the initial run did not retain target baselines.
+This is P[target benign on perturbed prompt | source success]. The pooled historical value is 1,398 / 4,362 = 32.0%. It remains valid as a conditional target-benign estimand, while it is not a verified target prediction change because the initial run did not retain target baselines.
 
 The historical conditional CSV and figure remain published as secondary outputs:
 
@@ -92,19 +92,19 @@ The public qualitative audit does not contain prompt text. It includes surrogate
 
 ## Outcome statistics
 
-The full audit contains 4,362 successful source attacks. The target initially predicts injection for 4,009 and benign for 353. It predicts benign after perturbation for 1,398. The verified target injection-to-benign count is 1,054 / 4,009 = 0.2629084560.
+The full audit contains 4,362 successful source-attack records, with repeated originals across cells. The target initially predicts injection for 4,009 records and benign for 353. It predicts benign after perturbation for 1,398. The verified target injection-to-benign count is 1,054 / 4,009, a pooled conditional rate of 26.3%. Among 189 distinct originals, 167 are target-positive and 22 target-benign.
 
-The primary association uses one macro true target flip rate per surrogate. For the designed ten-surrogate pool, mean CKA versus macro true target flip rate has rho = 0.8303030303 and two-sided p = 0.0047106481 under exact enumeration and the exchangeability null. Corrected DBS versus the same outcome has rho = 0.5878787879 and p = 0.0806057099.
+The primary association uses one macro true target flip rate per surrogate. For the designed ten-surrogate pool, mean CKA versus macro true target flip rate has rho = 0.830 and two-sided p = 0.0047 under exact enumeration and the exchangeability null. Corrected DBS versus the same outcome has rho = 0.588 and p = 0.081.
 
-M1 has macro true target flip mean 0.4733655391 and M2 has 0.1428548539. The difference is 33.0510685 percentage points. The one-sided p is 0.05, equal to the 1-in-20 floor. The project decision rule requires strict p < 0.05, so this contrast does not satisfy that rule.
+M1 and M2 macro means are 47.3% and 14.3%, a 33.1-percentage-point difference. The one-sided p is 0.05, the minimum among 20 allocations. The project rule requires at least five percentage points and strict p < 0.05. This three-versus-three design cannot meet that rule at any effect size; the contrast is descriptive.
 
-The p-values condition on exchangeability of surrogate outcome ranks under the null for this designed pool. The ten surrogates are non-random and not a demonstrated population sample. The results are within-pool descriptive evidence, not general predictor validation.
+The p-values condition on exchangeability of surrogate outcome ranks under the null for this designed pool. The ten surrogates are non-random and not a demonstrated population sample. The results are within-pool descriptive evidence. They do not constitute general predictor validation.
 
 Tree regressors remain exploratory code. The project does not report random-forest feature importance or held-out predictor performance as evidence.
 
 ## Source-excluded post-hoc sensitivity
 
-The known-source-excluded sensitivity removes every `jackhhao/jailbreak-classification` successful source-attack record before cell aggregation. It retains 3,384 source successes, 3,158 target baseline injections, and 982 verified target injection-to-benign outcomes, for a rate of 0.3109563015.
+The known-source-excluded sensitivity removes every `jackhhao/jailbreak-classification` successful source-attack record before cell aggregation. It retains 3,384 source successes, 3,158 target baseline injections, and 982 verified target injection-to-benign outcomes, for a pooled rate of 31.1%.
 
 The source-success breakdown for the full audit is:
 
@@ -112,7 +112,7 @@ The source-success breakdown for the full audit is:
 - deepset: 533.
 - jackhhao: 978.
 
-Under the post-hoc exclusion, mean CKA versus macro true target flip rate has rho = 0.9030303030 and p = 0.00080742945. M1 has mean 0.5338213245 and M2 0.1638472756, a 36.9974049 percentage-point difference with p = 0.05. This result shows that removing the known source did not weaken the observed within-pool association. It does not establish absence of target-training contamination.
+Under the post-hoc exclusion, mean CKA versus macro true target flip rate has rho = 0.903 and p = 0.00081. M1 and M2 macro means are 53.4% and 16.4%, a 37.0-percentage-point difference with p = 0.05. This result shows that removing the known source did not weaken the observed within-pool association. It does not establish absence of target-training contamination.
 
 ## Training-only CKA sensitivity
 
@@ -120,16 +120,32 @@ Under the post-hoc exclusion, mean CKA versus macro true target flip rate has rh
 
 `similarity_audit` creates a deterministic 1,600-row balanced training-only probe, 800 per label. It uses CLS pooling, max sequence length 512, CKA batch size 64, and DBS box 1. It is an explicit serial MPS run because target representations and an fp32 surrogate coexist in memory. It runs no attacks and performs no training.
 
-The probe uses training rows already seen by local fine-tunes. It removes direct attack-test probe overlap while it does not provide external validation.
+The probe uses training rows already seen by local fine-tunes. It removes direct attack-test probe overlap and does not provide external validation.
 
-The training-only mean CKA rank versus original mean CKA has rho = 0.9878787879 and p = 5.5114638447971785e-06. Corrected DBS rank has rho = 1.0 and p = 5.511463844797178e-07. Training thresholds are r1 = 0.4512952903 and r2 = 0.4157880497. M1 and M2 membership each have Jaccard overlap 1.0 with the original selection.
+The training-only mean CKA rank versus original mean CKA has rho = 0.988 and p = 5.5e-6. Corrected DBS rank has rho = 1.000 and p = 5.5e-7. Training thresholds are r1 = 0.451 and r2 = 0.416 (rounded). M1 and M2 membership each have Jaccard overlap 1.0 with the original selection.
 
-Training-only mean CKA versus the full-cohort macro true target flip rate has rho = 0.8181818182 and p = 0.00581845238. Membership is unchanged, so the M1 versus M2 contrast remains +33.0511 percentage points with p = 0.05. These rank-stability statistics are post-hoc sensitivity evidence. They do not establish generalization.
+Training-only mean CKA versus the full-cohort macro true target flip rate has rho = 0.818 and p = 0.0058. Membership is unchanged, so the M1 versus M2 contrast remains 33.1 percentage points with p = 0.05. These rank-stability statistics are post-hoc sensitivity evidence. They do not establish generalization.
 
 The published sensitivity artifacts are:
 
 - [docs/artifacts/training_probe_similarity.csv](docs/artifacts/training_probe_similarity.csv).
 - [docs/artifacts/training_probe_similarity_sensitivity.json](docs/artifacts/training_probe_similarity_sensitivity.json).
+
+## Method and implementation review
+
+The October 2026 review uses saved artifacts and synthetic local test fixtures. It confirms all 50 audit cells, 142 source rows, aggregate counts, exact permutation statistics, and saved CKA/DBS reductions. The current lock hash matches the execution ref. It does not repeat attacks, model training, or target inference.
+
+The original similarity calculation is full-probe globally centered linear CKA; batch size 64 controls representation extraction. The unused `cka.mode` setting has been removed. DBS box half-width 1 covers all cells for the 12-by-2 BiLSTM pair, so its DBS equals mean CKA by construction.
+
+Source search first clips originals to 3,200 characters, affecting 13 of 191 evaluation inputs. Model tokenizers subsequently apply their own 512-token windows. Selection uses evaluator access to target weights and hidden states, while target feedback is absent during attack generation. The TextAttack fork substitutes `all-MiniLM-L6-v2` and changes semantic constraints; the paper records the implemented variants and their short-input bypasses.
+
+The historical BiLSTM processes padding through recurrence, attention, and representation means. A saved-outcome sensitivity excluding it retains nine transformers, with rho = 0.800 and exact p = 0.014. Its pooled verified outcome is 998 / 3,410 = 29.3%. Main retains the defective model implementation and its historical outcomes. The `codex/methodology-recompute` branch masks padding for new models and retains `legacy_unmasked` loading for archived configs. A rerun could change CKA, source-success cohorts, target outcomes, and pool statistics; its direction is unknown.
+
+Fresh transformer heads were initialized before the historical training seed was set. On the recomputation branch, task-head modules are initialized after seeding while preserving the pretrained backbone. This requires retraining the four local transformer surrogates and regenerating their downstream measurements before replacement results can be reported. The branch also passes configured limits to torch attack wrappers; all saved historical limits already resolve to 512, so no mismatch was demonstrated. Synthetic local tests exercise padding invariance, legacy behavior, head seeding, and explicit truncation. No corrected training or attack execution was performed.
+
+`paper_reporting` is an explicit target-free stage consuming public aggregates only. It publishes four manuscript table includes, an outcome diagram, a cell heatmap, a probe comparison, and the pool-excluded sensitivity through MLflow-wrapped catalog entries. `just paper-report` runs it without model loading or experiment execution. Commit hooks require both language passes for changed prose, including `.qmd`, and check commit messages. Personal-project diagrams use their own visual style.
+
+These corrections do not establish exact fresh reproduction of the historical run. Immutable Hub revisions and a target-weight fingerprint across inference stages were not retained. The mixed label, training overlap, success conditioning, semantic validity, and designed-pool assumptions remain limitations. [Recomputation notes](docs/recomputation.md) document the defects, possible effects, and the requirement for isolated output paths before any rerun.
 
 ## Architecture and artifact policy
 
@@ -138,9 +154,9 @@ The project separates pure algorithms from Kedro orchestration:
 - `transfer_risk.lib` contains CKA, Bresenham DBS, seed derivation, association tests, selection ablation, audit aggregation, and public reporting helpers.
 - Pipeline nodes load catalog inputs, perform model and target inference, and persist outputs.
 - Dynamic models, similarity, and attacks fan out by configured surrogate and attack shard.
-- Audit, audit finalization, audit reporting, training-split preparation, and training-only CKA sensitivity are explicit pipelines outside `__default__`.
+- Audit, audit finalization, audit reporting, manuscript reporting, training-split preparation, and training-only CKA sensitivity are explicit pipelines outside `__default__`.
 
-All datasets, models, CKA matrices, checkpoints, attack partitions, audit aggregates, figures, and public artifacts are catalog-owned. Public files are wrapped in `MlflowArtifactDataset`. The reporting stages publish aggregate rows only where raw text would be unnecessary for evidence review.
+All datasets, models, CKA matrices, checkpoints, attack partitions, audit aggregates, figures, and public artifacts are catalog-owned. Public files are wrapped in `MlflowArtifactDataset`. Public reporting publishes aggregate counts, rates, and permitted metadata. Original and perturbed prompt text is excluded.
 
 The production attack sweep ran mostly on an ARM64 AWS `r8g.48xlarge` Graviton4 spot instance with 192 vCPUs. Final reductions, target auditing, and reporting ran locally. ARM64 ONNX Runtime failed fused transformer attention during production, so transformer victims used torch. Exported ONNX graphs remain parity checks.
 

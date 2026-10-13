@@ -1,0 +1,9 @@
+| Recipe | Source successes | Flips / target injections | Pooled verified rate (%) |
+| :--- | ---: | ---: | ---: |
+| bae | 892 | 325 / 830 | 39.2 |
+| bert-attack | 1,097 | 242 / 1,002 | 24.2 |
+| deepwordbug | 601 | 77 / 549 | 14.0 |
+| pwws | 830 | 221 / 773 | 28.6 |
+| textfooler | 942 | 189 / 855 | 22.1 |
+
+: Audited outcome totals by attack recipe. {#tbl-recipe-results}

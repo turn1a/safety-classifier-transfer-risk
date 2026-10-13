@@ -5,13 +5,14 @@ project:
     - index.qmd
     - paper.qmd
     - pipeline.qmd
+    - recomputation.md
   resources:
     - pipeline-viz/**
     - artifacts/**
 
 website:
-  title: "Text Safety Transfer Risk"
-  description: "A reproducible study of CKA-guided surrogate selection and adversarial transfer against a public prompt-injection detector."
+  title: "Text safety transfer risk"
+  description: "A saved-data audit of CKA-guided surrogate selection and classifier prediction changes against a public prompt-injection detector."
   site-url: "https://turn1a.github.io/safety-classifier-transfer-risk/"
   repo-url: "https://github.com/turn1a/safety-classifier-transfer-risk"
   repo-subdir: docs
@@ -27,6 +28,8 @@ website:
         text: Paper
       - href: pipeline.qmd
         text: Implementation
+      - href: recomputation.md
+        text: Recomputation
     right:
       - icon: github
         href: https://github.com/turn1a/safety-classifier-transfer-risk

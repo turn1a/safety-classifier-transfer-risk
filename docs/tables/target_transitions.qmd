@@ -1,0 +1,7 @@
+| Original prediction | Perturbed benign | Perturbed injection | Total |
+| :--- | ---: | ---: | ---: |
+| Injection | 1,054 | 2,955 | 4,009 |
+| Benign | 344 | 9 | 353 |
+| Total | 1,398 | 2,964 | 4,362 |
+
+: Target transitions over successful source-attack records. {#tbl-transitions}

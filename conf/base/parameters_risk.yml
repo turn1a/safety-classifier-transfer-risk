@@ -1,10 +1,10 @@
 # Risk stage: regression (transfer rate ~ similarity features) and the headline
 # M1-vs-M2 selection ablation (SPEC.md §3.1 steps 6-7).
 #
-# Tree depth is 3, not the paper's 6: with n ≈ surrogates×recipes (tens of rows) a
-# depth-6 tree (64 leaves) overfits. The trees are read for feature importance, not
-# prediction; Spearman(similarity, transfer) is the primary correlation evidence and
-# the selection ablation is the headline test.
+# Tree fits over surrogate-recipe cells remain exploratory. Their correlated rows
+# do not form independent research units, and feature importance is not evidence
+# for a selection claim. Associations use ten designed-pool surrogate summaries;
+# the three-versus-three selection test has a minimum exact p of 0.05.
 risk:
   decision_tree:
     max_depth: 3

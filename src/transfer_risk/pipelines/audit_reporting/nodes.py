@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 from matplotlib.figure import Figure
+from matplotlib.ticker import PercentFormatter
 
 from transfer_risk.lib.audit_reporting import (
     export_public_target_audit_cells,
@@ -148,8 +149,8 @@ def plot_true_flip_scatter(
             bbox={"boxstyle": "round,pad=0.15", "facecolor": "white", "alpha": 0.75},
         )
     annotation = (
-        f"Spearman rho = {association['rho']:.2f}; "
-        f"exact-enumeration two-sided p = {association['two_sided_p']:.4f}; "
+        f"Spearman rho = {association['rho']:.3f}; "
+        f"exact-enumeration two-sided p = {association['two_sided_p']:.2g}; "
         f"n = {association['n']}"
     )
     ax.text(
@@ -164,9 +165,10 @@ def plot_true_flip_scatter(
     )
     ax.set(
         xlabel="mean CKA (surrogate-level)",
-        ylabel="true target flip rate",
+        ylabel="true target flip rate (%)",
         title="True target flip rate vs mean CKA",
     )
+    ax.yaxis.set_major_formatter(PercentFormatter(1, decimals=0))
     ax.legend(
         loc="upper center",
         bbox_to_anchor=(0.5, -0.15),
@@ -243,7 +245,7 @@ def plot_true_flip_ablation(
     annotation = (
         f"+{stats['mean_diff_pp']:.1f} pp\n"
         f"exact one-sided p = {_format_probability(stats['mean_p_value'])}\n"
-        "1/20 floor; strict p < .05 rule not met"
+        "1/20 floor; strict p < 0.05 unattainable"
     )
     ax.text(
         0.98,
@@ -258,14 +260,15 @@ def plot_true_flip_ablation(
     ax.set_xticks([group_positions["M1"], group_positions["M2"]], labels=["M1", "M2"])
     ax.set(
         title="Selection ablation: true target flip rate",
-        ylabel="macro true target flip rate",
+        ylabel="macro true target flip rate (%)",
         xlabel="similarity group",
         xlim=(-0.5, 1.5),
     )
+    ax.yaxis.set_major_formatter(PercentFormatter(1, decimals=0))
     ax.legend(loc="lower left", ncol=3, fontsize=8)
     return fig
 
 
 def _format_probability(value: float | int) -> str:
-    """Format a two-decimal probability without a leading zero below one."""
-    return f"{float(value):.2f}".removeprefix("0")
+    """Format a probability to two significant figures with a leading zero."""
+    return f"{float(value):.2g}"

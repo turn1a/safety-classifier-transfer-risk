@@ -128,11 +128,11 @@ def test_plot_transfer_scatter_uses_recipe_shapes_and_selected_annotations() -> 
     fig = reporting_nodes.plot_transfer_scatter(master)
     ax = fig.axes[0]
     annotation_text = " ".join(child.get_text() for child in ax.texts)
-    assert "Spearman rho = 0.76" in annotation_text
+    assert "Spearman rho = 0.758" in annotation_text
     assert "exact two-sided p = 0.015" in annotation_text
     assert "n = 10" in annotation_text
     assert ax.get_title() == "Historical conditional target-benign rate vs mean CKA"
-    assert ax.get_ylabel() == "Historical conditional target-benign rate"
+    assert ax.get_ylabel() == "Historical conditional target-benign rate (%)"
     scope_note = " ".join(text.get_text() for text in fig.texts)
     assert "historical conditional target-benign rate" in scope_note.lower()
     assert "designed surrogate pool" in scope_note.lower()

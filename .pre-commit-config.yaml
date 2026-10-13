@@ -2,7 +2,8 @@
 # Install: `just install` (runs `uv run pre-commit install --install-hooks`).
 # Run all: `uv run pre-commit run --all-files`.
 
-default_install_hook_types: [pre-commit, pre-push]
+default_install_hook_types: [pre-commit, commit-msg, pre-push]
+default_stages: [pre-commit, pre-push]
 
 # The vendored Kedro-Viz static bundle (docs/pipeline-viz/) is a generated artifact. Exclude it
 # from every hook so the file-hygiene fixers do not rewrite its minified assets and the
@@ -88,3 +89,20 @@ repos:
         pass_filenames: false
         always_run: true
         stages: [pre-push]
+
+  # Run language checks after file formatters.
+  - repo: local
+    hooks:
+      - id: register-prose
+        name: Register checker and Codex read-through
+        entry: uv run python -m transfer_risk.scripts.register_gate
+        language: system
+        files: '\.(md|qmd|txt|svg)$'
+        exclude: '(^|/)(AGENTS|CLAUDE)\.md$'
+        stages: [pre-commit]
+      - id: register-commit-message
+        name: Commit message register
+        entry: uv run python -m transfer_risk.scripts.register_gate --commit-message
+        language: system
+        stages: [commit-msg]
+        always_run: true

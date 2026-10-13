@@ -19,6 +19,7 @@ import numpy as np
 import pandas as pd
 from matplotlib.figure import Figure
 from matplotlib.patches import Patch
+from matplotlib.ticker import PercentFormatter
 
 from transfer_risk.lib.association import spearman_association
 from transfer_risk.lib.public_bundle import (
@@ -373,15 +374,16 @@ def plot_transfer_scatter(master_results_corrected: pd.DataFrame) -> Figure:
         )
     ax.set(
         xlabel="mean CKA (surrogate-level)",
-        ylabel="Historical conditional target-benign rate",
+        ylabel="Historical conditional target-benign rate (%)",
         title="Historical conditional target-benign rate vs mean CKA",
     )
+    ax.yaxis.set_major_formatter(PercentFormatter(1, decimals=0))
     ax.text(
         0.03,
         0.97,
         (
-            f"Spearman rho = {stats['rho']:.2f}; "
-            f"exact two-sided p = {stats['two_sided_p']:.3f}; "
+            f"Spearman rho = {stats['rho']:.3f}; "
+            f"exact two-sided p = {stats['two_sided_p']:.2g}; "
             f"n = {stats['n']}"
         ),
         transform=ax.transAxes,

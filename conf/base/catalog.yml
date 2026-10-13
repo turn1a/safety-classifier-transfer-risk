@@ -489,6 +489,8 @@ fig_cka_ranked:
   dataset:
     type: matplotlib.MatplotlibDataset
     filepath: docs/figures/fig_cka_ranked.png
+    save_args:
+      dpi: 300
   artifact_path: figures
   metadata:
     kedro-viz:
@@ -499,6 +501,8 @@ fig_transfer_scatter:
   dataset:
     type: matplotlib.MatplotlibDataset
     filepath: docs/figures/fig_transfer_scatter.png
+    save_args:
+      dpi: 300
   artifact_path: figures
   metadata:
     kedro-viz:
@@ -540,6 +544,8 @@ fig_true_flip_scatter:
   dataset:
     type: matplotlib.MatplotlibDataset
     filepath: docs/figures/fig_true_flip_scatter.png
+    save_args:
+      dpi: 300
   artifact_path: figures
   metadata:
     kedro-viz:
@@ -550,6 +556,8 @@ fig_true_flip_ablation:
   dataset:
     type: matplotlib.MatplotlibDataset
     filepath: docs/figures/fig_true_flip_ablation.png
+    save_args:
+      dpi: 300
   artifact_path: figures
   metadata:
     kedro-viz:
@@ -575,6 +583,78 @@ pub_training_probe_similarity_sensitivity:
   metadata:
     kedro-viz:
       layer: reporting
+
+# --- smoke (wiring check) --------------------------------------------------
+pub_surrogate_excluded_sensitivity:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: json.JSONDataset
+    filepath: docs/artifacts/surrogate_excluded_sensitivity.json
+  artifact_path: results
+
+paper_transition_table:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: text.TextDataset
+    filepath: docs/tables/target_transitions.qmd
+  artifact_path: tables
+
+paper_surrogate_table:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: text.TextDataset
+    filepath: docs/tables/surrogate_results.qmd
+  artifact_path: tables
+
+paper_recipe_table:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: text.TextDataset
+    filepath: docs/tables/recipe_results.qmd
+  artifact_path: tables
+
+paper_sensitivity_table:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: text.TextDataset
+    filepath: docs/tables/sensitivity_results.qmd
+  artifact_path: tables
+
+fig_audit_flow:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: matplotlib.MatplotlibDataset
+    filepath: docs/figures/fig_audit_flow.png
+    save_args:
+      dpi: 300
+  artifact_path: figures
+
+fig_recipe_heatmap:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: matplotlib.MatplotlibDataset
+    filepath: docs/figures/fig_recipe_heatmap.png
+    save_args:
+      dpi: 300
+  artifact_path: figures
+
+fig_probe_stability:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: matplotlib.MatplotlibDataset
+    filepath: docs/figures/fig_probe_stability.png
+    save_args:
+      dpi: 300
+  artifact_path: figures
+
+fig_dbs_geometry:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: matplotlib.MatplotlibDataset
+    filepath: docs/figures/fig_dbs_geometry.png
+    save_args:
+      dpi: 300
+  artifact_path: figures
 
 # --- smoke (wiring check) --------------------------------------------------
 smoke_report:

@@ -8,6 +8,22 @@ pre code {
   font-size: 0.85em;
 }
 
+.quarto-float table {
+  font-size: 0.9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.quarto-float table code {
+  color: inherit;
+  background: transparent;
+}
+
+#tbl-surrogate-results th:first-child,
+#tbl-surrogate-results td:first-child {
+  width: 24%;
+  text-align: left;
+}
+
 .metric-grid {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));

@@ -4,10 +4,10 @@ Linear CKA (Kornblith et al. 2019) measures how similar two sets of activations 
 invariant to orthogonal rotation and isotropic scaling, in ``[0, 1]``. We use the
 cross-covariance form ``||Y_c^T X_c||_F^2 / (||X_c^T X_c||_F * ||Y_c^T Y_c||_F)``
 (``_c`` = column-centred), which equals the HSIC/Gram formulation but only ever forms
-the ``p x q`` feature matrices, never the ``n x n`` Gram matrix — so it stays exact and
-cheap for our probe sizes and needs no minibatching for memory. ``minibatch_cka``
-accumulates the same statistic across batches (Nguyen, Raghu & Kornblith 2020) and is
-kept as a streaming option and a correctness cross-check.
+the ``p x q`` feature matrices, without constructing an ``n x n`` Gram matrix. The
+production pipeline uses full-probe centering. ``minibatch_cka`` is an unused helper
+that sums biased, batch-centered HSIC terms; it generally differs from full-probe
+CKA and is not the unbiased minibatch estimator described by Nguyen et al.
 
 Reference: SPEC.md §3.2.
 """

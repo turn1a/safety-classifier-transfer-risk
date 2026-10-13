@@ -1,0 +1,20 @@
+{
+  "analysis_label": "post-hoc surrogate-excluded sensitivity on saved outcomes",
+  "excluded_surrogates": [
+    "bilstm-attention"
+  ],
+  "n_surrogates": 9,
+  "source_successful": 3704,
+  "target_original_benign": 294,
+  "target_original_injection": 3410,
+  "target_perturbed_benign": 1287,
+  "true_target_flips": 998,
+  "true_target_flip_rate": 0.29266862170087976,
+  "mean_cka_association": {
+    "rho": 0.7999999999999999,
+    "two_sided_p": 0.01382826278659612,
+    "n": 9,
+    "exact": true
+  },
+  "interpretation": "Saved predictions and attacks are unchanged. Removing a model does not correct its historical implementation or provide independent validation. The enumerated p-value conditions on an exchangeability null for the retained designed pool."
+}

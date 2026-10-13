@@ -188,11 +188,10 @@ def test_run_recipe_builds_and_runs_against_onnx_victim(tmp_path: Path) -> None:
 
 
 def test_dynamic_pad_wrapper_matches_stock_logits() -> None:
-    """The dynamic-pad victim wrapper returns logits identical to the stock wrapper (regression).
+    """Compare dynamic-padding logits and predictions with a fixed-window wrapper.
 
-    The subclass differs only in padding to the batch's longest sequence instead of a fixed 512
-    (and inference_mode vs no_grad); the attention mask makes pad positions inert, so the per-row
-    logits must be identical. This guards the speedup as a true no-op on the attack's decisions.
+    The synthetic batch must agree within floating-point tolerance and retain the
+    same predicted labels. This check does not establish bitwise equality for all inputs.
     """
     from tokenizers import Tokenizer, models, pre_tokenizers  # noqa: PLC0415
     from transformers import (  # noqa: PLC0415
@@ -226,4 +225,4 @@ def test_dynamic_pad_wrapper_matches_stock_logits() -> None:
     dyn = DynamicPadHuggingFaceModelWrapper(model, tokenizer)(texts).detach().numpy()
     assert dyn.shape == stock.shape
     assert (dyn.argmax(-1) == stock.argmax(-1)).all()
-    assert float(np.abs(dyn - stock).max()) < 1e-5  # mask makes padding inert -> identical logits
+    assert float(np.abs(dyn - stock).max()) < 1e-5

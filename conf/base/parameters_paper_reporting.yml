@@ -1,0 +1,4 @@
+# Post-hoc manuscript sensitivity; reuses saved outcomes without model inference.
+paper_reporting:
+  excluded_surrogates:
+    - bilstm-attention
