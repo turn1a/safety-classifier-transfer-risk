@@ -1,0 +1,17 @@
+{
+  "corpus": {
+    "grouping_method": null,
+    "grouping_evidence_sha256": null,
+    "records": [],
+    "target_preparations": []
+  },
+  "source_revisions": {},
+  "annotation_evidence_sha256": null,
+  "registration": {
+    "registry_uri": null,
+    "registered_at": null,
+    "protocol_sha256": null,
+    "corpus_sha256": null,
+    "evidence_sha256": null
+  }
+}

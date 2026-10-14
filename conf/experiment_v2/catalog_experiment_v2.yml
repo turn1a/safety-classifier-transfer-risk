@@ -1,0 +1,247 @@
+# All runtime gate receipts are ephemeral so resumed runs revalidate current evidence.
+# Checkpoint metadata is outside checkpoint directories to keep fingerprints stable.
+v2_corpus_evidence:
+  type: json.JSONDataset
+  filepath: ${globals:v2_evidence_root}/corpus.json
+v2_registration_evidence:
+  type: json.JSONDataset
+  filepath: ${globals:v2_evidence_root}/registration.json
+v2_calibration_records:
+  type: transfer_risk.datasets.experiment_v2_json_dataset.ExperimentV2JSONDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/analysis/calibration_reviewed_records.json
+v2_evaluation_records:
+  type: transfer_risk.datasets.experiment_v2_json_dataset.ExperimentV2JSONDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/analysis/evaluation_reviewed_records.json
+v2_preflight_report:
+  type: transfer_risk.datasets.experiment_v2_json_dataset.ExperimentV2JSONDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/analysis/preflight.json
+v2_execution_manifest:
+  type: transfer_risk.datasets.experiment_v2_json_dataset.ExperimentV2JSONDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/analysis/execution_manifest.json
+v2_preflight_receipt:
+  type: transfer_risk.datasets.experiment_v2_json_dataset.ExperimentV2JSONDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/analysis/preflight_validated.json
+v2_selection_lock:
+  type: transfer_risk.datasets.experiment_v2_json_dataset.ExperimentV2JSONDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/analysis/selection_lock.json
+v2_public_summary:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  artifact_path: experiment_v2
+  dataset:
+    type: transfer_risk.datasets.experiment_v2_json_dataset.ExperimentV2JSONDataset
+    run_id: ${globals:v2_run_id}
+    visibility: public
+    filepath: ${globals:v2_public_root}/summary.json
+v2_execution_context:
+  type: transfer_risk.datasets.experiment_v2_context_dataset.ExperimentV2ExecutionContextDataset
+v2_models_receipt:
+  type: MemoryDataset
+v2_target_preparation_receipt:
+  type: MemoryDataset
+v2_calibration_receipt:
+  type: MemoryDataset
+v2_evaluation_receipt:
+  type: MemoryDataset
+v2_calibration_current_models:
+  type: MemoryDataset
+v2_evaluation_current_models:
+  type: MemoryDataset
+v2_empty_backbone:
+  type: MemoryDataset
+v2_private_train:
+  type: transfer_risk.datasets.experiment_v2_json_dataset.ExperimentV2JSONDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/corpus/train.json
+v2_private_validation:
+  type: transfer_risk.datasets.experiment_v2_json_dataset.ExperimentV2JSONDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/corpus/validation.json
+v2_private_probe:
+  type: transfer_risk.datasets.experiment_v2_json_dataset.ExperimentV2JSONDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/corpus/probe.json
+v2_private_calibration:
+  type: transfer_risk.datasets.experiment_v2_json_dataset.ExperimentV2JSONDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/corpus/calibration.json
+v2_private_evaluation:
+  type: transfer_risk.datasets.experiment_v2_json_dataset.ExperimentV2JSONDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/corpus/evaluation.json
+v2_hub__archived-target:
+  type: transfer_risk.datasets.experiment_v2_hub_dataset.ExperimentV2HubModelDataset
+  repo_id: protectai/deberta-v3-base-prompt-injection-v2
+  revision: null
+  tokenizer_repo_id: protectai/deberta-v3-base-prompt-injection-v2
+  tokenizer_revision: null
+  load_args:
+    output_hidden_states: true
+v2_hub__replication-target:
+  type: transfer_risk.datasets.experiment_v2_model_dataset.ExperimentV2ModelDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/models/replication-target/prepared
+v2_hub__bert-base-ft:
+  type: transfer_risk.datasets.experiment_v2_hub_dataset.ExperimentV2HubModelDataset
+  repo_id: google-bert/bert-base-uncased
+  revision: null
+  tokenizer_repo_id: google-bert/bert-base-uncased
+  tokenizer_revision: null
+  load_args:
+    output_hidden_states: true
+    num_labels: 2
+v2_hub__roberta-base-ft:
+  type: transfer_risk.datasets.experiment_v2_hub_dataset.ExperimentV2HubModelDataset
+  repo_id: FacebookAI/roberta-base
+  revision: null
+  tokenizer_repo_id: FacebookAI/roberta-base
+  tokenizer_revision: null
+  load_args:
+    output_hidden_states: true
+    num_labels: 2
+v2_hub__electra-small-ft:
+  type: transfer_risk.datasets.experiment_v2_hub_dataset.ExperimentV2HubModelDataset
+  repo_id: google/electra-small-discriminator
+  revision: null
+  tokenizer_repo_id: google/electra-small-discriminator
+  tokenizer_revision: null
+  load_args:
+    output_hidden_states: true
+    num_labels: 2
+v2_hub__deberta-base-ft:
+  type: transfer_risk.datasets.experiment_v2_hub_dataset.ExperimentV2HubModelDataset
+  repo_id: microsoft/deberta-v3-base
+  revision: null
+  tokenizer_repo_id: microsoft/deberta-v3-base
+  tokenizer_revision: null
+  load_args:
+    output_hidden_states: true
+    num_labels: 2
+v2_hub__distilbert-base-ft:
+  type: transfer_risk.datasets.experiment_v2_hub_dataset.ExperimentV2HubModelDataset
+  repo_id: distilbert/distilbert-base-uncased
+  revision: null
+  tokenizer_repo_id: distilbert/distilbert-base-uncased
+  tokenizer_revision: null
+  load_args:
+    output_hidden_states: true
+    num_labels: 2
+v2_hub__albert-base-ft:
+  type: transfer_risk.datasets.experiment_v2_hub_dataset.ExperimentV2HubModelDataset
+  repo_id: albert/albert-base-v2
+  revision: null
+  tokenizer_repo_id: albert/albert-base-v2
+  tokenizer_revision: null
+  load_args:
+    output_hidden_states: true
+    num_labels: 2
+v2_hub__mobilebert-ft:
+  type: transfer_risk.datasets.experiment_v2_hub_dataset.ExperimentV2HubModelDataset
+  repo_id: google/mobilebert-uncased
+  revision: null
+  tokenizer_repo_id: google/mobilebert-uncased
+  tokenizer_revision: null
+  load_args:
+    output_hidden_states: true
+    num_labels: 2
+v2_models_manifest:
+  type: transfer_risk.datasets.experiment_v2_immutable_json_dataset.ExperimentV2ImmutableJSONDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/analysis/models_manifest.json
+v2_calibration_clean_predictions:
+  type: transfer_risk.datasets.experiment_v2_immutable_json_dataset.ExperimentV2ImmutableJSONDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/calibration/clean_predictions.json
+v2_calibration_similarities:
+  type: transfer_risk.datasets.experiment_v2_immutable_json_dataset.ExperimentV2ImmutableJSONDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/calibration/similarities.json
+v2_calibration_raw_records:
+  type: transfer_risk.datasets.experiment_v2_immutable_json_dataset.ExperimentV2ImmutableJSONDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/calibration/raw_records.json
+v2_calibration_annotations:
+  type: json.JSONDataset
+  filepath: ${globals:v2_evidence_root}/calibration_annotations.json
+v2_evaluation_clean_predictions:
+  type: transfer_risk.datasets.experiment_v2_immutable_json_dataset.ExperimentV2ImmutableJSONDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/evaluation/clean_predictions.json
+v2_evaluation_similarities:
+  type: transfer_risk.datasets.experiment_v2_immutable_json_dataset.ExperimentV2ImmutableJSONDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/evaluation/similarities.json
+v2_evaluation_raw_records:
+  type: transfer_risk.datasets.experiment_v2_immutable_json_dataset.ExperimentV2ImmutableJSONDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/evaluation/raw_records.json
+v2_evaluation_annotations:
+  type: json.JSONDataset
+  filepath: ${globals:v2_evidence_root}/evaluation_annotations.json
+v2_selection_registration:
+  type: json.JSONDataset
+  filepath: ${globals:v2_evidence_root}/selection_registration.json
+v2_target_preparation_evidence:
+  type: json.JSONDataset
+  filepath: ${globals:v2_evidence_root}/target_preparation.json
+v2_target_private_train:
+  type: transfer_risk.datasets.experiment_v2_json_dataset.ExperimentV2JSONDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/target_preparation/corpus/train.json
+v2_target_private_validation:
+  type: transfer_risk.datasets.experiment_v2_json_dataset.ExperimentV2JSONDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/target_preparation/corpus/validation.json
+v2_target_backbone:
+  type: transfer_risk.datasets.experiment_v2_hub_dataset.ExperimentV2HubModelDataset
+  repo_id: FacebookAI/roberta-base
+  revision: null
+  tokenizer_repo_id: FacebookAI/roberta-base
+  tokenizer_revision: null
+  load_args:
+    num_labels: 2
+    output_hidden_states: true
+v2_prepared_target:
+  type: transfer_risk.datasets.experiment_v2_model_dataset.ExperimentV2ModelDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/models/replication-target/prepared
+v2_prepared_target_metadata:
+  type: transfer_risk.datasets.experiment_v2_immutable_json_dataset.ExperimentV2ImmutableJSONDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/model_metadata/replication-target/prepared.json
+v2_target_preparation_record:
+  type: transfer_risk.datasets.experiment_v2_immutable_json_dataset.ExperimentV2ImmutableJSONDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/target_preparation/preparation_record.json
+v2_model__{model_id}__r{replicate}:
+  type: transfer_risk.datasets.experiment_v2_model_dataset.ExperimentV2ModelDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/models/{model_id}/replicate-{replicate}
+v2_model_meta__{model_id}__r{replicate}:
+  type: transfer_risk.datasets.experiment_v2_immutable_json_dataset.ExperimentV2ImmutableJSONDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/model_metadata/{model_id}/replicate-{replicate}.json
+v2_{phase}_attempts__{source_id}__r{replicate}__{recipe}:
+  type: transfer_risk.datasets.experiment_v2_immutable_json_dataset.ExperimentV2ImmutableJSONDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/{phase}/attempts/{source_id}/replicate-{replicate}/{recipe}.json
+v2_{phase}_audited__{source_id}__r{replicate}__{recipe}:
+  type: transfer_risk.datasets.experiment_v2_immutable_json_dataset.ExperimentV2ImmutableJSONDataset
+  run_id: ${globals:v2_run_id}
+  filepath: ${globals:v2_private_root}/{phase}/audited/{source_id}/replicate-{replicate}/{recipe}.json
+
+v2_attack_asset_source:
+  type: json.JSONDataset
+  filepath: ${globals:v2_evidence_root}/attack_asset_source.json
+v2_attack_asset_manifest:
+  type: transfer_risk.datasets.experiment_v2_attack_assets_dataset.ExperimentV2AttackAssetsDataset
+  run_id: ${globals:v2_run_id}
+  manifest_filepath: ${globals:v2_private_root}/attack_assets/manifest.json
+  cache_root: ${globals:v2_private_root}/attack_assets/cache
+v2_attack_assets_preparation_receipt:
+  type: MemoryDataset

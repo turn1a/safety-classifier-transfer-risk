@@ -5,8 +5,10 @@ project:
     - index.qmd
     - paper.qmd
     - guide.qmd
+    - validation.qmd
     - pipeline.qmd
     - recomputation.md
+    - experiment-v2.qmd
   resources:
     - pipeline-viz/**
     - artifacts/**
@@ -32,10 +34,14 @@ website:
         text: Paper
       - href: guide.qmd
         text: Study guide
+      - href: validation.qmd
+        text: Validity checks
       - href: pipeline.qmd
         text: Implementation
       - href: recomputation.md
         text: Recomputation
+      - href: experiment-v2.qmd
+        text: Prospective v2
     right:
       - icon: github
         href: https://github.com/turn1a/safety-classifier-transfer-risk

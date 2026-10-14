@@ -1,0 +1,162 @@
+---
+title: "Prospective prompt-injection transfer experiment"
+subtitle: "V2 protocol and evidence contracts"
+execute:
+  enabled: false
+---
+
+The v2 study compares frozen surrogate-selection rules on a held-out prompt-injection corpus. It requires new target preparation, source training, representations, attacks, target predictions, and human judgments. No replacement experiment has been executed. The checked-in configuration has null revisions and empty evidence templates, so its preflight fails. This document is a protocol draft; an external registration must bind the completed protocol, corpus, and later selection lock before evaluation is opened.
+
+The historical paper and its saved-data audits remain evidence from the original experiment. Their conditional CKA association is exploratory and does not establish that CKA selection improves all-attempt yield. The saved selection policies are post-hoc comparisons, and human semantic validity remains unresolved. Corrections to BiLSTM padding, fresh-head initialization, and attack token limits are necessary implementation changes, but they do not resolve the original task mixture, shared sources, missing semantic judgments, or within-pool selection assessment. V2 changes those parts of the design and requires a separate run identity and catalog roots.
+
+## Task and target roles
+
+A positive example contains an attempt to redirect a model through lower-trust content in a stated legitimate task. Original task context, trusted instructions, the lower-trust boundary, and the attacker's objective must be available to human reviewers. A direct request to violate a safety policy is a jailbreak example and belongs to a separate study. A classifier label alone cannot establish this distinction. Records without the required context are ineligible for the primary corpus.
+
+Benign examples include ordinary content, neutral instructions, and quoted instructions that a model should treat as data. Calibration and evaluation must contain independent groups of quoted-instruction and neutral-instruction hard negatives. Clean false-positive rates are measured alongside positive detection rates.
+
+| Role | Target preparation | Purpose and limit |
+|:--|:--|:--|
+| Historical reference | The archived ProtectAI DeBERTa target, pinned to a full upstream revision and realized checkpoint/tokenizer fingerprints | Retains the historical reference. Its pretrained training exposure remains a documented limitation. |
+| Independent replication | A separately trained RoBERTa prompt-injection detector, frozen before core study registration | Uses another backbone and separate training/validation groups, origins, and attack families. Its preparation protocol, task reviews, data revisions, and checkpoint/tokenizer hashes must be supplied. |
+
+A different DeBERTa checkpoint does not establish architectural independence. The prepared replication target has its own data and preparation evidence, and its groups, origins, attack families, and exact content cannot occur in any core study partition. Its private preparation record retains the registered target corpus hash, original content identities, group assignments, and task-review metadata. The preparation gate and core preflight both recheck that inventory. Its input identity is the frozen prepared checkpoint. The target-preparation phase precedes the core experiment's registration.
+
+Every target has a fixed designed candidate pool. Its own model identity and any alias with identical realized weights are excluded from that pool. The proposed pool contains same-task BERT, RoBERTa, ELECTRA, DeBERTa, DistilBERT, ALBERT, MobileBERT, and masked BiLSTM detectors. The seven transformer names identify starting backbones; their local detector checkpoints do not exist yet. Every local detector uses the registered training/validation partition, its pinned architecture-specific recipe, a 512-token window, and a derived initialization/training seed. Frozen pretrained detectors can be retained as historical references under a separate declared comparison block; they are not evidence of controlled same-task training.
+
+The protocol fixes three seed replicates. Replicate and component seeds are derived through `transfer_risk.lib.seeds`, with stable identifiers for each model and source/recipe cell. Source seeds are averaged within evaluation groups before uncertainty is calculated. Repeated seeds do not multiply the number of independent evaluation groups.
+
+## Corpus construction and independence
+
+Candidate source review may consider [Tensor Trust](https://github.com/HumanCompatibleAI/tensor-trust-data) and [BIPIA](https://github.com/microsoft/BIPIA). Their use requires source-specific task mapping, origin and near-duplicate review, immutable versions, and a documented assessment of pretrained target exposure. An external benchmark's name does not establish record-level decontamination. The existing deepset and Lakera sources can contribute reviewed training examples; the historical mixed injection/jailbreak corpus cannot be reused as a pure-task holdout.
+
+Grouping precedes splitting. Exact normalized duplicates, near duplicates, shared templates, attack families, and collection origins form connected groups. The grouping review must cover the independent target's preparation corpus and the core corpus together. Group, origin, attack-family, and exact-content identities cannot cross core partition boundaries. An origin or attack family cannot be split into multiple nominally independent groups within a partition, and duplicate exact content is rejected. The preflight verifies the supplied identities and their overlaps; the grouping implementation and human review must establish that those identities reflect the actual records.
+
+| Partition | Permitted use | Proposed minimum independent groups per label |
+|:--|:--|--:|
+| Train | Surrogate fitting and BiLSTM vocabulary construction | 500 |
+| Validation | Preregistered training checkpoint selection | 100 |
+| Representation probe | CKA only, after models are frozen | 100 |
+| Calibration | Clean-utility eligibility and source-only selector fitting | 100 |
+| Evaluation | Held-out policy comparison and final clean utility | 100 |
+
+Calibration and evaluation each require at least 50 groups of each hard-negative subtype. The minimum counts are prospective settings. They do not report counts of available data. A supplied power/precision analysis must justify the final group sizes and account for the intended effect, between-family variation, model seeds, missing judgments, and multiplicity before registration. The current configuration has no such evidence.
+
+The representation probe is independent of surrogate training, validation, calibration, and evaluation. V2 does not call the historical `build_probe_set`, which samples before splitting, or the historical random canonical split. Transformer representations use CLS pooling from each encoder layer, with the static embedding layer excluded. The masked BiLSTM uses mean embeddings and mean recurrent outputs over valid tokens. Globally centered linear CKA compares all available target/source representation pairs over the complete registered probe, and their matrix mean is the fixed selection score. Representation types and depths differ across architectures; this remains a limit of that score. Alternative representation reductions remain secondary analyses unless a new registration declares them primary.
+
+Every source has a full immutable revision or local archive hash, a content-manifest hash, a task-review hash, and an exposure-review hash. Known target-training overlaps are excluded from probe, calibration, and evaluation. Unknown pretrained exposure must remain explicit even when all known sources have been removed.
+
+## Identities and isolated catalog boundaries
+
+The protocol binds model and tokenizer revisions separately, complete binary label maps, label-review evidence, token windows, decision rules, training recipes, attack variants, the input policy, the human protocol, the power analysis, and a frozen execution Git commit. The public Hugging Face loader passes the revision and offline artifact-location options to both model and tokenizer. A tokenizer loaded from a mutable default branch cannot accompany a pinned model.
+
+TextAttack also needs pinned auxiliary assets: the masked language model, semantic encoder, counterfitted embeddings, and NLTK files. A catalog-owned manifest binds their full revisions and every cache-file hash, including the post-install marker that prevents import-time corpus downloads. An existing cache directory does not supply that evidence. The asset-preparation stage copies an operator-supplied local bundle into the isolated run cache. Recipe construction uses those local paths and offline settings, and download hooks are blocked. The manifest digest enters the registered execution specification and resumption identities. The checked-in source template has null revisions and no files.
+
+Checkpoint fingerprints hash a path-sorted canonical manifest of configuration and weight-file hashes. Tokenizer fingerprints hash the remaining saved artifacts separately; a BiLSTM adds its vocabulary and token limit to that identity. The model dataset fixes the exact filename rules and JSON serialization.
+
+Realized model records additionally bind checkpoint and tokenizer fingerprints to the code commit, training partition, and derived seed. The prepared target must match its preparation fingerprints. Clean predictions, probe CKA, source attempts, and target candidate predictions must retain those exact identities. Calibration and evaluation cannot use different realizations. Hashes recorded now do not reconstruct missing identities from the historical cloud execution.
+
+Private data and outputs use `data/experiment_v2/<run_id>/`. Public aggregate outputs use `docs/artifacts/experiment_v2/<run_id>/` and an `MlflowArtifactDataset` wrapper. The guarded v2 datasets resolve relative paths and Kedro-normalized absolute paths within the current project's run directory. They reject historical/shared roots, other projects or runs, path traversal, remote paths, and symlink redirection. The execution datasets enforce the same rule for model directories and private text. Switching Git branches and using `--only-missing-outputs` do not isolate ignored artifacts.
+
+The execution worktree must be isolated, clean, on the correction branch, and at the frozen execution commit before an execution phase reads private text or loads model inputs. Core registration must strictly precede model execution. Immutable resumption records retain the registration time and their original start time, and every resumed model or phase artifact must preserve that ordering. Missing revisions must fail before a Hub download, and recipe construction requires a verified offline auxiliary cache. The historical default pipeline, its data paths, its checkpoints, and its public results remain separate.
+
+## Detector controls and query budgets
+
+Every model predicts every original in calibration and evaluation, including benign originals and hard negatives. All candidates and targets use a reviewed binary prompt-injection label map, the declared argmax rule, and the same token-window policy. CKA, random selection, and source-only selection use the same calibration eligibility gate: TPR at least 0.80 and FPR at most 0.10. The same FPR ceiling applies separately to quoted and neutral instruction negatives. Models that pass these bounds can retain different TPR and FPR values. Residual operating-point differences remain a limitation of the fixed argmax comparison. The detector operating points and their denominators must be reported. Evaluation utility does not change pool membership or thresholds.
+
+The proposed policy selects two sources and applies TextFooler, BAE, PWWS, DeepWordBug, and TextBugger to each. This prospective set substitutes TextBugger for the historical BERT-Attack recipe. A source/recipe/original cell has a cap of 100 source-model queries, including its original prediction. Early stopping is allowed within that cap; actual query counts are retained. All strategies therefore have the same cap of 1,000 source queries per original and seed. The complete offline pool experiment generates outcomes for eight sources to evaluate the policies; that measurement cost must be reported separately from the cost of using a two-source policy.
+
+Attack generation has zero target-search queries. The evaluator accesses target hidden states on the independent probe for CKA and later obtains target predictions for auditing. This access is part of the threat model. CKA selection is not a result for an attacker without representation access.
+
+Every planned cell remains in the record grid as a success, failure, source-benign skip, or technical error. A setup error before the first source call retains zero actual source queries; the separate clean baseline is still required. Other statuses require a counted source-original query. Every returned candidate is retained, including a failed source search's candidate. It receives target predictions regardless of the source's final prediction. Errors, skips, and absent candidates count as zero procedure yield in the all-attempt denominator. They cannot disappear from the denominator. Raw originals and candidates remain private.
+
+## Human adjudication and mechanical screening
+
+Original task labels require independent human review with the task context available. Candidate review uses two independent reviewers blinded to model identities, selection status, CKA, and classifier outcomes. They judge semantic preservation, retention of the attacker's objective, and whether the candidate still contains a prompt-injection attempt. Each judgment binds the exact original and candidate hashes and the registered annotation protocol.
+
+Agreement on all affirmative criteria establishes a human-valid candidate. Agreement on any one negative criterion establishes an invalid candidate, even if another criterion remains uncertain or disputed. One reviewer alone never resolves validity. A disagreement without such consensus requires a third independent adjudicator. Full criterion review is recorded separately from logically resolved validity, so a candidate can be known invalid while another criterion remains unassessed. Mechanical edit, syntax, or embedding checks have their own evidence and counts; a passing screen cannot replace a human semantic or intent judgment.
+
+Calibration source-only selection requires resolved validity for possible source transitions in its clean-eligible pools. Evaluation requires validity for the union of possible target injection-to-benign transitions across the frozen eligible pools and target roles, because every eligible source can enter the random comparator. A nonflip contributes zero regardless of candidate validity and needs no validity judgment for that outcome. An unresolved potentially contributing flip produces conservative lower and upper bounds and withholds confirmed policy comparisons. Overall fidelity review remains separate. No template, classifier, or local smoke test supplies a person's judgment.
+
+With `N` positive originals, the proposed grid has `N * 8 * 5 * 3` source cells per phase. Mandatory review covers only distinct eligible source-transition pairs in calibration and the union of eligible target-flip pairs in evaluation. One exact original-candidate pair adjudication covers matching cells across sources, recipes, and seeds; contradictory resolved pair adjudications are rejected. The registration must budget for those contributing pairs. An overall fidelity study would need a separate probability sample and weighting plan over all returned pairs. The current reducer reports observed review coverage and does not estimate overall fidelity from selective contributor review.
+
+## Outcomes and denominators
+
+| Outcome | Numerator | Denominator or scope |
+|:--|:--|:--|
+| Raw source transition | Source injection on the original and benign on its candidate | All planned source cells, with source-positive baselines reported separately |
+| Human-valid source yield | Raw source transition and human-valid candidate | All planned source cells |
+| Raw target transition | Target injection on the original and benign on the candidate | All planned source cells, including source failures |
+| Human-valid target yield | Raw target transition and human-valid candidate | All planned source cells |
+| Joint source/target transition | Both actual classifier transitions | Secondary count; human-valid joint outcomes must be identified separately |
+| Policy target yield | At least one human-valid target transition from the selected sources and recipes | All reviewed positive evaluation originals, aggregated within independent groups |
+
+The primary policy outcome includes every positive evaluation original. An original already classified benign by the target contributes a baseline error and zero injection-to-benign policy yield. A secondary analysis may condition on target-positive originals if it states that denominator. The primary outcome does not condition on source success. A valid candidate generated during a failed source search can still produce an audited target transition.
+
+The historical success-conditioned target flip rate is a different estimand. Its numerical value cannot be substituted for v2 procedure yield. Application-level success also requires separate evidence.
+
+## Frozen selection comparison
+
+Before opening evaluation, the selection pipeline fixes the eligible pool, ranks mean CKA, and selects its top two sources with model-id tie breaking. It also freezes a source-only baseline that greedily maximizes human-valid source-transition coverage on calibration groups. This baseline uses clean utility and source outcomes; target candidate outcomes do not enter its selection score. Its greedy union objective accounts for redundant source successes.
+
+The random comparator uses every equally weighted size-two subset of the same eligible pool under the same recipe and query caps. An eight-source pool has 28 subsets. Exact expected random policy yield is available without a Monte Carlo sample. The reported mean within-seed random rank is descriptive and does not become a population p-value. The prospective design requires at least seven eligible sources after calibration utility filtering. This minimum preserves the declared pool breadth; it is not a permutation p-value threshold.
+
+The held-out reducer first averages original-level policy outcomes within each attack-family/origin group, then averages seed replicates within that group. Its primary contrast compares CKA with expected random yield and with the frozen source-only baseline. A paired bootstrap resamples groups, keeping source choices and within-group dependence intact. The proposed procedure uses 2,000 draws and one-sided percentile lower bounds with Bonferroni alpha `0.05 / (2 targets * 2 comparisons) = 0.0125`. The decision requires each adjusted lower bound to exceed five percentage points for both declared targets.
+
+That prospective decision differs from the historical M1/M2 allocation test. It requires a registered power analysis and a defensible group sampling procedure. Bootstrap bounds quantify variation under group resampling for the fixed corpus collection, targets, designed source pool, and recipes. They do not validate an unseen target population or a universal CKA predictor. Target-wise estimates, raw counts, clean utility, exclusions, and incomplete states remain reportable when the decision rule is not met.
+
+## Optional application-effectiveness study
+
+An optional study evaluates one fixed single-turn task with a pinned local decoder, tokenizer, decoding specification, trusted instructions, lower-trust context, attack objective, and deterministic objective-specific checker. It has no LLM judge, multi-turn interaction, agent wrapper, or external side effect. It is disabled in the current configuration, and the detector analysis does not execute a decoder.
+
+Each candidate needs matched benign, original-attack, and perturbed-attack controls under the same context and decoder. The benign control must pass the legitimate task and fail the attacker's objective. The original and perturbed objective checks are recorded separately. Retained effectiveness requires both malicious controls to satisfy the original objective; a newly successful perturbed objective has a separate count. A human-valid effective target evasion additionally requires the independent human judgment and the actual target injection-to-benign transition.
+
+Missing task context, decoder identity, checker evidence, execution hashes, or controls makes the application record unassessable. A passing deterministic check does not supply human semantic evidence. The current reducer can assess supplied control records, but no application decoder execution or replacement effectiveness result has been produced.
+
+## Execution and analysis boundaries
+
+The structured execution manifest records phase inputs, output paths, seed derivation, reused algorithms, and implementation status. Target preparation has an earlier phase gate because its frozen artifacts are inputs to the core registration. The core model phase then trains sources using only the new train and validation partitions. Calibration execution computes clean controls, independent probe CKA, all source cells, and target predictions for all returned candidates. Human judgments are merged through a separate target-free boundary. The selection lock and its external registration precede any evaluation text load. Evaluation execution repeats the fixed accounting plan on held-out data, followed by target-free annotation merging and reduction.
+
+The execution adapters reuse the existing model-training, representation, TextAttack, and target-inference functions through those explicit inputs. The historical pipeline assemblies construct different inputs: they construct the old random split/probe, use historical paths, and audit successful source attacks only. Checkpoints must be newly produced under the registered v2 paths and fingerprinted after catalog persistence.
+
+The gated execution route is implemented on the correction branch. Preparation and core execution have separate resolved run configurations. Their external registrations must bind those resolved values, including the actual code commit. A tracked file cannot contain its own final commit hash: commit the chosen source, data pins, and training settings first, then place the resolved execution ref and its dependent hashes in an ignored run configuration under the private run root. Kedro's configuration file uses a `run` mapping with `env: experiment_v2` and a `params` mapping containing the complete resolved protocol and execution settings. The gate validates those runtime parameters against the registration and actual clean worktree.
+
+The auxiliary bundle has a separate local preparation boundary. The source bundle and its resolved plan are operator-supplied inputs; this command downloads no assets:
+
+```bash
+uv run kedro run --config data/experiment_v2/prospective-v2/inputs/asset-preparation-run.yml --pipeline experiment_v2_assets_prepare --runner SequentialRunner
+```
+
+After the target preparation plan and its target-only corpus are registered, its separate phase is:
+
+```bash
+uv run kedro run --config data/experiment_v2/prospective-v2/inputs/target-preparation-run.yml --pipeline experiment_v2_target_prepare --runner SequentialRunner
+```
+
+The prepared target hashes and preparation evidence then become inputs to the core protocol. After its independent registration, the prospective sequence is:
+
+```bash
+uv run kedro run --config data/experiment_v2/prospective-v2/inputs/core-run.yml --pipeline experiment_v2_models --runner SequentialRunner
+uv run kedro run --config data/experiment_v2/prospective-v2/inputs/core-run.yml --pipeline experiment_v2_calibration_execute --runner SequentialRunner
+uv run kedro run --config data/experiment_v2/prospective-v2/inputs/core-run.yml --pipeline experiment_v2_calibration_annotations
+uv run kedro run --config data/experiment_v2/prospective-v2/inputs/core-run.yml --pipeline experiment_v2_selection
+uv run kedro run --config data/experiment_v2/prospective-v2/inputs/core-run.yml --pipeline experiment_v2_evaluation_execute --runner SequentialRunner
+uv run kedro run --config data/experiment_v2/prospective-v2/inputs/core-run.yml --pipeline experiment_v2_evaluation_annotations
+uv run kedro run --config data/experiment_v2/prospective-v2/inputs/core-run.yml --pipeline experiment_v2_analysis
+```
+
+These paths denote future operator-supplied inputs; the files and scientific evidence are absent from the checked-in templates. Calibration validity for possible eligible source transitions must be resolved before selector freezing. The selection-lock digest must receive an external registration before evaluation can read its private text. Execution gates use ephemeral outputs so `--only-missing-outputs` rechecks the current worktree, checkpoints, parameters, and lock; immutable model metadata, attempt shards, audited shards, and raw phase records support resumption. Human annotation merging and the final reduction can run again without model inference. Sequential execution limits concurrent model memory use.
+
+The target-free entry points also run directly against the dedicated environment:
+
+```bash
+uv run kedro run --env experiment_v2 --pipeline experiment_v2_preflight
+uv run kedro run --env experiment_v2 --pipeline experiment_v2_selection
+uv run kedro run --env experiment_v2 --pipeline experiment_v2_analysis
+```
+
+The first command currently saves a blocker report and fails. The latter commands require supplied phase records, original human task review, target preparation, immutable pins, registration evidence, and a selection lock. They perform no model loading, training, attacks, or target inference. Synthetic tests exercise their accounting and rejection behavior; those fixtures are not new empirical results.
+
+`conf/experiment_v2/parameters_experiment_v2.yml` contains the prospective rules. Strict evidence schemas are in `src/transfer_risk/lib/experiment_v2/schemas.py`. The catalog owns private evidence and MLflow-wrapped aggregate publication. No curated v2 holdout, independently trained replication target, completed human review, or external registration is supplied by the empty templates.
+
+This study measures bounded classifier transfer and separately declared application objectives; it does not certify robustness.

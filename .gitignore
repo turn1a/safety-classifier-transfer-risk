@@ -40,6 +40,9 @@ mlartifacts/
 # Quarto — rendered site and scratch
 docs/_site/
 docs/.quarto/
+docs/site_libs/
+docs/*.html
+docs/*.typ
 .quarto/
 
 # macOS

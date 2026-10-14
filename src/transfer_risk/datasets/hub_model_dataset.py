@@ -58,7 +58,14 @@ class HuggingFaceHubModelDataset(AbstractDataset[Any, dict[str, Any]]):
         model = AutoModelForSequenceClassification.from_pretrained(
             self._repo_id, token=self._token, **kwargs
         )
-        tokenizer = AutoTokenizer.from_pretrained(self._repo_id, token=self._token)
+        # Artifact-location options apply to both components. Model-only options such
+        # as num_labels and output_hidden_states must not reach the tokenizer.
+        shared_args = {
+            key: value
+            for key, value in self._load_args.items()
+            if key in {"revision", "local_files_only", "cache_dir", "subfolder", "force_download"}
+        }
+        tokenizer = AutoTokenizer.from_pretrained(self._repo_id, token=self._token, **shared_args)
         return {"kind": "transformer", "model": model, "tokenizer": tokenizer}
 
     def save(self, data: Any) -> None:  # noqa: ARG002 (read-only dataset; arg is interface-only)

@@ -13,6 +13,8 @@ A source attack first changes a surrogate's prediction. The target audit then co
 
 The CKA association uses ten surrogate macro rates, with equal weight for each defined recipe rate. It has rho = 0.830 and exact p = 0.0047 under a designed-pool exchangeability null. The 33.1-percentage-point M1 versus M2 contrast has p = 0.05, the minimum for three-versus-three enumeration, and cannot satisfy the project's strict p < 0.05 rule. This limits the evidence for surrogate selection.
 
+Across nine transformers, the conditional association is 0.800 (p = 0.014), while the source-success-gated trial-yield association is 0.400 (p = 0.29). A separate pass over all returned candidates, including failed source searches, finds 1,403 target changes in 8,595 trials (16.3%) and a yield association of 0.733 (p = 0.031). These outcomes use different candidate policies. The [paper's comparison](paper.qmd#tbl-objective-associations) states the denominators, and the [validity guide](validation.qmd) separates classifier changes from meaning, intent, and application effectiveness.
+
 The reported outcomes come from the completed model and attack runs. Tables, figures, and statistical summaries were recalculated from saved outputs. The historical model implementation has padding and initialization defects. The [correction branch](https://github.com/turn1a/safety-classifier-transfer-risk/tree/codex/methodology-recompute) has local synthetic tests, but its corrected models have not been trained or attacked. [Recomputation notes](recomputation.md) explain which results could change.
 
 ## Datasets
@@ -65,6 +67,13 @@ Marked terms on the site show these definitions on hover or keyboard focus. Foll
 | [Source aggregates](artifacts/target_audit_sources.csv) | Successful attack records grouped by their original dataset source |
 | [Training-probe similarity](artifacts/training_probe_similarity.csv) | Training-only CKA and DBS summaries for the same saved models |
 | [Nine-transformer sensitivity](artifacts/surrogate_excluded_sensitivity.json) | Saved-outcome counts and association after excluding the historical BiLSTM |
+| [Objective sensitivity](artifacts/pool_objective_sensitivity.json) | Conditional versus fixed-trial associations, model omissions, and every equal-size saved-source subset |
+| [All-candidate checkpoint comparison](artifacts/checkpoint_comparison.json) | Original baselines and target changes on the same seven sources, with target-role exclusions |
+| [Clean-input predictions](artifacts/detector_baseline_summary.json) | Canonical-label confusion counts for the target and nine saved transformer checkpoints |
+| [Source baseline check](artifacts/source_baseline_check.json) | Current positive-input misses match saved skipped trials in all 135 source/model/recipe strata; count agreement does not prove historical weight identity |
+| [Distinct-original coverage](artifacts/original_policy_coverage.json) | Candidate-policy unions and all 84 equal-budget three-transformer subsets |
+| [Computational pair screens](artifacts/semantic_screen_summary.json) | Sample embedding/NLI score distributions, pinned identities, and truncation coverage |
+| [Human review preparation](artifacts/semantic_review_preparation.json) | Sampling design and explicitly pending judgment coverage |
 | [Results manifest](artifacts/results_manifest.json) | Run scope and original cloud execution provenance |
 
 CSV and JSON artifacts retain full numerical precision for reanalysis. The paper and site round displayed values. Raw originals, perturbations, private CKA matrices, and model checkpoints are excluded from the public artifacts. The [implementation page](pipeline.qmd) explains the catalog and pipeline boundaries.

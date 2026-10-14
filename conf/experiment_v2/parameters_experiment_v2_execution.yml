@@ -1,0 +1,80 @@
+# Prospective execution settings. Hash these exact settings before core registration.
+experiment_v2_execution:
+  device_policy: mps_or_cpu
+  inference_batch_size: 32
+  query_batch_size: 32
+  pooling: cls
+  training:
+    bert-base-ft:
+      lr: 2.0e-05
+      batch_size: 32
+      epochs: 3
+      max_seq_len: 512
+    roberta-base-ft:
+      lr: 2.0e-05
+      batch_size: 32
+      epochs: 3
+      max_seq_len: 512
+    electra-small-ft:
+      lr: 2.0e-05
+      batch_size: 32
+      epochs: 3
+      max_seq_len: 512
+    deberta-base-ft:
+      lr: 2.0e-05
+      batch_size: 32
+      epochs: 3
+      max_seq_len: 512
+    distilbert-base-ft:
+      lr: 2.0e-05
+      batch_size: 32
+      epochs: 3
+      max_seq_len: 512
+    albert-base-ft:
+      lr: 2.0e-05
+      batch_size: 32
+      epochs: 3
+      max_seq_len: 512
+    mobilebert-ft:
+      lr: 2.0e-05
+      batch_size: 32
+      epochs: 3
+      max_seq_len: 512
+    bilstm-attention:
+      padding_policy: masked
+      embed_dim: 128
+      hidden_dim: 256
+      num_layers: 2
+      dropout: 0.3
+      lr: 0.001
+      batch_size: 64
+      epochs: 5
+      max_vocab: 20000
+      max_seq_len: 512
+experiment_v2_target_preparation:
+  run_id: ${globals:v2_run_id}
+  target_role: replication
+  model_id: replication-target
+  repository: FacebookAI/roberta-base
+  revision: null
+  tokenizer_repository: FacebookAI/roberta-base
+  tokenizer_revision: null
+  backbone_family: roberta
+  root_seed: 20260616
+  execution_ref: null
+  max_tokens: 512
+  output_labels:
+  - '0'
+  - '1'
+  label_map:
+    '0': benign
+    '1': prompt_injection
+  label_review_sha256: null
+  training:
+    lr: 2.0e-05
+    batch_size: 32
+    epochs: 3
+    max_seq_len: 512
+  min_train_groups: 500
+  min_validation_groups: 100
+  core_corpus_sha256: null

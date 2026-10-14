@@ -2,14 +2,14 @@
 title: "Attack transfer between text safety classifiers"
 author: "Aspen Hazel Olszewska"
 date: "2026-07-14"
-date-modified: "2026-10-13"
-description: "Representational similarity, source attacks, and audited prediction changes for a public prompt-injection detector."
+date-modified: "2026-10-14"
+description: "How outcome definitions affect representational similarity and measured attack transfer between text classifiers."
 toc: true
 toc-depth: 2
 ---
 
 ::: {.study-lead}
-An attack that changes one classifier's prediction may also change another's. This study asks whether classifiers with more similar hidden representations show more attack transfer to a frozen [prompt-injection detector](https://huggingface.co/protectai/deberta-v3-base-prompt-injection-v2). It compares ten [surrogates](guide.qmd#surrogate){.term-help} under five adapted TextAttack recipes and checks target predictions on both originals and perturbations.
+An attack that changes one classifier's prediction may also change another's. This study tests how hidden-representation similarity relates to those target changes. Ten [surrogates](guide.qmd#surrogate){.term-help} receive five adapted TextAttack recipes, followed by local target checks. The association depends on whether the analysis conditions on source success or counts every returned candidate.
 :::
 
 ::: {.action-row}
@@ -21,25 +21,25 @@ An attack that changes one classifier's prediction may also change another's. Th
 
 ::: {.metric-grid aria-label="Audited results"}
 <div class="metric-card">
-<p class="metric-value">26.3%</p>
-<p class="metric-label"><a class="term-help" href="guide.html#pooled">Pooled verified flip rate</a><br>1,054 flips / 4,009 source-success records with target injection baselines</p>
+<p class="metric-value">ρ = 0.800</p>
+<p class="metric-label"><a class="term-help" href="guide.html#macro">Conditional flip association</a><br>Nine transformers; source-success-conditioned macro rate; p = 0.014</p>
 </div>
 <div class="metric-card">
-<p class="metric-value">11.0%</p>
-<p class="metric-label"><a class="term-help" href="guide.html#yield">Yield across all attempts</a><br>The same 1,054 flips / 9,550 attempted source evaluations</p>
+<p class="metric-value">ρ = 0.400</p>
+<p class="metric-label"><a class="term-help" href="guide.html#yield">Source-success-gated yield association</a><br>The same nine transformers; fixed attempted-trial denominator; p = 0.29</p>
 </div>
 <div class="metric-card">
-<p class="metric-value">ρ = 0.830</p>
-<p class="metric-label"><a class="term-help" href="guide.html#rho">CKA association</a><br>Ten surrogate macro rates; exact p = 0.0047 within this designed pool</p>
+<p class="metric-value">ρ = 0.733</p>
+<p class="metric-label"><a class="term-help" href="guide.html#all-candidate-yield">All-candidate yield association</a><br>All returned candidates from nine transformers; p = 0.031</p>
 </div>
 <div class="metric-card">
-<p class="metric-value">33.1 pp</p>
-<p class="metric-label"><a class="term-help" href="guide.html#groups">M1 minus M2</a><br>p = 0.05; three versus three cannot meet the strict p &lt; 0.05 rule</p>
+<p class="metric-value">16.3%</p>
+<p class="metric-label"><a class="term-help" href="guide.html#all-candidate-yield">All returned candidate yield</a><br>1,403 target changes / 8,595 transformer trials, including 405 from failed source searches</p>
 </div>
 :::
 
 ::: {.study-status}
-The reported numbers come from completed model and attack runs. Tables, figures, and statistical summaries were recalculated from saved outputs. The model implementation used for those runs has padding and initialization defects; [tested code corrections](recomputation.md) have not been evaluated in a replacement experiment.
+The source models and attack candidates come from the completed sweep. Local reevaluation adds target outcomes for failed source searches, clean-input checks, and a pending human review. No training or attack search was repeated. The affected BiLSTM is excluded from the new comparisons; [model fixes and a controlled redesign](recomputation.md) have no replacement experimental results.
 :::
 
 ## How transfer was counted
@@ -82,6 +82,10 @@ Click the heatmap to enlarge it. Rates condition on successful source attacks an
 
 ## Association and sensitivities
 
+![CKA has different associations with conditional transfer, source-success-gated trial yield, and all-returned-candidate yield over the same nine transformers.](figures/fig_objective_sensitivity.png){fig-alt="Three panels compare CKA with outcome definitions: rho 0.800, 0.400, and 0.733." width=100%}
+
+The source-success-gated yield correlation is 0.400 (p = 0.29), compared with 0.800 (p = 0.014) for conditional macro transfer. Scoring all returned candidates gives 0.733 (p = 0.031). Probabilities describe a designed-pool exchangeability null. The selected three models produce 424 source-success-gated flips in 2,865 trials (14.8%); eleven observed three-model choices produce more. These post-hoc results establish no held-out selection rule.
+
 Across ten surrogate macro summaries, mean CKA has Spearman rho = 0.830 and exact two-sided p = 0.0047 under an exchangeability null for the designed pool. M1 and M2 means are 47.3% and 14.3%, a 33.1-percentage-point difference. The one-sided enumeration has only 20 allocations and cannot meet the project's strict p < 0.05 rule.
 
 Excluding the known shared source `jackhhao/jailbreak-classification` gives rho = 0.903 and p = 0.00081. The training-only CKA probe gives rho = 0.818 and p = 0.0058 against unchanged outcomes. Both M1 and M2 membership sets remain unchanged. These are post-hoc within-pool sensitivities, without external validation or established decontamination.
@@ -92,7 +96,9 @@ The historical BiLSTM includes padding in its recurrent computation, attention, 
 
 The [pure core](https://github.com/turn1a/safety-classifier-transfer-risk/tree/main/src/transfer_risk/lib) contains CKA, DBS, seeds, statistics, and audit aggregation. Kedro nodes execute models and attacks, and the catalog owns input and output artifacts. The original attack sweep used an ARM64 AWS `r8g.48xlarge` Graviton4 spot instance with 192 vCPUs. Reductions, target auditing, and reporting ran locally.
 
-`just paper-report` regenerates the manuscript tables, outcome diagram, heatmap, probe comparison, synthetic DBS selector, and pool sensitivity from public aggregates and configuration. `just docs` renders the site. Both commands support inspection of the completed study without another sweep. The [implementation page](pipeline.qmd) describes the execution stages and saved-output boundaries.
+`just paper-report` regenerates manuscript tables, figures, fixed-trial associations, and common-source checkpoint comparisons from public aggregates and configuration. `just docs` renders the site. The [implementation page](pipeline.qmd) describes the execution stages and saved-output boundaries.
+
+The [validity guide](validation.qmd) explains the 278-pair independent review and completed local embedding/NLI screens. The scores diagnose text changes; they supply no semantic-validity labels. No downstream application effectiveness rate is available. Clean-input checks also show different behavior: deepset flags 60 of 104 canonical benign inputs, while ProtectAI and Prompt Guard 22M flag none in this sample.
 
 ## Limits
 

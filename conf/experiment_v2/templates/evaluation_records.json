@@ -1,0 +1,15 @@
+{
+  "phase": "evaluation",
+  "protocol_sha256": "",
+  "corpus_sha256": "",
+  "execution_ref": "",
+  "started_at": "",
+  "completed_at": "",
+  "hardware": "",
+  "realizations": [],
+  "clean_predictions": [],
+  "similarities": [],
+  "attempts": [],
+  "annotations": [],
+  "application_records": []
+}

@@ -1,0 +1,76 @@
+{
+  "analysis_status": "post_hoc_computational_sample_screen",
+  "sample_pairs": 278,
+  "unique_originals": 140,
+  "coverage": {
+    "embedding_truncated_pairs": 65,
+    "nli_truncated_pairs": 64
+  },
+  "scores": {
+    "embedding_cosine": {
+      "minimum": 0.12300833809039786,
+      "q25": 0.6509082268683972,
+      "median": 0.851364105717511,
+      "q75": 0.9655601261230784,
+      "maximum": 1.0
+    },
+    "nli_min_entailment": {
+      "minimum": 1.1313298944398446e-05,
+      "q25": 0.0712206575441975,
+      "median": 0.8583972290063053,
+      "q75": 0.9762695287788639,
+      "maximum": 0.997934645121553
+    },
+    "nli_max_contradiction": {
+      "minimum": 0.00011896684099203216,
+      "q25": 0.0019632358857869826,
+      "median": 0.010262276768384013,
+      "q75": 0.12534577508775505,
+      "maximum": 0.9998264322224321
+    }
+  },
+  "provenance": {
+    "encoder": {
+      "repo_id": "sentence-transformers/all-MiniLM-L12-v2",
+      "revision": "a50ef00143b4d5391434df20ae11632588ac25be",
+      "role": "encoder",
+      "inference_weights_sha256": "be75fd338e177a14a34dd3185b491c9605275d287dddee56247a53716a5ab050",
+      "tokenizer_vocab_sha256": "f21ba7d9e039a58203c4dcbab3b89aacd44946d8dba15c12b61666cf93b786c1",
+      "loaded_hub_revision": "a50ef00143b4d5391434df20ae11632588ac25be",
+      "inference_dtype": "float32",
+      "provenance_scope": "current_local_audit_only"
+    },
+    "nli": {
+      "repo_id": "cross-encoder/nli-deberta-v3-small",
+      "revision": "fa2804872c3b4bd748f38c0185cc85775361e735",
+      "role": "nli",
+      "inference_weights_sha256": "3e94bebf2a4101924d3b2dafc19cd5e0212cbfd3f28f65b6e841cd5f686cda03",
+      "tokenizer_vocab_sha256": "06e375a096355049cfa0811f1ced58b56000335ae61ee3c0dac924fecd076ab7",
+      "loaded_hub_revision": "fa2804872c3b4bd748f38c0185cc85775361e735",
+      "inference_dtype": "float32",
+      "provenance_scope": "current_local_audit_only"
+    },
+    "settings": {
+      "batch_size": 16,
+      "encoder_max_tokens": 256,
+      "nli_max_tokens": 512
+    },
+    "pooling": "attention-mask-weighted token mean; cosine normalization",
+    "nli_mapping": {
+      "0": "contradiction",
+      "1": "entailment",
+      "2": "neutral"
+    },
+    "device": "mps"
+  },
+  "semantic_validity_assessed": false,
+  "injection_intent_assessed": false,
+  "downstream_effectiveness_assessed": false,
+  "human_reviews_used": false,
+  "limitations": [
+    "Distributions describe the stratified review sample, without population weighting.",
+    "Embedding similarity and NLI probabilities have no validated intent threshold here.",
+    "Truncated inputs can omit changed instructions or destinations.",
+    "Scores are kept separate from the blinded human-review interface."
+  ]
+}

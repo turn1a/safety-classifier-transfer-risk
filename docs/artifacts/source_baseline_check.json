@@ -1,0 +1,1098 @@
+{
+  "counts_agree": true,
+  "models_checked": [
+    "bert-base-ft",
+    "deberta-base-ft-seed",
+    "deberta-base-pi-v1",
+    "deberta-small-pi-v2",
+    "deepset-deberta-injection",
+    "electra-small-ft",
+    "llama-prompt-guard-22m",
+    "llama-prompt-guard-86m",
+    "roberta-base-ft"
+  ],
+  "cells_checked": 135,
+  "rows": [
+    {
+      "surrogate": "bert-base-ft",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "bae",
+      "attempted": 101,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "bert-base-ft",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "bert-attack",
+      "attempted": 101,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "bert-base-ft",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "deepwordbug",
+      "attempted": 101,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "bert-base-ft",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "pwws",
+      "attempted": 101,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "bert-base-ft",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "textfooler",
+      "attempted": 101,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "bert-base-ft",
+      "source": "deepset/prompt-injections",
+      "recipe": "bae",
+      "attempted": 27,
+      "current_clean_positive_misses": 5,
+      "saved_baseline_skips": 5
+    },
+    {
+      "surrogate": "bert-base-ft",
+      "source": "deepset/prompt-injections",
+      "recipe": "bert-attack",
+      "attempted": 27,
+      "current_clean_positive_misses": 5,
+      "saved_baseline_skips": 5
+    },
+    {
+      "surrogate": "bert-base-ft",
+      "source": "deepset/prompt-injections",
+      "recipe": "deepwordbug",
+      "attempted": 27,
+      "current_clean_positive_misses": 5,
+      "saved_baseline_skips": 5
+    },
+    {
+      "surrogate": "bert-base-ft",
+      "source": "deepset/prompt-injections",
+      "recipe": "pwws",
+      "attempted": 27,
+      "current_clean_positive_misses": 5,
+      "saved_baseline_skips": 5
+    },
+    {
+      "surrogate": "bert-base-ft",
+      "source": "deepset/prompt-injections",
+      "recipe": "textfooler",
+      "attempted": 27,
+      "current_clean_positive_misses": 5,
+      "saved_baseline_skips": 5
+    },
+    {
+      "surrogate": "bert-base-ft",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "bae",
+      "attempted": 63,
+      "current_clean_positive_misses": 2,
+      "saved_baseline_skips": 2
+    },
+    {
+      "surrogate": "bert-base-ft",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "bert-attack",
+      "attempted": 63,
+      "current_clean_positive_misses": 2,
+      "saved_baseline_skips": 2
+    },
+    {
+      "surrogate": "bert-base-ft",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "deepwordbug",
+      "attempted": 63,
+      "current_clean_positive_misses": 2,
+      "saved_baseline_skips": 2
+    },
+    {
+      "surrogate": "bert-base-ft",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "pwws",
+      "attempted": 63,
+      "current_clean_positive_misses": 2,
+      "saved_baseline_skips": 2
+    },
+    {
+      "surrogate": "bert-base-ft",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "textfooler",
+      "attempted": 63,
+      "current_clean_positive_misses": 2,
+      "saved_baseline_skips": 2
+    },
+    {
+      "surrogate": "deberta-base-ft-seed",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "bae",
+      "attempted": 101,
+      "current_clean_positive_misses": 0,
+      "saved_baseline_skips": 0
+    },
+    {
+      "surrogate": "deberta-base-ft-seed",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "bert-attack",
+      "attempted": 101,
+      "current_clean_positive_misses": 0,
+      "saved_baseline_skips": 0
+    },
+    {
+      "surrogate": "deberta-base-ft-seed",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "deepwordbug",
+      "attempted": 101,
+      "current_clean_positive_misses": 0,
+      "saved_baseline_skips": 0
+    },
+    {
+      "surrogate": "deberta-base-ft-seed",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "pwws",
+      "attempted": 101,
+      "current_clean_positive_misses": 0,
+      "saved_baseline_skips": 0
+    },
+    {
+      "surrogate": "deberta-base-ft-seed",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "textfooler",
+      "attempted": 101,
+      "current_clean_positive_misses": 0,
+      "saved_baseline_skips": 0
+    },
+    {
+      "surrogate": "deberta-base-ft-seed",
+      "source": "deepset/prompt-injections",
+      "recipe": "bae",
+      "attempted": 27,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "deberta-base-ft-seed",
+      "source": "deepset/prompt-injections",
+      "recipe": "bert-attack",
+      "attempted": 27,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "deberta-base-ft-seed",
+      "source": "deepset/prompt-injections",
+      "recipe": "deepwordbug",
+      "attempted": 27,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "deberta-base-ft-seed",
+      "source": "deepset/prompt-injections",
+      "recipe": "pwws",
+      "attempted": 27,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "deberta-base-ft-seed",
+      "source": "deepset/prompt-injections",
+      "recipe": "textfooler",
+      "attempted": 27,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "deberta-base-ft-seed",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "bae",
+      "attempted": 63,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "deberta-base-ft-seed",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "bert-attack",
+      "attempted": 63,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "deberta-base-ft-seed",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "deepwordbug",
+      "attempted": 63,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "deberta-base-ft-seed",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "pwws",
+      "attempted": 63,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "deberta-base-ft-seed",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "textfooler",
+      "attempted": 63,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "deberta-base-pi-v1",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "bae",
+      "attempted": 101,
+      "current_clean_positive_misses": 2,
+      "saved_baseline_skips": 2
+    },
+    {
+      "surrogate": "deberta-base-pi-v1",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "bert-attack",
+      "attempted": 101,
+      "current_clean_positive_misses": 2,
+      "saved_baseline_skips": 2
+    },
+    {
+      "surrogate": "deberta-base-pi-v1",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "deepwordbug",
+      "attempted": 101,
+      "current_clean_positive_misses": 2,
+      "saved_baseline_skips": 2
+    },
+    {
+      "surrogate": "deberta-base-pi-v1",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "pwws",
+      "attempted": 101,
+      "current_clean_positive_misses": 2,
+      "saved_baseline_skips": 2
+    },
+    {
+      "surrogate": "deberta-base-pi-v1",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "textfooler",
+      "attempted": 101,
+      "current_clean_positive_misses": 2,
+      "saved_baseline_skips": 2
+    },
+    {
+      "surrogate": "deberta-base-pi-v1",
+      "source": "deepset/prompt-injections",
+      "recipe": "bae",
+      "attempted": 27,
+      "current_clean_positive_misses": 16,
+      "saved_baseline_skips": 16
+    },
+    {
+      "surrogate": "deberta-base-pi-v1",
+      "source": "deepset/prompt-injections",
+      "recipe": "bert-attack",
+      "attempted": 27,
+      "current_clean_positive_misses": 16,
+      "saved_baseline_skips": 16
+    },
+    {
+      "surrogate": "deberta-base-pi-v1",
+      "source": "deepset/prompt-injections",
+      "recipe": "deepwordbug",
+      "attempted": 27,
+      "current_clean_positive_misses": 16,
+      "saved_baseline_skips": 16
+    },
+    {
+      "surrogate": "deberta-base-pi-v1",
+      "source": "deepset/prompt-injections",
+      "recipe": "pwws",
+      "attempted": 27,
+      "current_clean_positive_misses": 16,
+      "saved_baseline_skips": 16
+    },
+    {
+      "surrogate": "deberta-base-pi-v1",
+      "source": "deepset/prompt-injections",
+      "recipe": "textfooler",
+      "attempted": 27,
+      "current_clean_positive_misses": 16,
+      "saved_baseline_skips": 16
+    },
+    {
+      "surrogate": "deberta-base-pi-v1",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "bae",
+      "attempted": 63,
+      "current_clean_positive_misses": 9,
+      "saved_baseline_skips": 9
+    },
+    {
+      "surrogate": "deberta-base-pi-v1",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "bert-attack",
+      "attempted": 63,
+      "current_clean_positive_misses": 9,
+      "saved_baseline_skips": 9
+    },
+    {
+      "surrogate": "deberta-base-pi-v1",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "deepwordbug",
+      "attempted": 63,
+      "current_clean_positive_misses": 9,
+      "saved_baseline_skips": 9
+    },
+    {
+      "surrogate": "deberta-base-pi-v1",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "pwws",
+      "attempted": 63,
+      "current_clean_positive_misses": 9,
+      "saved_baseline_skips": 9
+    },
+    {
+      "surrogate": "deberta-base-pi-v1",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "textfooler",
+      "attempted": 63,
+      "current_clean_positive_misses": 9,
+      "saved_baseline_skips": 9
+    },
+    {
+      "surrogate": "deberta-small-pi-v2",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "bae",
+      "attempted": 101,
+      "current_clean_positive_misses": 0,
+      "saved_baseline_skips": 0
+    },
+    {
+      "surrogate": "deberta-small-pi-v2",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "bert-attack",
+      "attempted": 101,
+      "current_clean_positive_misses": 0,
+      "saved_baseline_skips": 0
+    },
+    {
+      "surrogate": "deberta-small-pi-v2",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "deepwordbug",
+      "attempted": 101,
+      "current_clean_positive_misses": 0,
+      "saved_baseline_skips": 0
+    },
+    {
+      "surrogate": "deberta-small-pi-v2",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "pwws",
+      "attempted": 101,
+      "current_clean_positive_misses": 0,
+      "saved_baseline_skips": 0
+    },
+    {
+      "surrogate": "deberta-small-pi-v2",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "textfooler",
+      "attempted": 101,
+      "current_clean_positive_misses": 0,
+      "saved_baseline_skips": 0
+    },
+    {
+      "surrogate": "deberta-small-pi-v2",
+      "source": "deepset/prompt-injections",
+      "recipe": "bae",
+      "attempted": 27,
+      "current_clean_positive_misses": 13,
+      "saved_baseline_skips": 13
+    },
+    {
+      "surrogate": "deberta-small-pi-v2",
+      "source": "deepset/prompt-injections",
+      "recipe": "bert-attack",
+      "attempted": 27,
+      "current_clean_positive_misses": 13,
+      "saved_baseline_skips": 13
+    },
+    {
+      "surrogate": "deberta-small-pi-v2",
+      "source": "deepset/prompt-injections",
+      "recipe": "deepwordbug",
+      "attempted": 27,
+      "current_clean_positive_misses": 13,
+      "saved_baseline_skips": 13
+    },
+    {
+      "surrogate": "deberta-small-pi-v2",
+      "source": "deepset/prompt-injections",
+      "recipe": "pwws",
+      "attempted": 27,
+      "current_clean_positive_misses": 13,
+      "saved_baseline_skips": 13
+    },
+    {
+      "surrogate": "deberta-small-pi-v2",
+      "source": "deepset/prompt-injections",
+      "recipe": "textfooler",
+      "attempted": 27,
+      "current_clean_positive_misses": 13,
+      "saved_baseline_skips": 13
+    },
+    {
+      "surrogate": "deberta-small-pi-v2",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "bae",
+      "attempted": 63,
+      "current_clean_positive_misses": 12,
+      "saved_baseline_skips": 12
+    },
+    {
+      "surrogate": "deberta-small-pi-v2",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "bert-attack",
+      "attempted": 63,
+      "current_clean_positive_misses": 12,
+      "saved_baseline_skips": 12
+    },
+    {
+      "surrogate": "deberta-small-pi-v2",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "deepwordbug",
+      "attempted": 63,
+      "current_clean_positive_misses": 12,
+      "saved_baseline_skips": 12
+    },
+    {
+      "surrogate": "deberta-small-pi-v2",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "pwws",
+      "attempted": 63,
+      "current_clean_positive_misses": 12,
+      "saved_baseline_skips": 12
+    },
+    {
+      "surrogate": "deberta-small-pi-v2",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "textfooler",
+      "attempted": 63,
+      "current_clean_positive_misses": 12,
+      "saved_baseline_skips": 12
+    },
+    {
+      "surrogate": "deepset-deberta-injection",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "bae",
+      "attempted": 101,
+      "current_clean_positive_misses": 3,
+      "saved_baseline_skips": 3
+    },
+    {
+      "surrogate": "deepset-deberta-injection",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "bert-attack",
+      "attempted": 101,
+      "current_clean_positive_misses": 3,
+      "saved_baseline_skips": 3
+    },
+    {
+      "surrogate": "deepset-deberta-injection",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "deepwordbug",
+      "attempted": 101,
+      "current_clean_positive_misses": 3,
+      "saved_baseline_skips": 3
+    },
+    {
+      "surrogate": "deepset-deberta-injection",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "pwws",
+      "attempted": 101,
+      "current_clean_positive_misses": 3,
+      "saved_baseline_skips": 3
+    },
+    {
+      "surrogate": "deepset-deberta-injection",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "textfooler",
+      "attempted": 101,
+      "current_clean_positive_misses": 3,
+      "saved_baseline_skips": 3
+    },
+    {
+      "surrogate": "deepset-deberta-injection",
+      "source": "deepset/prompt-injections",
+      "recipe": "bae",
+      "attempted": 27,
+      "current_clean_positive_misses": 0,
+      "saved_baseline_skips": 0
+    },
+    {
+      "surrogate": "deepset-deberta-injection",
+      "source": "deepset/prompt-injections",
+      "recipe": "bert-attack",
+      "attempted": 27,
+      "current_clean_positive_misses": 0,
+      "saved_baseline_skips": 0
+    },
+    {
+      "surrogate": "deepset-deberta-injection",
+      "source": "deepset/prompt-injections",
+      "recipe": "deepwordbug",
+      "attempted": 27,
+      "current_clean_positive_misses": 0,
+      "saved_baseline_skips": 0
+    },
+    {
+      "surrogate": "deepset-deberta-injection",
+      "source": "deepset/prompt-injections",
+      "recipe": "pwws",
+      "attempted": 27,
+      "current_clean_positive_misses": 0,
+      "saved_baseline_skips": 0
+    },
+    {
+      "surrogate": "deepset-deberta-injection",
+      "source": "deepset/prompt-injections",
+      "recipe": "textfooler",
+      "attempted": 27,
+      "current_clean_positive_misses": 0,
+      "saved_baseline_skips": 0
+    },
+    {
+      "surrogate": "deepset-deberta-injection",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "bae",
+      "attempted": 63,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "deepset-deberta-injection",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "bert-attack",
+      "attempted": 63,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "deepset-deberta-injection",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "deepwordbug",
+      "attempted": 63,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "deepset-deberta-injection",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "pwws",
+      "attempted": 63,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "deepset-deberta-injection",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "textfooler",
+      "attempted": 63,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "electra-small-ft",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "bae",
+      "attempted": 101,
+      "current_clean_positive_misses": 2,
+      "saved_baseline_skips": 2
+    },
+    {
+      "surrogate": "electra-small-ft",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "bert-attack",
+      "attempted": 101,
+      "current_clean_positive_misses": 2,
+      "saved_baseline_skips": 2
+    },
+    {
+      "surrogate": "electra-small-ft",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "deepwordbug",
+      "attempted": 101,
+      "current_clean_positive_misses": 2,
+      "saved_baseline_skips": 2
+    },
+    {
+      "surrogate": "electra-small-ft",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "pwws",
+      "attempted": 101,
+      "current_clean_positive_misses": 2,
+      "saved_baseline_skips": 2
+    },
+    {
+      "surrogate": "electra-small-ft",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "textfooler",
+      "attempted": 101,
+      "current_clean_positive_misses": 2,
+      "saved_baseline_skips": 2
+    },
+    {
+      "surrogate": "electra-small-ft",
+      "source": "deepset/prompt-injections",
+      "recipe": "bae",
+      "attempted": 27,
+      "current_clean_positive_misses": 11,
+      "saved_baseline_skips": 11
+    },
+    {
+      "surrogate": "electra-small-ft",
+      "source": "deepset/prompt-injections",
+      "recipe": "bert-attack",
+      "attempted": 27,
+      "current_clean_positive_misses": 11,
+      "saved_baseline_skips": 11
+    },
+    {
+      "surrogate": "electra-small-ft",
+      "source": "deepset/prompt-injections",
+      "recipe": "deepwordbug",
+      "attempted": 27,
+      "current_clean_positive_misses": 11,
+      "saved_baseline_skips": 11
+    },
+    {
+      "surrogate": "electra-small-ft",
+      "source": "deepset/prompt-injections",
+      "recipe": "pwws",
+      "attempted": 27,
+      "current_clean_positive_misses": 11,
+      "saved_baseline_skips": 11
+    },
+    {
+      "surrogate": "electra-small-ft",
+      "source": "deepset/prompt-injections",
+      "recipe": "textfooler",
+      "attempted": 27,
+      "current_clean_positive_misses": 11,
+      "saved_baseline_skips": 11
+    },
+    {
+      "surrogate": "electra-small-ft",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "bae",
+      "attempted": 63,
+      "current_clean_positive_misses": 2,
+      "saved_baseline_skips": 2
+    },
+    {
+      "surrogate": "electra-small-ft",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "bert-attack",
+      "attempted": 63,
+      "current_clean_positive_misses": 2,
+      "saved_baseline_skips": 2
+    },
+    {
+      "surrogate": "electra-small-ft",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "deepwordbug",
+      "attempted": 63,
+      "current_clean_positive_misses": 2,
+      "saved_baseline_skips": 2
+    },
+    {
+      "surrogate": "electra-small-ft",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "pwws",
+      "attempted": 63,
+      "current_clean_positive_misses": 2,
+      "saved_baseline_skips": 2
+    },
+    {
+      "surrogate": "electra-small-ft",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "textfooler",
+      "attempted": 63,
+      "current_clean_positive_misses": 2,
+      "saved_baseline_skips": 2
+    },
+    {
+      "surrogate": "llama-prompt-guard-22m",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "bae",
+      "attempted": 101,
+      "current_clean_positive_misses": 22,
+      "saved_baseline_skips": 22
+    },
+    {
+      "surrogate": "llama-prompt-guard-22m",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "bert-attack",
+      "attempted": 101,
+      "current_clean_positive_misses": 22,
+      "saved_baseline_skips": 22
+    },
+    {
+      "surrogate": "llama-prompt-guard-22m",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "deepwordbug",
+      "attempted": 101,
+      "current_clean_positive_misses": 22,
+      "saved_baseline_skips": 22
+    },
+    {
+      "surrogate": "llama-prompt-guard-22m",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "pwws",
+      "attempted": 101,
+      "current_clean_positive_misses": 22,
+      "saved_baseline_skips": 22
+    },
+    {
+      "surrogate": "llama-prompt-guard-22m",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "textfooler",
+      "attempted": 101,
+      "current_clean_positive_misses": 22,
+      "saved_baseline_skips": 22
+    },
+    {
+      "surrogate": "llama-prompt-guard-22m",
+      "source": "deepset/prompt-injections",
+      "recipe": "bae",
+      "attempted": 27,
+      "current_clean_positive_misses": 24,
+      "saved_baseline_skips": 24
+    },
+    {
+      "surrogate": "llama-prompt-guard-22m",
+      "source": "deepset/prompt-injections",
+      "recipe": "bert-attack",
+      "attempted": 27,
+      "current_clean_positive_misses": 24,
+      "saved_baseline_skips": 24
+    },
+    {
+      "surrogate": "llama-prompt-guard-22m",
+      "source": "deepset/prompt-injections",
+      "recipe": "deepwordbug",
+      "attempted": 27,
+      "current_clean_positive_misses": 24,
+      "saved_baseline_skips": 24
+    },
+    {
+      "surrogate": "llama-prompt-guard-22m",
+      "source": "deepset/prompt-injections",
+      "recipe": "pwws",
+      "attempted": 27,
+      "current_clean_positive_misses": 24,
+      "saved_baseline_skips": 24
+    },
+    {
+      "surrogate": "llama-prompt-guard-22m",
+      "source": "deepset/prompt-injections",
+      "recipe": "textfooler",
+      "attempted": 27,
+      "current_clean_positive_misses": 24,
+      "saved_baseline_skips": 24
+    },
+    {
+      "surrogate": "llama-prompt-guard-22m",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "bae",
+      "attempted": 63,
+      "current_clean_positive_misses": 16,
+      "saved_baseline_skips": 16
+    },
+    {
+      "surrogate": "llama-prompt-guard-22m",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "bert-attack",
+      "attempted": 63,
+      "current_clean_positive_misses": 16,
+      "saved_baseline_skips": 16
+    },
+    {
+      "surrogate": "llama-prompt-guard-22m",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "deepwordbug",
+      "attempted": 63,
+      "current_clean_positive_misses": 16,
+      "saved_baseline_skips": 16
+    },
+    {
+      "surrogate": "llama-prompt-guard-22m",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "pwws",
+      "attempted": 63,
+      "current_clean_positive_misses": 16,
+      "saved_baseline_skips": 16
+    },
+    {
+      "surrogate": "llama-prompt-guard-22m",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "textfooler",
+      "attempted": 63,
+      "current_clean_positive_misses": 16,
+      "saved_baseline_skips": 16
+    },
+    {
+      "surrogate": "llama-prompt-guard-86m",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "bae",
+      "attempted": 101,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "llama-prompt-guard-86m",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "bert-attack",
+      "attempted": 101,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "llama-prompt-guard-86m",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "deepwordbug",
+      "attempted": 101,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "llama-prompt-guard-86m",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "pwws",
+      "attempted": 101,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "llama-prompt-guard-86m",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "textfooler",
+      "attempted": 101,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "llama-prompt-guard-86m",
+      "source": "deepset/prompt-injections",
+      "recipe": "bae",
+      "attempted": 27,
+      "current_clean_positive_misses": 19,
+      "saved_baseline_skips": 19
+    },
+    {
+      "surrogate": "llama-prompt-guard-86m",
+      "source": "deepset/prompt-injections",
+      "recipe": "bert-attack",
+      "attempted": 27,
+      "current_clean_positive_misses": 19,
+      "saved_baseline_skips": 19
+    },
+    {
+      "surrogate": "llama-prompt-guard-86m",
+      "source": "deepset/prompt-injections",
+      "recipe": "deepwordbug",
+      "attempted": 27,
+      "current_clean_positive_misses": 19,
+      "saved_baseline_skips": 19
+    },
+    {
+      "surrogate": "llama-prompt-guard-86m",
+      "source": "deepset/prompt-injections",
+      "recipe": "pwws",
+      "attempted": 27,
+      "current_clean_positive_misses": 19,
+      "saved_baseline_skips": 19
+    },
+    {
+      "surrogate": "llama-prompt-guard-86m",
+      "source": "deepset/prompt-injections",
+      "recipe": "textfooler",
+      "attempted": 27,
+      "current_clean_positive_misses": 19,
+      "saved_baseline_skips": 19
+    },
+    {
+      "surrogate": "llama-prompt-guard-86m",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "bae",
+      "attempted": 63,
+      "current_clean_positive_misses": 3,
+      "saved_baseline_skips": 3
+    },
+    {
+      "surrogate": "llama-prompt-guard-86m",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "bert-attack",
+      "attempted": 63,
+      "current_clean_positive_misses": 3,
+      "saved_baseline_skips": 3
+    },
+    {
+      "surrogate": "llama-prompt-guard-86m",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "deepwordbug",
+      "attempted": 63,
+      "current_clean_positive_misses": 3,
+      "saved_baseline_skips": 3
+    },
+    {
+      "surrogate": "llama-prompt-guard-86m",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "pwws",
+      "attempted": 63,
+      "current_clean_positive_misses": 3,
+      "saved_baseline_skips": 3
+    },
+    {
+      "surrogate": "llama-prompt-guard-86m",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "textfooler",
+      "attempted": 63,
+      "current_clean_positive_misses": 3,
+      "saved_baseline_skips": 3
+    },
+    {
+      "surrogate": "roberta-base-ft",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "bae",
+      "attempted": 101,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "roberta-base-ft",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "bert-attack",
+      "attempted": 101,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "roberta-base-ft",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "deepwordbug",
+      "attempted": 101,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "roberta-base-ft",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "pwws",
+      "attempted": 101,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "roberta-base-ft",
+      "source": "Lakera/gandalf_ignore_instructions",
+      "recipe": "textfooler",
+      "attempted": 101,
+      "current_clean_positive_misses": 1,
+      "saved_baseline_skips": 1
+    },
+    {
+      "surrogate": "roberta-base-ft",
+      "source": "deepset/prompt-injections",
+      "recipe": "bae",
+      "attempted": 27,
+      "current_clean_positive_misses": 3,
+      "saved_baseline_skips": 3
+    },
+    {
+      "surrogate": "roberta-base-ft",
+      "source": "deepset/prompt-injections",
+      "recipe": "bert-attack",
+      "attempted": 27,
+      "current_clean_positive_misses": 3,
+      "saved_baseline_skips": 3
+    },
+    {
+      "surrogate": "roberta-base-ft",
+      "source": "deepset/prompt-injections",
+      "recipe": "deepwordbug",
+      "attempted": 27,
+      "current_clean_positive_misses": 3,
+      "saved_baseline_skips": 3
+    },
+    {
+      "surrogate": "roberta-base-ft",
+      "source": "deepset/prompt-injections",
+      "recipe": "pwws",
+      "attempted": 27,
+      "current_clean_positive_misses": 3,
+      "saved_baseline_skips": 3
+    },
+    {
+      "surrogate": "roberta-base-ft",
+      "source": "deepset/prompt-injections",
+      "recipe": "textfooler",
+      "attempted": 27,
+      "current_clean_positive_misses": 3,
+      "saved_baseline_skips": 3
+    },
+    {
+      "surrogate": "roberta-base-ft",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "bae",
+      "attempted": 63,
+      "current_clean_positive_misses": 2,
+      "saved_baseline_skips": 2
+    },
+    {
+      "surrogate": "roberta-base-ft",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "bert-attack",
+      "attempted": 63,
+      "current_clean_positive_misses": 2,
+      "saved_baseline_skips": 2
+    },
+    {
+      "surrogate": "roberta-base-ft",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "deepwordbug",
+      "attempted": 63,
+      "current_clean_positive_misses": 2,
+      "saved_baseline_skips": 2
+    },
+    {
+      "surrogate": "roberta-base-ft",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "pwws",
+      "attempted": 63,
+      "current_clean_positive_misses": 2,
+      "saved_baseline_skips": 2
+    },
+    {
+      "surrogate": "roberta-base-ft",
+      "source": "jackhhao/jailbreak-classification",
+      "recipe": "textfooler",
+      "attempted": 63,
+      "current_clean_positive_misses": 2,
+      "saved_baseline_skips": 2
+    }
+  ],
+  "interpretation": "Current positive-input misses match saved skips by source and recipe. Count agreement does not prove historical checkpoint identity."
+}

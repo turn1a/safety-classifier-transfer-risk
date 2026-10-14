@@ -1,0 +1,276 @@
+# Prospective v2 contract. Null pins and empty evidence intentionally block execution claims.
+# Model names and label maps require revision-specific review before registration.
+experiment_v2:
+  schema_version: 2
+  run_id: ${globals:v2_run_id}
+  task: prompt_injection
+  root_seed: 20260616
+  execution_ref: null
+  private_root: ${globals:v2_private_root}
+  public_root: ${globals:v2_public_root}
+  replicates:
+  - 0
+  - 1
+  - 2
+  models:
+  - id: archived-target
+    repository: protectai/deberta-v3-base-prompt-injection-v2
+    revision: null
+    tokenizer_repository: protectai/deberta-v3-base-prompt-injection-v2
+    tokenizer_revision: null
+    kind: frozen
+    output_labels:
+    - '0'
+    - '1'
+    label_map:
+      '0': benign
+      '1': prompt_injection
+    label_review_sha256: null
+    max_tokens: 512
+    decision_rule: argmax
+    comparison_block: matched-prompt-injection-512
+    training_recipe_sha256: null
+    backbone_family: deberta
+  - id: replication-target
+    repository: local:independently-prepared-roberta-prompt-injection
+    revision: null
+    tokenizer_repository: local:independently-prepared-roberta-prompt-injection
+    tokenizer_revision: null
+    kind: frozen
+    output_labels:
+    - '0'
+    - '1'
+    label_map:
+      '0': benign
+      '1': prompt_injection
+    label_review_sha256: null
+    max_tokens: 512
+    decision_rule: argmax
+    comparison_block: matched-prompt-injection-512
+    training_recipe_sha256: null
+    backbone_family: roberta
+  - id: bert-base-ft
+    repository: google-bert/bert-base-uncased
+    revision: null
+    tokenizer_repository: google-bert/bert-base-uncased
+    tokenizer_revision: null
+    kind: finetune
+    output_labels:
+    - '0'
+    - '1'
+    label_map:
+      '0': benign
+      '1': prompt_injection
+    label_review_sha256: null
+    max_tokens: 512
+    decision_rule: argmax
+    comparison_block: matched-prompt-injection-512
+    training_recipe_sha256: null
+    backbone_family: bert
+  - id: roberta-base-ft
+    repository: FacebookAI/roberta-base
+    revision: null
+    tokenizer_repository: FacebookAI/roberta-base
+    tokenizer_revision: null
+    kind: finetune
+    output_labels:
+    - '0'
+    - '1'
+    label_map:
+      '0': benign
+      '1': prompt_injection
+    label_review_sha256: null
+    max_tokens: 512
+    decision_rule: argmax
+    comparison_block: matched-prompt-injection-512
+    training_recipe_sha256: null
+    backbone_family: roberta
+  - id: electra-small-ft
+    repository: google/electra-small-discriminator
+    revision: null
+    tokenizer_repository: google/electra-small-discriminator
+    tokenizer_revision: null
+    kind: finetune
+    output_labels:
+    - '0'
+    - '1'
+    label_map:
+      '0': benign
+      '1': prompt_injection
+    label_review_sha256: null
+    max_tokens: 512
+    decision_rule: argmax
+    comparison_block: matched-prompt-injection-512
+    training_recipe_sha256: null
+    backbone_family: electra
+  - id: deberta-base-ft
+    repository: microsoft/deberta-v3-base
+    revision: null
+    tokenizer_repository: microsoft/deberta-v3-base
+    tokenizer_revision: null
+    kind: finetune
+    output_labels:
+    - '0'
+    - '1'
+    label_map:
+      '0': benign
+      '1': prompt_injection
+    label_review_sha256: null
+    max_tokens: 512
+    decision_rule: argmax
+    comparison_block: matched-prompt-injection-512
+    training_recipe_sha256: null
+    backbone_family: deberta
+  - id: distilbert-base-ft
+    repository: distilbert/distilbert-base-uncased
+    revision: null
+    tokenizer_repository: distilbert/distilbert-base-uncased
+    tokenizer_revision: null
+    kind: finetune
+    output_labels:
+    - '0'
+    - '1'
+    label_map:
+      '0': benign
+      '1': prompt_injection
+    label_review_sha256: null
+    max_tokens: 512
+    decision_rule: argmax
+    comparison_block: matched-prompt-injection-512
+    training_recipe_sha256: null
+    backbone_family: distilbert
+  - id: albert-base-ft
+    repository: albert/albert-base-v2
+    revision: null
+    tokenizer_repository: albert/albert-base-v2
+    tokenizer_revision: null
+    kind: finetune
+    output_labels:
+    - '0'
+    - '1'
+    label_map:
+      '0': benign
+      '1': prompt_injection
+    label_review_sha256: null
+    max_tokens: 512
+    decision_rule: argmax
+    comparison_block: matched-prompt-injection-512
+    training_recipe_sha256: null
+    backbone_family: albert
+  - id: mobilebert-ft
+    repository: google/mobilebert-uncased
+    revision: null
+    tokenizer_repository: google/mobilebert-uncased
+    tokenizer_revision: null
+    kind: finetune
+    output_labels:
+    - '0'
+    - '1'
+    label_map:
+      '0': benign
+      '1': prompt_injection
+    label_review_sha256: null
+    max_tokens: 512
+    decision_rule: argmax
+    comparison_block: matched-prompt-injection-512
+    training_recipe_sha256: null
+    backbone_family: mobilebert
+  - id: bilstm-attention
+    repository: local:transfer_risk.pipelines.models.bilstm
+    revision: null
+    tokenizer_repository: local:transfer_risk.pipelines.models.bilstm
+    tokenizer_revision: null
+    kind: bilstm
+    output_labels:
+    - '0'
+    - '1'
+    label_map:
+      '0': benign
+      '1': prompt_injection
+    label_review_sha256: null
+    max_tokens: 512
+    decision_rule: argmax
+    comparison_block: matched-prompt-injection-512
+    training_recipe_sha256: null
+    backbone_family: bilstm
+  sources:
+  - id: deepset/prompt-injections
+    revision: null
+    content_sha256: null
+    task_review_sha256: null
+    exposure_review_sha256: null
+  - id: Lakera/gandalf_ignore_instructions
+    revision: null
+    content_sha256: null
+    task_review_sha256: null
+    exposure_review_sha256: null
+  - id: local:prospective-representation-probe
+    revision: null
+    content_sha256: null
+    task_review_sha256: null
+    exposure_review_sha256: null
+  - id: local:prospective-calibration-corpus
+    revision: null
+    content_sha256: null
+    task_review_sha256: null
+    exposure_review_sha256: null
+  - id: local:prospective-heldout-evaluation-corpus
+    revision: null
+    content_sha256: null
+    task_review_sha256: null
+    exposure_review_sha256: null
+  target_roles:
+  - id: primary
+    model_id: archived-target
+    purpose: primary
+    candidate_ids:
+    - bert-base-ft
+    - roberta-base-ft
+    - electra-small-ft
+    - deberta-base-ft
+    - distilbert-base-ft
+    - albert-base-ft
+    - mobilebert-ft
+    - bilstm-attention
+    preparation: historical_anchor
+  - id: replication
+    model_id: replication-target
+    purpose: replication
+    candidate_ids:
+    - bert-base-ft
+    - roberta-base-ft
+    - electra-small-ft
+    - deberta-base-ft
+    - distilbert-base-ft
+    - albert-base-ft
+    - mobilebert-ft
+    - bilstm-attention
+    preparation: independently_prepared
+  recipes:
+  - textfooler
+  - bae
+  - pwws
+  - deepwordbug
+  - textbugger
+  source_query_budget: 100
+  attack_spec_sha256: null
+  attack_assets_sha256: null
+  input_policy_sha256: null
+  annotation_protocol_sha256: null
+  power_analysis_sha256: null
+  selection_k: 2
+  min_groups:
+    train: 500
+    validation: 100
+    probe: 100
+    calibration: 100
+    evaluation: 100
+  utility_min_tpr: 0.8
+  utility_max_fpr: 0.1
+  bootstrap_replicates: 2000
+  alpha: 0.05
+  minimum_effect: 0.05
+  application_study:
+    enabled: false
+  min_hard_negative_groups: 50
+  minimum_eligible_sources: 7

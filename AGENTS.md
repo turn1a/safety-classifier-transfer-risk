@@ -14,6 +14,8 @@ This project measures bounded transfer behavior. It does not certify robustness.
 
 v1 covers a public archived prompt-injection target, ten surrogates, CKA and corrected DBS, five TextAttack recipes, target auditing, a source-excluded sensitivity, and a training-only CKA sensitivity.
 
+Explicit retrospective stages additionally score saved returned candidates, including failed source searches, on existing checkpoints; calculate clean-input confusion counts and distinct-original coverage; and prepare independent semantic/intent review with local computational screens. They perform no attack search or training. Current outcome policies and review states must remain distinct. The prospective controlled redesign is confined to `codex/methodology-recompute` and has no replacement experiment results.
+
 Do not add:
 
 - GCG or nanoGCG suffix attacks.
@@ -35,7 +37,10 @@ src/transfer_risk/
 │   ├── audit_reporting          # target-free public audit report
 │   ├── paper_reporting          # public-aggregate manuscript tables and figures
 │   ├── similarity_audit_prepare # saved training split boundary
-│   └── similarity_audit         # serial training-only CKA sensitivity
+│   ├── similarity_audit         # serial training-only CKA sensitivity
+│   ├── retrospective_audit      # local saved-candidate and clean-input checks
+│   ├── semantic_audit           # private sample, independent tools and human review
+│   └── semantic_screening       # pinned local sample diagnostics, hidden from review
 ├── pipeline_registry.py
 └── settings.py
 conf/base/                       # catalog, parameters, MLflow
@@ -60,6 +65,9 @@ infra/                           # Terraform cloud sweep documentation
 - `audit_reporting` must remain target-free. It publishes aggregate-only cells, source rows, summaries, and figures.
 - `paper_reporting` reads public aggregates only. It generates manuscript tables, explanatory figures, and the BiLSTM-excluded sensitivity without model, prompt, attack, or checkpoint inputs.
 - `similarity_audit_prepare` materializes the saved training split. `similarity_audit` runs serially on MPS, recomputes CKA over a training-only probe, and creates no attacks or training.
+- `retrospective_audit` requires the historical reference-cell count check before publication. Additional target roles exclude their own source candidates. `detector_baseline_audit` and `retrospective_policy_coverage` use saved checkpoints or predictions.
+- `semantic_audit`, `semantic_review_tools`, `semantic_audit_review`, and `semantic_screening` are opt-in and excluded from `__default__`. Raw pairs, review HTML, annotations, notes, and per-pair scores remain private and are never MLflow artifacts.
+- Human review must preserve missing, uncertain, and conflicting evidence as unresolved. Computational scores are hidden from reviewers and are never substituted for human labels.
 - Every public artifact must be catalog-owned and wrapped in `MlflowArtifactDataset`. Do not publish raw prompts, perturbations, model checkpoints, or private CKA matrices.
 - `qualitative_examples.json` is a redacted audit artifact. It may contain only surrogate, recipe, edit count, categorical label, change summary, and audit note. Do not quote, paraphrase, or recreate underlying prompt text in public documentation.
 - Public docs must label original conditional target-benign artifacts as historical or secondary when true target flip artifacts are present.
@@ -70,7 +78,7 @@ infra/                           # Terraform cloud sweep documentation
 - State that enumerated p-values condition on an exchangeability null for the designed pool. Do not present them as population or general-predictor validation.
 - The M1 versus M2 decision rule is a project rule: at least five percentage points and strict p < 0.05.
 - A p value of 0.05 in a three-versus-three enumeration equals the 1-in-20 floor and does not satisfy the strict decision rule.
-- Tree regressors remain exploratory machinery. Do not report feature importance as research evidence.
+- Tree regressors are used only for exploratory analysis. Do not report feature importance as research evidence.
 - Preserve source and contamination limits. `jackhhao/jailbreak-classification` is both a canonical source and a target-card training source. Record-level decontamination is unavailable.
 
 ## Development environment
@@ -99,6 +107,14 @@ infra/                           # Terraform cloud sweep documentation
 - Main preserves the historical model and attack implementation, including unmasked BiLSTM padding and uncontrolled fresh-head initialization. Corrected saved-data reductions and reporting belong on main. Changes requiring retraining or new attacks belong on `codex/methodology-recompute` until a separate rerun supplies replacement evidence.
 - On the recomputation branch, new BiLSTMs use masked padding and historical configs without `padding_policy` load with `legacy_unmasked`. Initialize fresh transformer task heads after the derived seed and respect configured token limits. Never report synthetic regression tests as corrected experiment outcomes.
 - A rerun requires an isolated worktree and separate catalog output paths. Existing ignored checkpoints and attack files do not change when Git branches change; `--only-missing-outputs` can reuse defective historical models.
+
+## Prospective v2 branch boundaries
+
+- `codex/methodology-recompute` also contains the prospective protocol in `docs/experiment-v2.qmd`, strict non-text evidence schemas, an isolated `experiment_v2` catalog environment, and opt-in preflight, selection, and aggregate-analysis stages. Keep every v2 stage outside `__default__`, `stage`, and `downstream`.
+- V2 requires contextual pure prompt-injection labels, group/origin/attack-family separation, quoted and neutral instruction hard negatives, a separately prepared target of another backbone, fixed query caps, and human review. Do not fill missing evidence with synthetic fixtures or mechanical classifier judgments.
+- A preflight validation report is distinct from execution readiness. Heavy adapters and missing data/annotations are separate status dimensions. Pending judgments on possible contributing flips produce validity bounds and no confirmed selector decision. Nonflips need no candidate-validity judgment for yield. Overall fidelity review and logical validity resolution are separate states.
+- All v2 private artifacts belong below `data/experiment_v2/<run_id>/`; public aggregate-only artifacts belong below `docs/artifacts/experiment_v2/<run_id>/` and remain MLflow-wrapped. No v2 command may silently use the historical split, probe, checkpoints, or success-only audit.
+- Target preparation, model training, attacks, and inference require explicit authorization to execute. Preparing and testing the code does not supply replacement study evidence.
 
 ## Reproducibility and provenance
 

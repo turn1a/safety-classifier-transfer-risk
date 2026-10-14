@@ -1,0 +1,6 @@
+# Dedicated prospective run. Change this identity before freezing a real registration.
+v2_run_id: prospective-v2
+v2_private_root: data/experiment_v2/${v2_run_id}
+v2_public_root: docs/artifacts/experiment_v2/${v2_run_id}
+# Empty evidence templates produce a blocked report. A real run must point at sealed inputs.
+v2_evidence_root: conf/experiment_v2/templates

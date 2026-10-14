@@ -1,0 +1,14 @@
+| Detector | [Canonical-positive recall](guide.qmd#clean-recall){.term-help} | [Canonical-benign flagged](guide.qmd#clean-false-positives){.term-help} | [Label accuracy](guide.qmd#clean-accuracy){.term-help} |
+| :--- | ---: | ---: | ---: |
+| [`protectai-v2`](guide.qmd#target-model) | 167/191 (87.4%) | 0/104 (0.0%) | 91.9% |
+| [`deberta-base-pi-v1`](guide.qmd#model-deberta-base-pi-v1) | 164/191 (85.9%) | 1/104 (1.0%) | 90.5% |
+| [`deberta-small-pi-v2`](guide.qmd#model-deberta-small-pi-v2) | 166/191 (86.9%) | 2/104 (1.9%) | 90.8% |
+| [`deepset-deberta-injection`](guide.qmd#model-deepset-deberta-injection) | 187/191 (97.9%) | 60/104 (57.7%) | 78.3% |
+| [`llama-prompt-guard-86m`](guide.qmd#model-llama-prompt-guard-86m) | 168/191 (88.0%) | 0/104 (0.0%) | 92.2% |
+| [`llama-prompt-guard-22m`](guide.qmd#model-llama-prompt-guard-22m) | 129/191 (67.5%) | 0/104 (0.0%) | 79.0% |
+| [`bert-base-ft`](guide.qmd#model-bert-base-ft) | 183/191 (95.8%) | 2/104 (1.9%) | 96.6% |
+| [`roberta-base-ft`](guide.qmd#model-roberta-base-ft) | 185/191 (96.9%) | 1/104 (1.0%) | 97.6% |
+| [`electra-small-ft`](guide.qmd#model-electra-small-ft) | 176/191 (92.1%) | 6/104 (5.8%) | 92.9% |
+| [`deberta-base-ft-seed`](guide.qmd#model-deberta-base-ft-seed) | 189/191 (99.0%) | 1/104 (1.0%) | 99.0% |
+
+: Clean-input predictions on the saved 295-row test split. Canonical labels mix prompt injection and jailbreaks; these counts describe the sample. The affected BiLSTM is omitted. {#tbl-clean-baselines}

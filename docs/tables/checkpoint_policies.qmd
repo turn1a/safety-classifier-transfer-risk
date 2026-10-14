@@ -1,0 +1,7 @@
+| Target checkpoint | Originally positive | [Source-success flips](guide.qmd#verified-flip){.term-help} | All returned flips | [All returned yield](guide.qmd#all-candidate-yield){.term-help} |
+| :--- | ---: | ---: | ---: | ---: |
+| [`protectai-v2`](guide.qmd#target-model) | 167/191 | 913 | 1,253 | 18.7% |
+| [`deepset-deberta-injection`](guide.qmd#model-deepset-deberta-injection) | 187/191 | 141 | 174 | 2.6% |
+| [`llama-prompt-guard-22m`](guide.qmd#model-llama-prompt-guard-22m) | 129/191 | 1,511 | 2,683 | 40.1% |
+
+: Common-source checkpoint check: each row uses 6,685 attempted trials over the same 7 surrogates and 5 recipes. Returned candidates include failed source searches. Different target objectives and operating points prevent a robustness ranking. {#tbl-checkpoint-policies}
