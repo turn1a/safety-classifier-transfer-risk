@@ -12,7 +12,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 - Clean-input canonical-label confusion counts for the target and nine saved transformer checkpoints.
 
-- A fixed 278-pair blinded review sample, separate offline human-review tools, progress and CSV resume support, strict export validation, and unresolved-evidence handling.
+- A fixed 278-pair blinded review sample, separate offline human-review tools, JSON progress backups and resume, CSV submission, strict export validation, and unresolved-evidence handling.
 
 - Pinned local embedding and bidirectional NLI screens, private per-pair scores, public truncation coverage, and a validity guide. Computational scores are hidden from reviewers and supply no validity labels.
 

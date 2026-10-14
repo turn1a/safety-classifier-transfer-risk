@@ -58,7 +58,7 @@ just review-pairs reviewer_2 8766
 
 Open `http://127.0.0.1:8766/` for the second review. The servers bind to loopback and serve only the role's HTML page. The partner can also receive the private `reviewer_2.html` file and open it in their own browser. The tool contains the complete selected texts and makes no network requests.
 
-Progress is saved in that browser's local storage, keyed by the sample fingerprint and reviewer role. Use the same browser and address to resume, and export a CSV backup before moving to another browser or clearing browser data. An export can be imported into the matching role to resume. Untouched rows are omitted from review coverage.
+Progress is saved in that browser's local storage, keyed by the sample fingerprint and reviewer role. Use the same browser and address to resume. Before changing browsers or clearing browser data, export a progress JSON backup; import that file into the matching reviewer role to restore your answers. CSV exports supply the labels for analysis. Untouched rows are omitted from review coverage.
 
 Confirm independent review explicitly before exporting. Keep both exports until import succeeds. To validate their roles, sample fingerprints, pair identities, and independence attestations, then calculate consensus and aggregate results:
 
