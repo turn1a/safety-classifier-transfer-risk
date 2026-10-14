@@ -16,6 +16,14 @@ from kedro.framework.project import find_pipelines
 from kedro.pipeline import Pipeline
 
 from transfer_risk.pipelines.audit.pipeline import create_finalization_pipeline
+from transfer_risk.pipelines.retrospective_audit.pipeline import (
+    create_baseline_pipeline,
+    create_coverage_pipeline,
+)
+from transfer_risk.pipelines.semantic_audit.pipeline import (
+    create_review_pipeline,
+    create_tools_pipeline,
+)
 
 _EXCLUDED_FROM_DEFAULT = (
     "smoke",
@@ -25,6 +33,13 @@ _EXCLUDED_FROM_DEFAULT = (
     "similarity_audit_prepare",
     "similarity_audit",
     "paper_reporting",
+    "semantic_audit",
+    "semantic_audit_review",
+    "semantic_review_tools",
+    "semantic_screening",
+    "retrospective_audit",
+    "detector_baseline_audit",
+    "retrospective_policy_coverage",
 )
 _STAGE = ("data", "models", "similarity")
 _DOWNSTREAM = ("transfer", "risk", "reporting")
@@ -34,6 +49,10 @@ def register_pipelines() -> dict[str, Pipeline]:
     """Return a mapping of pipeline name to ``Pipeline`` object."""
     pipelines: dict[str, Pipeline] = find_pipelines()
     pipelines["audit_finalization"] = create_finalization_pipeline()
+    pipelines["semantic_audit_review"] = create_review_pipeline()
+    pipelines["semantic_review_tools"] = create_tools_pipeline()
+    pipelines["detector_baseline_audit"] = create_baseline_pipeline()
+    pipelines["retrospective_policy_coverage"] = create_coverage_pipeline()
     domain = [
         pipeline for name, pipeline in pipelines.items() if name not in _EXCLUDED_FROM_DEFAULT
     ]

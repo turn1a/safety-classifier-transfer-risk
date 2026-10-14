@@ -1,0 +1,25 @@
+# Local classifier inference uses saved candidates and existing checkpoints.
+retrospective_audit:
+  max_seq_len: 512
+  max_prompt_chars: 3200
+  batch_size: 16
+  reference_target: protectai-v2
+  targets:
+    protectai-v2:
+      repo_id: protectai/deberta-v3-base-prompt-injection-v2
+      positive_label: 1
+      benign_label: 0
+      positive_label_name: injection
+      excluded_surrogates: [bilstm-attention]
+    deepset-deberta-injection:
+      repo_id: deepset/deberta-v3-base-injection
+      positive_label: 1
+      benign_label: 0
+      positive_label_name: injection
+      excluded_surrogates: [bilstm-attention, deepset-deberta-injection]
+    llama-prompt-guard-22m:
+      repo_id: meta-llama/Llama-Prompt-Guard-2-22M
+      positive_label: 1
+      benign_label: 0
+      positive_label_name: malicious
+      excluded_surrogates: [bilstm-attention, llama-prompt-guard-22m]

@@ -3,10 +3,14 @@
 from kedro.pipeline import Pipeline, node
 
 from transfer_risk.pipelines.paper_reporting.nodes import (
+    build_checkpoint_comparison,
+    build_objective_sensitivity,
     build_paper_tables,
     build_pool_sensitivity,
+    build_strengthening_tables,
     plot_audit_flow,
     plot_dbs_geometry,
+    plot_objective_sensitivity,
     plot_probe_stability,
     plot_recipe_heatmap,
 )
@@ -16,6 +20,55 @@ def create_pipeline() -> Pipeline:
     """Return a target-free pipeline with no attack, checkpoint, or text inputs."""
     return Pipeline(
         [
+            node(
+                build_objective_sensitivity,
+                inputs=[
+                    "pub_target_audit_cells",
+                    "pub_surrogate_summary",
+                    "pub_results_manifest",
+                    "params:attacks",
+                    "params:paper_reporting",
+                ],
+                outputs="pub_pool_objective_sensitivity",
+                name="paper_objective_sensitivity",
+            ),
+            node(
+                build_checkpoint_comparison,
+                inputs=[
+                    "pub_retrospective_cells__protectai-v2",
+                    "pub_retrospective_cells__deepset-deberta-injection",
+                    "pub_retrospective_cells__llama-prompt-guard-22m",
+                    "pub_surrogate_summary",
+                    "pub_retrospective_audit_summary",
+                    "pub_results_manifest",
+                    "params:attacks",
+                    "pub_source_baseline_check",
+                ],
+                outputs="pub_checkpoint_comparison",
+                name="paper_checkpoint_comparison",
+            ),
+            node(
+                build_strengthening_tables,
+                inputs=[
+                    "pub_pool_objective_sensitivity",
+                    "pub_checkpoint_comparison",
+                    "pub_detector_baseline_summary",
+                    "pub_original_policy_coverage",
+                ],
+                outputs=[
+                    "paper_objective_table",
+                    "paper_baseline_table",
+                    "paper_checkpoint_table",
+                    "paper_coverage_table",
+                ],
+                name="paper_strengthening_tables",
+            ),
+            node(
+                plot_objective_sensitivity,
+                inputs=["pub_pool_objective_sensitivity", "pub_checkpoint_comparison"],
+                outputs="fig_objective_sensitivity",
+                name="paper_objective_figure",
+            ),
             node(
                 plot_dbs_geometry,
                 inputs="params:similarity",

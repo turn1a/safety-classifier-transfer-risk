@@ -1,0 +1,5 @@
+semantic_screening:
+  batch_size: 16
+  # MiniLM-L12's published sentence-transformer window is 256 wordpieces.
+  encoder_max_tokens: 256
+  nli_max_tokens: 512

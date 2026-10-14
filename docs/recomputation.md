@@ -1,6 +1,6 @@
 # Implementation defects and deferred recomputation
 
-The paper reports results from the completed model and attack runs. The implementation used for those runs has the defects listed below. Aggregate reductions, manuscript tables, figures, and statistical summaries have been checked and recalculated locally from saved outputs. Main includes corrected reporting and retains the historical model and attack code. The separate [`codex/methodology-recompute` branch](https://github.com/turn1a/safety-classifier-transfer-risk/tree/codex/methodology-recompute) contains corrections with synthetic regression tests. No replacement training or attack sweep has been performed.
+The source models and attack candidates reported in the paper come from the completed sweep. That implementation has the defects listed below. Main adds corrected reductions and local inference over saved candidates and clean inputs; it has no replacement training or attack results. The separate [`codex/methodology-recompute` branch](https://github.com/turn1a/safety-classifier-transfer-risk/tree/codex/methodology-recompute) contains model corrections and a prospective controlled redesign, with synthetic regression tests. The direction and size of their experimental effects remain unmeasured.
 
 ## Findings and possible effects
 
@@ -25,6 +25,35 @@ just docs
 ```
 
 These commands consume saved inputs and run no model inference, retraining, or attacks. The public-only `paper-report` and `docs` commands can be used without the private saved matrices. Recalculated historical totals remain 4,362 successful source records, 4,009 target-positive baselines, and 1,054 verified flips, or 26.3%. Display rounding preserves source JSON and CSV precision.
+
+## Local evidence added without new attacks
+
+The fixed-trial analysis gives CKA rho = 0.400 (p = 0.29) for source-success-gated yield across nine transformers, compared with conditional rho = 0.800 (p = 0.014). Local reevaluation of all returned candidates adds 405 changes from failed source searches to 998 source-success flips. This distinct post-hoc policy yields 1,403 changes in 8,595 trials (16.3%), with rho = 0.733 (p = 0.031). Every retained source-success reference cell reproduces its earlier counts. Current fingerprints identify the local pass. They do not establish the missing historical checkpoint identities.
+
+All 84 three-transformer subsets can also be compared by the number of distinct target-positive originals affected. The CKA-selected subset covers 104 of 167 originals under the source-success gate and 120 under the all-candidate policy. Other observed selections cover more. These comparisons reuse the same evaluation inputs and supply no prospective selector validation or equal-query-cost claim.
+
+Clean-input checks show different canonical-label behavior, including deepset flagging 60 of 104 canonically benign inputs. The common-source checkpoint comparison therefore cannot be read as a robustness ranking. A fixed 278-pair independent human review and two local computational screens are prepared. Human judgments, valid-attack yield, and downstream effectiveness remain unmeasured. See [validity checks](validation.qmd) for the evidence and review tool.
+
+```bash
+just audit-saved-candidates
+just audit-detector-baselines
+just summarize-original-coverage
+just prepare-semantic-review
+just build-review-tools
+just screen-review-sample
+```
+
+The inference commands run serially on the local device. Preparation and coverage reduction use saved artifacts without models. No command here launches cloud resources, training, or attack search.
+
+## Prospective controlled redesign
+
+The correction branch prepares a prompt-injection-specific study with reviewed original labels, group-aware source/original/attack-family splits, and disjoint representation-probe, calibration, and held-out evaluation data. It uses controlled same-task surrogate backbones with seed replicates and a separately prepared frozen RoBERTa replication target. The archived ProtectAI target remains a historical reference. Known shared-source exclusions and grouped splits constrain overlap; they cannot establish absence of unknown pretraining contamination.
+
+Selection compares CKA with random source subsets and a source-only calibration baseline. The outcome counts each eligible original once after taking the union across selected sources and recipes, and averages seed replicates within original groups. Validity-aware held-out comparisons use paired group outcomes. Clean-input recall and hard-negative false-positive gates prevent treating a detector that rejects benign inputs as useful solely because its candidate-flip rate is low. Human evidence remains required for semantic-valid outcomes.
+
+The branch includes catalog adapters for future target preparation, source materialization/training, CKA, bounded attack execution, complete candidate target auditing, and analysis. Evidence gates require immutable model/tokenizer identities, realized weight hashes, pinned offline auxiliary attack assets, code/lock/runtime provenance, isolated run paths, and calibration/selection locks. Saved run records retain the original execution and selection identities so old evaluation artifacts cannot acquire a new lock. Synthetic tests exercise those contracts; no model training or attack execution has occurred.
+
+Before execution, an operator must supply reviewed corpus groups and labels, resolved upstream revisions, realized model and auxiliary-asset manifests, and a sealed run registration. The template contains missing identities explicitly and must reject them. External datasets require review and cannot establish decontamination by their names alone. A separate optional single-turn application study requires complete task/trust-boundary context and clean/original/perturbed controls; no downstream success rate is claimed.
 
 ## Requirements before replacement results
 

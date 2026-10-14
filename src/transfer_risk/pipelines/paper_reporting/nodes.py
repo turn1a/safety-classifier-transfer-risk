@@ -24,11 +24,125 @@ from transfer_risk.lib.paper_reporting import (
     render_surrogate_table,
     render_transition_table,
 )
+from transfer_risk.lib.pool_sensitivity import build_pool_sensitivity as calculate_objectives
+from transfer_risk.lib.retrospective_comparison import compare_saved_candidate_policies
+from transfer_risk.lib.strengthening_tables import (
+    render_baseline_table,
+    render_coverage_table,
+    render_objective_table,
+    render_policy_table,
+)
 
 _INK = "#263238"
 _BLUE = "#476b87"
 _GRAY = "#707070"
 _DARK_CELL_THRESHOLD = 0.72
+
+
+def build_objective_sensitivity(
+    cells: pd.DataFrame,
+    similarity: pd.DataFrame,
+    manifest: dict[str, Any],
+    attacks_params: dict[str, Any],
+    reporting_params: dict[str, Any],
+) -> dict[str, Any]:
+    """Recalculate conditional, trial-yield and model-omission sensitivity from aggregates."""
+    return calculate_objectives(
+        cells,
+        similarity,
+        attempts_per_cell=int(manifest["attack_attempts_per_cell"]),
+        recipes=attacks_params["recipes"],
+        excluded_surrogates=reporting_params["excluded_surrogates"],
+    )
+
+
+def build_checkpoint_comparison(
+    reference: pd.DataFrame,
+    deepset: pd.DataFrame,
+    prompt_guard: pd.DataFrame,
+    similarity: pd.DataFrame,
+    summary: dict[str, Any],
+    manifest: dict[str, Any],
+    params: dict[str, Any],
+    baseline_check: dict[str, Any],
+) -> dict[str, Any]:
+    """Compare saved local checkpoints using an identical common surrogate pool."""
+    if baseline_check.get("counts_agree") is not True:
+        msg = "checkpoint comparison requires current/source baseline count agreement"
+        raise ValueError(msg)
+    report = compare_saved_candidate_policies(
+        {
+            "protectai-v2": reference,
+            "deepset-deberta-injection": deepset,
+            "llama-prompt-guard-22m": prompt_guard,
+        },
+        similarity,
+        summary,
+        attempts_per_cell=int(manifest["attack_attempts_per_cell"]),
+        recipes=params["recipes"],
+        reference_target="protectai-v2",
+    )
+    report["source_baseline_check"] = baseline_check
+    return report
+
+
+def build_strengthening_tables(
+    objectives: dict[str, Any],
+    comparison: dict[str, Any],
+    baseline: dict[str, Any],
+    coverage: dict[str, Any],
+) -> tuple[str, str, str, str]:
+    """Create the new rounded objective, clean-baseline and checkpoint tables."""
+    return (
+        render_objective_table(objectives, comparison),
+        render_baseline_table(baseline),
+        render_policy_table(comparison),
+        render_coverage_table(coverage),
+    )
+
+
+def plot_objective_sensitivity(objectives: dict[str, Any], comparison: dict[str, Any]) -> Figure:
+    """Contrast CKA associations for conditional transfer and two fixed-trial policies."""
+    retained = objectives["pools"]["surrogate_excluded"]["surrogates"]
+    rows = [row for row in objectives["surrogate_rows"] if row["surrogate"] in retained]
+    candidate = {row["surrogate"]: row for row in comparison["reference_pool"]["surrogate_rows"]}
+    names = [row["surrogate"] for row in rows]
+    titles = ["Conditional flip rate", "Source-success-gated yield", "All returned candidate yield"]
+    outcomes = [
+        "macro_conditional_verified_flip_rate",
+        "source_success_gated_verified_flip_yield",
+        "all_candidate_yield",
+    ]
+    fig, axes = plt.subplots(1, 3, figsize=(9.8, 4.2), layout="constrained")
+    for axis, outcome, title in zip(axes, outcomes, titles, strict=True):
+        all_candidates = outcome == "all_candidate_yield"
+        values = [
+            candidate[name][outcome] if all_candidates else row[outcome]
+            for name, row in zip(names, rows, strict=True)
+        ]
+        axis.scatter([row["mean_cka"] for row in rows], values, color=_BLUE, s=44)
+        axis.set(xlabel="Mean CKA", title=title, ylim=(0, max(values) * 1.23))
+        axis.set_title(title, fontsize=12)
+        axis.set_xlabel("Mean CKA", fontsize=12)
+        axis.tick_params(labelsize=11)
+        axis.yaxis.set_major_formatter(PercentFormatter(1.0))
+        axis.spines[["top", "right"]].set_visible(False)
+        axis.grid(axis="y", alpha=0.2)
+        stats = (
+            comparison["reference_pool"]["association"]
+            if all_candidates
+            else objectives["pools"]["surrogate_excluded"]["associations"][outcome]
+        )
+        axis.text(
+            0.04,
+            0.95,
+            rf"$\rho$ = {stats['rho']:.3f}" + f"\np = {stats['two_sided_p']:.2g}",
+            transform=axis.transAxes,
+            va="top",
+            fontsize=12,
+            color=_INK,
+        )
+    return fig
 
 
 def build_pool_sensitivity(summary: dict[str, Any], params: dict[str, Any]) -> dict[str, Any]:

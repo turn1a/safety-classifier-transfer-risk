@@ -12,15 +12,25 @@
 <dt id="groups">M1, middle, and M2</dt>
 <dd>M1 contains the three highest-CKA surrogates and M2 the three lowest under the empirical quartile rule. Four models form the middle group. These groups describe the designed pool.</dd>
 <dt id="source-success">Source success</dt>
-<dd>TextAttack records a successful source attack when the surrogate predicts the positive class on the original and benign after perturbation. Only source-success records enter the target audit.</dd>
+<dd>TextAttack records a successful source attack when the surrogate predicts the positive class on the original and benign after perturbation. The initial audit uses these records; the later all-candidate pass also scores failed and skipped trials.</dd>
 <dt id="target-baseline">Target injection baseline</dt>
 <dd>The target predicts injection on the original input of a successful source attack. These records form the denominator for the verified flip rate. Repeated originals count once per attack record.</dd>
 <dt id="macro">Macro rate</dt>
-<dd>The unweighted mean of a surrogate's defined recipe-level verified flip rates. Each recipe receives equal weight, even when its source-success cohort is small. This is the outcome used for the CKA association.</dd>
+<dd>The unweighted mean of a surrogate's defined recipe-level verified flip rates. Each recipe receives equal weight, even when its source-success cohort is small. The fixed-trial outcomes use separate denominators.</dd>
 <dt id="pooled">Pooled rate</dt>
 <dd>Total verified flips divided by successful source-attack records with target injection baselines. For the full study, 1,054 / 4,009 = 26.3%. It conditions on source success and the original target prediction.</dd>
-<dt id="yield">Procedure yield</dt>
-<dd>Verified flips divided by all attempted source evaluations, including baseline misses and failed attacks. For the full study, 1,054 / 9,550 = 11.0%. Failed-source perturbations were not target-audited.</dd>
+<dt id="yield">Source-success-gated trial yield</dt>
+<dd>Verified flips from successful source attacks divided by all attempted evaluations, including baseline misses and failed attacks. The ten-model value is 1,054 / 9,550 = 11.0%. Each surrogate has 955 attempted trials. This policy excludes target changes from failed source searches.</dd>
+<dt id="all-candidate-yield">All returned candidate yield</dt>
+<dd>Target positive-to-benign changes among every saved returned candidate, divided by all attempted trials. This later policy includes failed source searches. For nine transformers, 1,403 / 8,595 = 16.3%. It counts repeated originals across models and recipes and establishes no semantic-validity or application-success rate.</dd>
+<dt id="original-coverage">Distinct-original coverage</dt>
+<dd>The fraction of originally target-positive inputs with at least one target-changing candidate across the selected sources and recipes. Each original counts once. The comparison uses 167 target-positive originals and the same 2,865 attempted trials for every three-transformer subset.</dd>
+<dt id="clean-recall">Canonical-positive recall</dt>
+<dd>The fraction of 191 canonically positive test inputs classified positive before perturbation. The corpus combines prompt injections and jailbreaks, so these labels do not establish prompt-injection-specific recall.</dd>
+<dt id="clean-false-positives">Canonical-benign flagged</dt>
+<dd>The number and fraction of 104 canonically benign test inputs classified positive. This is a sample-specific check; a deployment false-positive rate requires representative application data.</dd>
+<dt id="clean-accuracy">Canonical-label accuracy</dt>
+<dd>The fraction of all 295 clean test inputs whose predicted class matches the saved canonical label. It summarizes the same mixed task and class balance as the test split.</dd>
 <dt id="rho">Spearman rho</dt>
 <dd>A rank correlation. Positive rho means larger values of one variable tend to accompany larger values of the other within the observed pool. It does not establish causation or prediction on new models.</dd>
 <dt id="exact-p">Exact p-value</dt>

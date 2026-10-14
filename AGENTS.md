@@ -14,6 +14,8 @@ This project measures bounded transfer behavior. It does not certify robustness.
 
 v1 covers a public archived prompt-injection target, ten surrogates, CKA and corrected DBS, five TextAttack recipes, target auditing, a source-excluded sensitivity, and a training-only CKA sensitivity.
 
+Explicit retrospective stages additionally score saved returned candidates, including failed source searches, on existing checkpoints; calculate clean-input confusion counts and distinct-original coverage; and prepare independent semantic/intent review with local computational screens. They perform no attack search or training. Current outcome policies and review states must remain distinct. The prospective controlled redesign is confined to `codex/methodology-recompute` and has no replacement experiment results.
+
 Do not add:
 
 - GCG or nanoGCG suffix attacks.
@@ -35,7 +37,10 @@ src/transfer_risk/
 │   ├── audit_reporting          # target-free public audit report
 │   ├── paper_reporting          # public-aggregate manuscript tables and figures
 │   ├── similarity_audit_prepare # saved training split boundary
-│   └── similarity_audit         # serial training-only CKA sensitivity
+│   ├── similarity_audit         # serial training-only CKA sensitivity
+│   ├── retrospective_audit      # local saved-candidate and clean-input checks
+│   ├── semantic_audit           # private sample, independent tools and human review
+│   └── semantic_screening       # pinned local sample diagnostics, hidden from review
 ├── pipeline_registry.py
 └── settings.py
 conf/base/                       # catalog, parameters, MLflow
@@ -60,6 +65,9 @@ infra/                           # Terraform cloud sweep documentation
 - `audit_reporting` must remain target-free. It publishes aggregate-only cells, source rows, summaries, and figures.
 - `paper_reporting` reads public aggregates only. It generates manuscript tables, explanatory figures, and the BiLSTM-excluded sensitivity without model, prompt, attack, or checkpoint inputs.
 - `similarity_audit_prepare` materializes the saved training split. `similarity_audit` runs serially on MPS, recomputes CKA over a training-only probe, and creates no attacks or training.
+- `retrospective_audit` requires the historical reference-cell count check before publication. Additional target roles exclude their own source candidates. `detector_baseline_audit` and `retrospective_policy_coverage` use saved checkpoints or predictions.
+- `semantic_audit`, `semantic_review_tools`, `semantic_audit_review`, and `semantic_screening` are opt-in and excluded from `__default__`. Raw pairs, review HTML, annotations, notes, and per-pair scores remain private and are never MLflow artifacts.
+- Human review must preserve missing, uncertain, and conflicting evidence as unresolved. Computational scores are hidden from reviewers and are never substituted for human labels.
 - Every public artifact must be catalog-owned and wrapped in `MlflowArtifactDataset`. Do not publish raw prompts, perturbations, model checkpoints, or private CKA matrices.
 - `qualitative_examples.json` is a redacted audit artifact. It may contain only surrogate, recipe, edit count, categorical label, change summary, and audit note. Do not quote, paraphrase, or recreate underlying prompt text in public documentation.
 - Public docs must label original conditional target-benign artifacts as historical or secondary when true target flip artifacts are present.

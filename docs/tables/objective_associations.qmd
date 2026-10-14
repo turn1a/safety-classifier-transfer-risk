@@ -1,0 +1,9 @@
+| Pool | Outcome | [Spearman $\rho$](guide.qmd#rho){.term-help} | [Two-sided p](guide.qmd#exact-p){.term-help} |
+| :--- | ---: | ---: | ---: |
+| Ten-model historical pool | Conditional macro flip rate | 0.830 | 0.0047 |
+| Ten-model historical pool | Source-success-gated trial yield | 0.539 | 0.11 |
+| Nine transformers | Conditional macro flip rate | 0.800 | 0.014 |
+| Nine transformers | Source-success-gated trial yield | 0.400 | 0.29 |
+| Nine transformers | All-returned-candidate trial yield | 0.733 | 0.031 |
+
+: CKA association depends on the outcome definition. Trial yields retain the same attempted denominator for each surrogate. Enumerated p-values condition on the designed-pool exchangeability null; post-hoc rows provide no external selection validation. {#tbl-objective-associations}

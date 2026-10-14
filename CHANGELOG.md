@@ -6,6 +6,16 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Added
 
+- Saved-pool conditional versus fixed-trial yield analyses, complete three-source subset enumeration, model-omission sensitivities, and distinct-original union coverage.
+
+- Serial local inference over all returned transformer candidates, including failed source searches, with a 45-cell historical reference check and aggregate common-source checkpoint comparison.
+
+- Clean-input canonical-label confusion counts for the target and nine saved transformer checkpoints.
+
+- A fixed 278-pair blinded review sample, separate offline human-review tools, progress and CSV resume support, strict export validation, and unresolved-evidence handling.
+
+- Pinned local embedding and bidirectional NLI screens, private per-pair scores, public truncation coverage, and a validity guide. Computational scores are hidden from reviewers and supply no validity labels.
+
 - A study guide with model cards, dataset links, metric definitions, and public artifact descriptions. Marked terms show definitions on hover or keyboard focus and link to the guide on touch devices. Figures open in a larger view.
 
 - A PDF export of the same manuscript using Quarto's bundled Typst compiler, with no model execution or TeX installation.
@@ -29,6 +39,12 @@ All notable changes to this project are documented here. The format follows [Kee
 - Two redacted qualitative audit entries with metadata and audit notes only. Underlying prompt text remains private.
 
 ### Changed
+
+- The paper distinguishes conditional transfer, source-success-gated trial yield, all-returned-candidate outcomes, and distinct-original coverage. Nine-transformer CKA associations are 0.800, 0.400, and 0.733 for the first three outcomes, respectively.
+
+- The local all-candidate pass adds 405 target changes from failed source searches to 998 source-success flips, giving 1,403 changes in 8,595 transformer trials (16.3%). Semantic validity and application effectiveness remain unmeasured.
+
+- Documentation describes the correction branch's prospective controlled experiment and runnable catalog adapters, together with reviewed-data and pinned-identity requirements. No replacement training or attack run is claimed.
 
 - The paper now defines evaluator access, implemented attack constraints, clipping, denominators, aggregation, procedure yield, and the original implementation and provenance limits. It has complete model and method tables, numbered figures, discussion, and consistent display rounding; source JSON and CSV precision is preserved.
 

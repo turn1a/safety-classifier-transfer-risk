@@ -108,6 +108,42 @@ docs:
 paper-report:
     uv run kedro run --pipeline paper_reporting
 
+# Prepare blinded private review sheets from saved pairs. No inference or attacks.
+prepare-semantic-review:
+    uv run kedro run --pipeline semantic_audit
+
+# Summarize independently supplied private annotations; incomplete evidence stays unresolved.
+semantic-review-results:
+    uv run kedro run --pipeline semantic_audit_review
+
+# Render separate private tools from the fixed saved review sample.
+build-review-tools:
+    uv run kedro run --pipeline semantic_review_tools
+
+# Serve one role on loopback; labels persist in that browser origin.
+review-pairs reviewer="reviewer_1" port="8765":
+    uv run python -m transfer_risk.scripts.semantic_review_server serve --reviewer {{reviewer}} --port {{port}} --open
+
+# Validate both independent exports before importing any labels.
+import-reviews first second:
+    uv run python -m transfer_risk.scripts.semantic_review_server combine --reviewer-1 {{quote(first)}} --reviewer-2 {{quote(second)}} --finalize
+
+# Small local sample screen; no attack search, training, or human-label inputs.
+screen-review-sample:
+    uv run kedro run --pipeline semantic_screening --runner SequentialRunner
+
+# Serial local classifier inference over saved candidates, including failed source searches.
+audit-saved-candidates:
+    HF_HUB_CACHE=data/06_models/hub_cache uv run kedro run --pipeline retrospective_audit --runner SequentialRunner
+
+# Small local clean-input pass over the saved transformer checkpoints.
+audit-detector-baselines:
+    HF_HUB_CACHE=data/06_models/hub_cache uv run kedro run --pipeline detector_baseline_audit --runner SequentialRunner
+
+# Count each affected original once per policy from saved private predictions.
+summarize-original-coverage:
+    uv run kedro run --pipeline retrospective_policy_coverage
+
 # Live-preview the Quarto site.
 docs-preview:
     quarto preview docs

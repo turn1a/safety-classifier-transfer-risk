@@ -1,0 +1,4 @@
+target,source,attempted,source_successful,source_failed,source_skipped,source_other,target_original_positive,target_original_benign,target_original_positive_successful,verified_flips_source_successful,verified_flips_source_failed,verified_flips_source_skipped,verified_flips_source_other,verified_flips_all_candidates,originally_benign_candidates_benign,source_gated_yield,all_candidate_yield,source_conditional_flip_rate,all_candidate_conditional_flip_rate
+protectai-v2,Lakera/gandalf_ignore_instructions,4545,2419,1966,160,0,4545,0,2419,827,286,0,0,1113,0,0.1819581958195819,0.2448844884488449,0.3418768085985945,0.2448844884488449
+protectai-v2,deepset/prompt-injections,1215,464,291,460,0,540,675,269,104,37,0,0,141,666,0.08559670781893,0.1160493827160493,0.3866171003717472,0.2611111111111111
+protectai-v2,jackhhao/jailbreak-classification,2835,821,1774,240,0,2430,405,722,67,82,0,0,149,381,0.0236331569664903,0.0525573192239858,0.092797783933518,0.0613168724279835

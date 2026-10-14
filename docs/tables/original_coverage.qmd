@@ -1,0 +1,6 @@
+| Candidate policy | [CKA-selected coverage](guide.qmd#original-coverage){.term-help} | [Observed-best coverage](guide.qmd#original-coverage){.term-help} | Higher subsets |
+| :--- | ---: | ---: | ---: |
+| Source-success gated | 104/167 (62.3%) | 118/167 (70.7%) | 19 |
+| All returned candidates | 120/167 (71.9%) | 127/167 (76.0%) | 16 |
+
+: Distinct target-positive originals affected by at least one candidate. Each of 84 three-source choices uses 2,865 saved trials. Observed-best selections are post-hoc comparators on the same data; meaning and intent remain unresolved. {#tbl-original-coverage}

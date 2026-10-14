@@ -584,7 +584,246 @@ pub_training_probe_similarity_sensitivity:
     kedro-viz:
       layer: reporting
 
-# --- smoke (wiring check) --------------------------------------------------
+# --- semantic/intent review preparation (private text; public aggregates) ---
+semantic_audit_private_pairs:
+  type: pandas.CSVDataset
+  filepath: data/08_reporting/private/semantic_audit/pairs.csv
+  load_args:
+    keep_default_na: false
+
+semantic_audit_annotation_candidates:
+  type: pandas.CSVDataset
+  filepath: data/08_reporting/private/semantic_audit/annotation_candidates.csv
+  load_args:
+    keep_default_na: false
+
+semantic_review_html_template:
+  type: text.TextDataset
+  filepath: src/transfer_risk/templates/semantic_review_tool.html
+
+"semantic_audit_review_tool_{reviewer}":
+  type: text.TextDataset
+  filepath: data/08_reporting/private/semantic_audit/{reviewer}.html
+
+"semantic_audit_{reviewer}_export":
+  type: pandas.CSVDataset
+  filepath: data/08_reporting/private/semantic_audit/{reviewer}_export.csv
+  load_args:
+    keep_default_na: false
+
+semantic_screen_encoder:
+  type: transfer_risk.datasets.semantic_model_dataset.PinnedSemanticModelDataset
+  repo_id: sentence-transformers/all-MiniLM-L12-v2
+  revision: a50ef00143b4d5391434df20ae11632588ac25be
+  role: encoder
+  cache_dir: data/06_models/hub_cache
+
+semantic_screen_nli:
+  type: transfer_risk.datasets.semantic_model_dataset.PinnedSemanticModelDataset
+  repo_id: cross-encoder/nli-deberta-v3-small
+  revision: fa2804872c3b4bd748f38c0185cc85775361e735
+  role: nli
+  cache_dir: data/06_models/hub_cache
+
+semantic_screen_private_scores:
+  type: pandas.CSVDataset
+  filepath: data/08_reporting/private/semantic_audit/computational_scores.csv
+  load_args:
+    keep_default_na: false
+
+pub_semantic_screen_summary:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: json.JSONDataset
+    filepath: docs/artifacts/semantic_screen_summary.json
+  artifact_path: results
+
+semantic_audit_sample_linkage:
+  type: pandas.CSVDataset
+  filepath: data/08_reporting/private/semantic_audit/sample_linkage.csv
+  load_args:
+    keep_default_na: false
+
+semantic_audit_annotations:
+  type: pandas.CSVDataset
+  filepath: data/08_reporting/private/semantic_audit/annotations.csv
+  load_args:
+    keep_default_na: false
+
+semantic_audit_pending_consensus:
+  type: pandas.CSVDataset
+  filepath: data/08_reporting/private/semantic_audit/pending_consensus.csv
+  load_args:
+    keep_default_na: false
+
+semantic_audit_review_consensus:
+  type: pandas.CSVDataset
+  filepath: data/08_reporting/private/semantic_audit/review_consensus.csv
+  load_args:
+    keep_default_na: false
+
+pub_semantic_fidelity_summary:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: json.JSONDataset
+    filepath: docs/artifacts/semantic_fidelity_summary.json
+  artifact_path: results
+
+pub_semantic_review_preparation_summary:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: json.JSONDataset
+    filepath: docs/artifacts/semantic_review_preparation.json
+  artifact_path: results
+
+pub_semantic_review_summary:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: json.JSONDataset
+    filepath: docs/artifacts/semantic_review_summary.json
+  artifact_path: results
+
+pub_semantic_valid_flip_yield_summary:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: json.JSONDataset
+    filepath: docs/artifacts/semantic_valid_flip_yield_summary.json
+  artifact_path: results
+
+# --- retrospective classifier inference (explicit; no training/attacks) ---
+"retrospective_model__{name}":
+  type: transfer_risk.datasets.hub_model_dataset.HuggingFaceHubModelDataset
+  repo_id: ${globals:model_root}/{name}
+  load_args:
+    local_files_only: true
+
+retrospective_model__protectai-v2:
+  type: transfer_risk.datasets.hub_model_dataset.HuggingFaceHubModelDataset
+  repo_id: protectai/deberta-v3-base-prompt-injection-v2
+
+"retrospective_predictions__{target}":
+  type: pandas.CSVDataset
+  filepath: data/08_reporting/private/retrospective_audit/{target}_predictions.csv
+  load_args:
+    keep_default_na: false
+
+"retrospective_context__{target}":
+  type: json.JSONDataset
+  filepath: data/08_reporting/retrospective_audit/{target}_context.json
+
+"detector_baseline__{target}":
+  type: json.JSONDataset
+  filepath: data/08_reporting/retrospective_audit/{target}_baseline.json
+
+"retrospective_cells__{target}":
+  type: pandas.CSVDataset
+  filepath: data/08_reporting/retrospective_audit/{target}_cells.csv
+
+"retrospective_sources__{target}":
+  type: pandas.CSVDataset
+  filepath: data/08_reporting/retrospective_audit/{target}_sources.csv
+
+"pub_retrospective_cells__{target}":
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: pandas.CSVDataset
+    filepath: docs/artifacts/retrospective_{target}_cells.csv
+  artifact_path: tables
+
+"pub_retrospective_sources__{target}":
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: pandas.CSVDataset
+    filepath: docs/artifacts/retrospective_{target}_sources.csv
+  artifact_path: tables
+
+pub_retrospective_audit_summary:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: json.JSONDataset
+    filepath: docs/artifacts/retrospective_audit_summary.json
+  artifact_path: results
+
+pub_retrospective_reference_check:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: json.JSONDataset
+    filepath: docs/artifacts/retrospective_reference_check.json
+  artifact_path: results
+
+pub_detector_baseline_summary:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: json.JSONDataset
+    filepath: docs/artifacts/detector_baseline_summary.json
+  artifact_path: results
+
+pub_pool_objective_sensitivity:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: json.JSONDataset
+    filepath: docs/artifacts/pool_objective_sensitivity.json
+  artifact_path: results
+
+pub_checkpoint_comparison:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: json.JSONDataset
+    filepath: docs/artifacts/checkpoint_comparison.json
+  artifact_path: results
+
+pub_original_policy_coverage:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: json.JSONDataset
+    filepath: docs/artifacts/original_policy_coverage.json
+  artifact_path: results
+
+pub_source_baseline_check:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: json.JSONDataset
+    filepath: docs/artifacts/source_baseline_check.json
+  artifact_path: results
+
+paper_objective_table:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: text.TextDataset
+    filepath: docs/tables/objective_associations.qmd
+  artifact_path: tables
+
+paper_baseline_table:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: text.TextDataset
+    filepath: docs/tables/clean_baselines.qmd
+  artifact_path: tables
+
+paper_checkpoint_table:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: text.TextDataset
+    filepath: docs/tables/checkpoint_policies.qmd
+  artifact_path: tables
+
+paper_coverage_table:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: text.TextDataset
+    filepath: docs/tables/original_coverage.qmd
+  artifact_path: tables
+
+fig_objective_sensitivity:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: matplotlib.MatplotlibDataset
+    filepath: docs/figures/fig_objective_sensitivity.png
+    save_args:
+      dpi: 300
+  artifact_path: figures
+
+# --- manuscript reporting from public aggregates --------------------------
 pub_surrogate_excluded_sensitivity:
   type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
   dataset:

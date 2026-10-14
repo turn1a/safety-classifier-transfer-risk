@@ -6,7 +6,9 @@
 
 The audit found 1,054 verified injection-to-benign prediction changes among 4,009 successful source-attack records with target injection baselines, a pooled conditional rate of 26.3%. Across ten surrogate macro summaries, mean CKA has rho = 0.830 and exact two-sided p = 0.0047 under an exchangeability null for the designed pool. M1 minus M2 is 33.1 percentage points, with p = 0.05. The three-versus-three design cannot meet the project's strict p < 0.05 rule.
 
-The historical BiLSTM has batch-dependent padding behavior. A saved-outcome sensitivity excluding it gives rho = 0.800 and p = 0.014 among nine transformers. The paper also documents semantic-constraint changes, mixed task labels, shared training sources, success-conditioned cohorts, fresh-head seeding, and model provenance limits. These results are exploratory classifier prediction measurements.
+The historical BiLSTM has batch-dependent padding behavior. Excluding it gives rho = 0.800 (p = 0.014) for conditional transfer among nine transformers, but rho = 0.400 (p = 0.29) for source-success-gated flips per attempted trial. Local inference over all returned transformer candidates adds 405 changes from failed source searches, for 1,403 target changes in 8,595 trials (16.3%) and rho = 0.733 (p = 0.031) under that separate policy. The outcome definition materially affects the association; no held-out surrogate selector is validated.
+
+Clean-input checks expose different operating points: deepset flags 60 of 104 canonically benign test inputs, while ProtectAI and Prompt Guard 22M flag none. A 278-pair blinded semantic/intent review is prepared for two independent human reviewers. Local embedding and bidirectional entailment screens provide diagnostics, with truncation coverage reported. Human validity judgments and downstream effectiveness remain pending.
 
 ## Paper and results
 
@@ -14,11 +16,17 @@ The historical BiLSTM has batch-dependent padding behavior. A saved-outcome sens
 - [Paper](https://turn1a.github.io/safety-classifier-transfer-risk/paper.html)
 - [Paper PDF](https://turn1a.github.io/safety-classifier-transfer-risk/paper.pdf)
 - [Study guide: models, datasets, and metrics](https://turn1a.github.io/safety-classifier-transfer-risk/guide.html)
+- [Validity checks and private review instructions](https://turn1a.github.io/safety-classifier-transfer-risk/validation.html)
 - [Implementation](https://turn1a.github.io/safety-classifier-transfer-risk/pipeline.html)
 - [Target audit summary](docs/artifacts/target_audit_summary.json)
 - [Target audit cells](docs/artifacts/target_audit_cells.csv)
 - [Source aggregates](docs/artifacts/target_audit_sources.csv)
 - [BiLSTM-excluded sensitivity](docs/artifacts/surrogate_excluded_sensitivity.json)
+- [Outcome and equal-trial selection sensitivity](docs/artifacts/pool_objective_sensitivity.json)
+- [Distinct-original policy coverage](docs/artifacts/original_policy_coverage.json)
+- [Common-source checkpoint comparison](docs/artifacts/checkpoint_comparison.json)
+- [Clean-input confusion counts](docs/artifacts/detector_baseline_summary.json)
+- [Computational pair screens](docs/artifacts/semantic_screen_summary.json)
 - [Training-only CKA sensitivity](docs/artifacts/training_probe_similarity_sensitivity.json)
 - [Historical conditional target-benign results](docs/artifacts/master_results_table.csv)
 - [Public run metrics](docs/artifacts/run_metrics.json)
@@ -72,13 +80,28 @@ just cka-train-sensitivity
 
 `audit-target` runs frozen-target inference over saved attack texts. `audit-report` publishes existing aggregates. `prepare-training-cka` materializes the saved training split; `cka-train-sensitivity` recomputes training-only CKA serially on MPS. These stages require their saved inputs. Full experimental reproduction is expensive and requires model access, including gated Hugging Face models.
 
+The following opt-in stages use saved inputs without training or attack search:
+
+```bash
+just prepare-semantic-review
+just build-review-tools
+just audit-saved-candidates
+just audit-detector-baselines
+just summarize-original-coverage
+just screen-review-sample
+```
+
+Preparation and original-coverage reduction load no models. Classifier and computational screens run serially on the local device; missing public screening weights are downloaded through the catalog. The private review tools are `data/08_reporting/private/semantic_audit/reviewer_1.html` and `reviewer_2.html`. They contain the same fixed blinded sample, separate local progress, resume imports, and separate exports. `just review-pairs reviewer_1 8765` and `just review-pairs reviewer_2 8766` serve the respective tools on loopback. See the [review guide](docs/validation.qmd) before importing independently completed exports.
+
 ## Implementation and provenance
 
 The [pure core](src/transfer_risk/lib/) contains deterministic algorithms. [Catalog configuration](conf/base/catalog.yml) owns data, model sources, checkpoints, attack partitions, and report outputs. The dynamic attack graph expands by surrogate, recipe, and example shard, with resumption through `--only-missing-outputs`.
 
 The saved run uses root seed `20260616` and the environment in `uv.lock`. Its implementation has two known defects: BiLSTM predictions and representations depend on batch padding, and fresh transformer-head initialization preceded the training seed. Main retains that historical model and attack code, with corrected saved-data reporting. The paper's measurements have not been regenerated with fixed training code.
 
-The separate `codex/methodology-recompute` branch corrects padding for newly trained BiLSTMs, seeds fresh transformer heads, and makes torch attack token limits explicit. A rerun could change CKA ordering, group membership, source successes, target flip counts, and correlations; the direction is unknown. The token-limit change has no demonstrated effect on this run because all saved limits were already 512. [Recomputation notes](docs/recomputation.md) distinguish the fixes from unresolved task, semantic-validity, and provenance limits. Use an isolated worktree and separate output paths for any future rerun; switching branches does not isolate saved model and attack files.
+The separate [`codex/methodology-recompute` branch](https://github.com/turn1a/safety-classifier-transfer-risk/tree/codex/methodology-recompute) corrects padding, seeds fresh transformer heads, and makes torch token limits explicit. It also implements a prospective prompt-injection protocol with grouped held-out partitions, controlled seed replicates, a separate frozen replication target, disjoint representation and calibration data, clean-input gates, immutable identities, offline attack assets, isolated output paths, selection-lock checks, and validity-aware comparison with random and source-only baselines. New catalog execution adapters are exercised with synthetic tests. The protocol still requires reviewed corpus data and realized pinned model/asset manifests before execution; no replacement experiment has run.
+
+A rerun could change CKA ordering, group membership, source successes, target counts, and correlations; the direction is unknown. The historical token-limit change has no demonstrated effect because all saved limits were already 512. [Recomputation notes](docs/recomputation.md) distinguish measured local checks, branch corrections, and unavailable experimental evidence. Switching branches does not isolate ignored checkpoints or attack artifacts.
 
 The study measures bounded classifier transfer behavior and does not certify robustness. [infra/README.md](infra/README.md) documents the completed cloud sweep and its execution controls.
 

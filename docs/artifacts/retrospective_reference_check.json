@@ -1,0 +1,28 @@
+{
+  "counts_agree": true,
+  "reference_cells_sha256": "abe9facc8ff62112203c541fb671e8c698958020c75f19eaed872f9e4d25ea35",
+  "checked_cells": 45,
+  "checked_count_columns": [
+    "source_successful",
+    "target_original_injection",
+    "true_target_flips"
+  ],
+  "retained_surrogates": [
+    "bert-base-ft",
+    "deberta-base-ft-seed",
+    "deberta-base-pi-v1",
+    "deberta-small-pi-v2",
+    "deepset-deberta-injection",
+    "electra-small-ft",
+    "llama-prompt-guard-22m",
+    "llama-prompt-guard-86m",
+    "roberta-base-ft"
+  ],
+  "aggregate_counts": {
+    "attempted": 8595,
+    "source_successful": 3704,
+    "target_original_positive_successful": 3410,
+    "verified_flips_source_successful": 998
+  },
+  "interpretation": "Aggregate prediction agreement does not establish historical weight identity."
+}

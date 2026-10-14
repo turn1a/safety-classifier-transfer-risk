@@ -34,7 +34,11 @@ def _structure() -> dict[str, Any]:
         conf_source=_CONF_SOURCE, env=env, base_env="base", default_run_env="local"
     )
     params = loader["parameters"]
-    return {"surrogates": list(params["models"]["surrogates"]), "attacks": dict(params["attacks"])}
+    return {
+        "surrogates": list(params["models"]["surrogates"]),
+        "attacks": dict(params["attacks"]),
+        "retrospective_audit": dict(params.get("retrospective_audit", {})),
+    }
 
 
 def surrogate_specs() -> list[dict[str, Any]]:
@@ -45,3 +49,14 @@ def surrogate_specs() -> list[dict[str, Any]]:
 def attack_params() -> dict[str, Any]:
     """Return the attack parameters (recipes, eval_set_size, shard_size, ...) for the build env."""
     return dict(_structure()["attacks"])
+
+
+def retrospective_target_specs() -> list[str]:
+    """Return configured classifier targets for the saved-candidate audit."""
+    return list(_structure()["retrospective_audit"]["targets"])
+
+
+def baseline_detector_specs() -> list[str]:
+    """Return archived transformers and the configured reference target."""
+    names = [spec["name"] for spec in surrogate_specs() if spec["kind"] != "bilstm"]
+    return [str(_structure()["retrospective_audit"]["reference_target"]), *names]

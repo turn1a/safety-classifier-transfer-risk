@@ -1,0 +1,9 @@
+# Human review preparation uses saved attacks and no model inference.
+semantic_audit:
+  # Preserve the historical attacks-stage evaluation set and clipping.
+  eval_set_size: 191
+  max_prompt_chars: 3200
+  # Independent draws from source/surrogate/recipe strata, deduplicated across strata.
+  pairs_per_stratum: 2
+  # Fixed private-tool roles; independent labels are still required for resolution.
+  reviewer_ids: [reviewer_1, reviewer_2]

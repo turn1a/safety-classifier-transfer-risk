@@ -1,0 +1,4 @@
+target,source,attempted,source_successful,source_failed,source_skipped,source_other,target_original_positive,target_original_benign,target_original_positive_successful,verified_flips_source_successful,verified_flips_source_failed,verified_flips_source_skipped,verified_flips_source_other,verified_flips_all_candidates,originally_benign_candidates_benign,source_gated_yield,all_candidate_yield,source_conditional_flip_rate,all_candidate_conditional_flip_rate
+deepset-deberta-injection,Lakera/gandalf_ignore_instructions,4040,2302,1593,145,0,3920,120,2199,147,33,0,0,180,120,0.0363861386138613,0.0445544554455445,0.0668485675306957,0.0459183673469387
+deepset-deberta-injection,deepset/prompt-injections,1080,449,171,460,0,1080,0,449,1,0,0,0,1,0,0.0009259259259259,0.0009259259259259,0.0022271714922048,0.0009259259259259
+deepset-deberta-injection,jackhhao/jailbreak-classification,2520,821,1464,235,0,2480,40,821,0,0,0,0,0,40,0.0,0.0,0.0,0.0

@@ -5,6 +5,7 @@ project:
     - index.qmd
     - paper.qmd
     - guide.qmd
+    - validation.qmd
     - pipeline.qmd
     - recomputation.md
   resources:
@@ -32,6 +33,8 @@ website:
         text: Paper
       - href: guide.qmd
         text: Study guide
+      - href: validation.qmd
+        text: Validity checks
       - href: pipeline.qmd
         text: Implementation
       - href: recomputation.md
