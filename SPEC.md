@@ -186,7 +186,7 @@ The original five-phase implementation plan is retained here as history:
 | Attacks and transfer       | Five in-process TextAttack recipes, sharding, resume, and original conditional target-benign output implemented.                                                                             |
 | Audit and reporting        | Target audit, audit finalization, audit reporting, source-excluded sensitivity, training-only CKA sensitivity, current figures, and public aggregate artifacts added after the original run. |
 
-The original protocol expected a same-backbone CKA near 0.9 and initially treated a target benign prediction after source success as transfer. The completed audit found the same-backbone anchor at mean CKA 0.475 and replaced the primary outcome with verified target injection-to-benign rates. The original plan's intended predictor feature set and holdout evaluation were not implemented as research evidence.
+The original protocol expected a same-backbone CKA near 0.9 and initially treated a target benign prediction after source success as transfer. The completed audit measured a same-backbone mean CKA of 0.475 and replaced the primary outcome with verified target injection-to-benign rates. The original plan's intended predictor feature set and holdout evaluation were not implemented as research evidence.
 
 ## Reproducibility
 
