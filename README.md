@@ -8,7 +8,7 @@ The audit found 1,054 verified injection-to-benign prediction changes among 4,00
 
 The historical BiLSTM has batch-dependent padding behavior. Excluding it gives rho = 0.800 (p = 0.014) for conditional transfer among nine transformers, but rho = 0.400 (p = 0.29) for source-success-gated flips per attempted trial. Local inference over all returned transformer candidates adds 405 changes from failed source searches, for 1,403 target changes in 8,595 trials (16.3%) and rho = 0.733 (p = 0.031) under that separate policy. The outcome definition materially affects the association; no held-out surrogate selector is validated.
 
-Clean-input checks expose different operating points: deepset flags 60 of 104 canonically benign test inputs, while ProtectAI and Prompt Guard 22M flag none. A 278-pair blinded semantic/intent review is prepared for two independent human reviewers. Local embedding and bidirectional entailment screens provide diagnostics, with truncation coverage reported. Human validity judgments and downstream effectiveness remain pending.
+Clean-input checks expose different operating points: deepset flags 60 of 104 canonically benign test inputs, while ProtectAI and Prompt Guard 22M flag none. The broad 278-pair semantic/intent audit remains available. A separate staged review covers all 1,318 exact target-changing pairs from the nine-transformer analysis. Its first stage samples 300 changed trial occurrences uniformly without replacement from 1,403, then deduplicates them to 291 display pairs; 1,027 pairs remain for the full review. Actual human judgments are pending. Local embedding and bidirectional entailment screens are diagnostics only; they establish neither validity nor downstream effectiveness.
 
 ## Paper and results
 
@@ -26,6 +26,7 @@ Clean-input checks expose different operating points: deepset flags 60 of 104 ca
 - [Distinct-original policy coverage](docs/artifacts/original_policy_coverage.json)
 - [Common-source checkpoint comparison](docs/artifacts/checkpoint_comparison.json)
 - [Clean-input confusion counts](docs/artifacts/detector_baseline_summary.json)
+- [Staged flip-review preparation](docs/artifacts/semantic_flip_review_preparation.json)
 - [Computational pair screens](docs/artifacts/semantic_screen_summary.json)
 - [Training-only CKA sensitivity](docs/artifacts/training_probe_similarity_sensitivity.json)
 - [Historical conditional target-benign results](docs/artifacts/master_results_table.csv)
@@ -50,7 +51,7 @@ just paper-report
 just docs
 ```
 
-Every commit runs both register passes on changed Markdown, Quarto source, text files, and SVG labels. A commit-message hook checks every commit message. The language checker and rules require a local `~/dev/vl-branding` checkout. SVG labels are checked as text, with independent visual styling. The independent read-through uses the Codex CLI with the model pinned in `.register-model`, currently `gpt-6.1-sol`. It runs in a temporary directory with a read-only sandbox and requires a complete structured verdict. A failed or incomplete read blocks approval; the script has no alternate-model retry. Approvals are cached against the subject bytes, model, rules, and reader implementation.
+Every commit runs both register passes on changed Markdown, Quarto source, text files, and SVG labels. A commit-message hook checks every commit message. The language checker and rules require a local `~/dev/vl-branding` checkout. SVG labels are checked as text, with independent visual styling. The repository adapter calls the installed `~/dev/vl-branding/checks/register-pass.sh`, whose qualified default is Codex `gpt-6.1-sol` at high effort through ChatGPT subscription authentication. The installed reader verifies authentication, provider, model, effort, and complete text coverage. Inherited provider/model/effort overrides are ignored by the adapter. Failed or incomplete reads block approval; provider failure cannot select another provider or API billing. Only matching installed-reader approvals can satisfy the gate.
 
 ```bash
 just register --all
@@ -93,13 +94,28 @@ just screen-review-sample
 
 Preparation and original-coverage reduction load no models. Classifier and computational screens run serially on the local device; missing public screening weights are downloaded through the catalog. The private review tools are `data/08_reporting/private/semantic_audit/reviewer_1.html` and `reviewer_2.html`. They contain the same fixed blinded sample, separate local progress, resume imports, and separate exports. `just review-pairs reviewer_1 8765` and `just review-pairs reviewer_2 8766` serve the respective tools on loopback. See the [review guide](docs/validation.qmd) before importing independently completed exports.
 
+## Staged review of target-changing candidates
+
+```bash
+just prepare-flip-review
+just build-flip-review-tools
+just review-flips reviewer_1
+just review-flips reviewer_2
+just import-flip-reviews /absolute/reviewer_1.csv /absolute/reviewer_2.csv
+just flip-review-results
+```
+
+The fixed cohort and role-specific tools are private under `data/08_reporting/private/semantic_flip_audit/`. The verified browser route uses loopback addresses `http://127.0.0.1:8767/` and `http://127.0.0.1:8768/`. JSON exports restore progress for the matching role; CSV exports supply independent judgments for import. Explicit reuse of genuine old exports requires exact text and role matches, retains provenance, and creates a separate progress backup for each reviewer. Each reviewer may restore only their own matching backup. Existing broad-review tools and browser state remain separate.
+
+The first-stage estimate retains its fixed 300-occurrence draw and repeated-pair multiplicities. It uses exact hypergeometric 95% intervals over the changed-trial population, divided by all 8,595 attempts. The source-success-gated outcome uses source success AND human validity on that same draw. Unresolved judgments widen intervals and can withhold point estimates. Full-review outputs report literal valid/invalid/unresolved counts and logical yield and original-union bounds. Preparation publishes `semantic_flip_review_preparation.json`; `semantic_flip_review_summary.json` remains absent until explicit finalization. Reporting accepts that absence and rejects finalized evidence with a different opaque preparation binding, population, or design.
+
 ## Implementation and provenance
 
 The [pure core](src/transfer_risk/lib/) contains deterministic algorithms. [Catalog configuration](conf/base/catalog.yml) owns data, model sources, checkpoints, attack partitions, and report outputs. The dynamic attack graph expands by surrogate, recipe, and example shard, with resumption through `--only-missing-outputs`.
 
 The saved run uses root seed `20260616` and the environment in `uv.lock`. Its implementation has two known defects: BiLSTM predictions and representations depend on batch padding, and fresh transformer-head initialization preceded the training seed. Main retains that historical model and attack code, with corrected saved-data reporting. The paper's measurements have not been regenerated with fixed training code.
 
-The separate [`codex/methodology-recompute` branch](https://github.com/turn1a/safety-classifier-transfer-risk/tree/codex/methodology-recompute) corrects padding, seeds fresh transformer heads, and makes torch token limits explicit. It also implements a prospective prompt-injection protocol with grouped held-out partitions, controlled seed replicates, a separate frozen replication target, disjoint representation and calibration data, clean-input gates, immutable identities, offline attack assets, isolated output paths, selection-lock checks, and validity-aware comparison with random and source-only baselines. New catalog execution adapters are exercised with synthetic tests. The protocol still requires reviewed corpus data and realized pinned model/asset manifests before execution; no replacement experiment has run.
+The separate [`codex/methodology-recompute` branch](https://github.com/turn1a/safety-classifier-transfer-risk/tree/codex/methodology-recompute) corrects padding, seeds fresh transformer heads, and makes torch token limits explicit. It also implements a prospective prompt-injection protocol with grouped held-out partitions, controlled seed replicates, a separate frozen replication target, disjoint representation and calibration data, clean-input gates, immutable identities, offline attack assets, isolated output paths, selection-lock checks, and validity-aware comparison with random and source-only baselines. New catalog execution adapters are exercised with synthetic tests. Model/tokenizer payloads, transactional metadata, and completion hashes are persisted together and verified on recovery. Fresh gates validate resumed execution before inference. Classifiers receive registered lower-trust text only; diagnostics retain full token counts, token limits, truncation, and missing measurements. Criterion-level adjudication preserves unresolved evidence. Statistical inference conditions on the three realized training replicates. The optional application executor is disabled and unimplemented. The protocol still requires reviewed corpus data and realized pinned model/asset manifests before execution; no replacement experiment has run.
 
 A rerun could change CKA ordering, group membership, source successes, target counts, and correlations; the direction is unknown. The historical token-limit change has no demonstrated effect because all saved limits were already 512. [Recomputation notes](docs/recomputation.md) distinguish measured local checks, branch corrections, and unavailable experimental evidence. Switching branches does not isolate ignored checkpoints or attack artifacts.
 

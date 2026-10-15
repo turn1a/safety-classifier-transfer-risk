@@ -957,6 +957,22 @@ pub_semantic_flip_preparation:
 pub_semantic_flip_review:
   type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
   dataset:
-    type: json.JSONDataset
+    type: transfer_risk.datasets.optional_review_dataset.OptionalReviewDataset
     filepath: docs/artifacts/semantic_flip_review_summary.json
   artifact_path: results
+
+paper_flip_review_table:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: text.TextDataset
+    filepath: docs/tables/flip_review_outcomes.qmd
+  artifact_path: tables
+
+fig_flip_review_coverage:
+  type: kedro_mlflow.io.artifacts.MlflowArtifactDataset
+  dataset:
+    type: matplotlib.MatplotlibDataset
+    filepath: docs/figures/fig_flip_review_coverage.png
+    save_args:
+      dpi: 300
+  artifact_path: figures

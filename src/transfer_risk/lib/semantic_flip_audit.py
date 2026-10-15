@@ -346,22 +346,33 @@ def summarize_flip_review(
         raise ValueError(msg)
     statuses = dict(zip(consensus["pair_id"], consensus["status"], strict=True))
     resolved = sum(value in {"valid", "invalid"} for value in statuses.values())
+    reviewed = int((consensus.get("reviewer_count", pd.Series(dtype=int)) > 0).sum())
+    complete = int(
+        (
+            consensus.get("complete_review_count", pd.Series(dtype=int)) == _MIN_ASSOCIATION_UNITS
+        ).sum()
+    )
     result: dict[str, Any] = {
         "schema_version": "semantic-flip-review-v1",
-        "review_status": "census_resolved"
+        "review_preparation_id": fingerprint(
+            ["public-semantic-flip-preparation-v1", cohort["cohort_fingerprint"]]
+        ),
+        "sampling_design": (
+            "SRS without replacement of changed trial occurrences; "
+            "pair deduplication after sampling"
+        ),
+        "review_status": "complete"
+        if complete == len(ids)
+        else ("in_progress" if reviewed or resolved else "pending"),
+        "validity_status": "census_resolved"
         if resolved == len(ids)
-        else ("in_progress" if resolved else "pending"),
+        else ("partially_resolved" if resolved else "unresolved"),
         "attempted_trials": cohort["attempted_trials"],
         "classifier_flip_trials": len(cohort["trials"]),
         "distinct_pair_workload": len(ids),
         "resolved_pairs": resolved,
-        "reviewed_pairs": int((consensus.get("reviewer_count", pd.Series(dtype=int)) > 0).sum()),
-        "two_reviewer_complete_pairs": int(
-            (
-                consensus.get("complete_review_count", pd.Series(dtype=int))
-                == _MIN_ASSOCIATION_UNITS
-            ).sum()
-        ),
+        "reviewed_pairs": reviewed,
+        "two_reviewer_complete_pairs": complete,
         "unresolved_pairs": len(ids) - resolved,
         "stage_one_sample_trials": len(cohort["sample_occurrence_ids"]),
         "stage_one_distinct_pairs": dataset["stage_one_pair_count"] if dataset else 0,

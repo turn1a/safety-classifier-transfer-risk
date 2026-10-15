@@ -2,7 +2,7 @@
 title: "Representational similarity and audited attack transfer for a prompt-injection detector"
 author: "Aspen Hazel Olszewska"
 date: "2026-07-14"
-date-modified: "2026-10-14"
+date-modified: "2026-10-15"
 description: "A saved-data study of CKA, conditional attack transfer, fixed-trial yield, and classifier prediction changes."
 bibliography: references.bib
 link-citations: true
@@ -24,7 +24,7 @@ format:
       x: 18mm
       y: 20mm
 abstract: |
-  This study examines how outcome definitions affect the association between representational similarity and text-attack transfer. Ten surrogates receive five adapted TextAttack recipes against 191 canonical-positive inputs. A balanced 2,000-prompt probe supplies linear Centered Kernel Alignment (CKA). An audit finds 1,054 target injection-to-benign prediction changes among 4,009 successful source-attack records with target-positive baselines (26.3%). After excluding a BiLSTM affected by padding dependence, CKA correlates with the macro conditional flip rate at rho = 0.800 (p = 0.014), but with source-success-gated flips per attempted trial at rho = 0.400 (p = 0.29). Local reevaluation of all saved candidates adds 405 target changes from failed source searches: 1,403 changes across 8,595 transformer trials (16.3%), with rho = 0.733 (p = 0.031) for this separate all-candidate policy. Enumerated p-values condition on an exchangeability null for the designed pool. Clean-input checks show substantial operating-point differences between checkpoints. Two independent human reviews of a 278-pair sample are pending; embedding and bidirectional entailment screens provide diagnostics only. The findings support an exploratory, outcome-dependent association. They establish neither a validated surrogate selector nor operational prompt-injection evasion. Model-training defects and a prospective controlled redesign are implemented on a separate branch, without replacement training or attack results.
+  This study examines how outcome definitions affect the association between representational similarity and text-attack transfer. Ten surrogates receive five adapted TextAttack recipes against 191 canonical-positive inputs. A balanced 2,000-prompt probe supplies linear Centered Kernel Alignment (CKA). An audit finds 1,054 target injection-to-benign prediction changes among 4,009 successful source-attack records with target-positive baselines (26.3%). After excluding a BiLSTM affected by padding dependence, CKA correlates with the macro conditional flip rate at rho = 0.800 (p = 0.014), but with source-success-gated flips per attempted trial at rho = 0.400 (p = 0.29). Local reevaluation of all saved candidates adds 405 target changes from failed source searches: 1,403 changes across 8,595 transformer trials (16.3%), with rho = 0.733 (p = 0.031) for this separate all-candidate policy. Enumerated p-values condition on an exchangeability null for the designed pool. Clean-input checks show substantial operating-point differences between checkpoints. Human review remains pending for the broad 278-pair audit and a separate staged review of 1,318 target-changing pairs; embedding and bidirectional entailment screens provide diagnostics only. The findings support an exploratory, outcome-dependent association. They establish neither a validated surrogate selector nor operational prompt-injection evasion. A separate branch implements training-code corrections and a prospective controlled redesign. Its synthetic tests supply no replacement training or attack results.
 ---
 
 ::: {.content-visible when-format="html"}
@@ -216,11 +216,15 @@ The BiLSTM-excluded sensitivity removes its five cells from the saved aggregate 
 
 ### Retrospective checkpoint and validity checks
 
-The all-candidate pass excludes the affected BiLSTM. It deduplicates exact original/candidate pairs before local inference, then restores every trial's source-status and recipe accounting. The ProtectAI reference reproduces the earlier source-success counts in all 45 retained cells. Current clean-input positive misses also match saved skipped trials in all 135 source/model/recipe strata, as recorded in the [source baseline check](artifacts/source_baseline_check.json). Current weight and tokenizer fingerprints identify this pass; matching counts cannot reconstruct fingerprints missing from the original execution.
+The all-candidate pass excludes the affected BiLSTM. It deduplicates exact original/candidate pairs before local inference, then restores every trial's source-status and recipe accounting. The ProtectAI reference reproduces the earlier source-success counts in all 45 retained cells. Current clean-input positive misses also match saved skipped trials in all 135 source/model/recipe strata, as recorded in the [source baseline check](artifacts/source_baseline_check.json). Current weight and tokenizer fingerprints identify this pass. Reporting checks current candidate and independent clean-input context identities and inference settings, and revalidates the reference-cell digest and counts. Matching current evidence cannot reconstruct fingerprints missing from the original execution.
 
 Two existing detector checkpoints, deepset injection and Prompt Guard 2 22M, are also evaluated on saved candidates. Each is excluded from its own source pool. Cross-checkpoint comparison uses the intersection of seven retained sources, giving 6,685 attempted trials per target. These checkpoints were originally surrogates, share the DeBERTa family, and have different positive objectives. They provide retrospective checkpoint checks. No independent CKA selector was calibrated or externally validated on them.
 
 For validity review, all 9,550 saved trials are deduplicated to 8,137 exact pairs. Independent two-pair draws within each source/surrogate/recipe stratum produce a 278-pair blinded sample after deduplication. Union-inclusion probabilities account for pairs appearing in multiple strata. Two human reviewers separately assess preserved meaning, preserved injection intent, and whether the original is an injection. Uncertain judgments and disagreements remain unresolved. The sample supports overall review, without precise validity estimates for all 50 cells.
+
+A separate staged review targets all 1,318 exact target-changing pairs from the nine-transformer analysis. Its sampling unit is a changed trial occurrence. A root-seeded simple random sample without replacement selects 300 of 1,403 changed occurrences, then deduplication produces 291 first-stage display pairs. The remaining 1,027 distinct pairs follow in a fixed seeded order. Repeated sampled pairs retain their multiplicities in the estimator. Both candidate policies use this same draw; the gated sampled outcome is source success AND human validity. Exact equal-tailed hypergeometric 95% population-count intervals divide by all 8,595 attempts. Missing, uncertain, or conflicting judgments widen the limits over compatible counts and can leave the point estimate unidentified.
+
+Full-cohort review reports exact confirmed-valid, invalid, and unresolved counts with logical finite-population yield bounds and distinct-original union bounds. These logical bounds are separate from fixed-sample confidence intervals. Per-cell validity, distinct-original validity, and designed-pool validity associations are not inferred from the interim sample. Review activity and completion are recorded separately from validity resolution.
 
 A pinned MiniLM-L12 encoder supplies normalized embedding cosines, and a pinned DeBERTa NLI classifier scores entailment and contradiction in both directions [@minilm-l12-screen; @deberta-nli-screen]. These models run locally, with 256-token single-text and 512-token paired-text windows. Scores are hidden from the human reviewers. They are uncalibrated diagnostics for this corpus and cannot establish intent preservation or downstream effectiveness. The [validation guide](validation.qmd) records the models, review rubric, truncation coverage, and import procedure.
 
@@ -292,7 +296,15 @@ The nine-transformer all-candidate pass evaluates 8,595 trials. ProtectAI predic
 
 {{< include tables/checkpoint_policies.qmd >}}
 
-The 278-pair human review is pending. Computational screens have embedding cosine median 0.851 (interquartile range 0.651 to 0.966) and minimum bidirectional entailment-probability median 0.858 (interquartile range 0.071 to 0.976). The encoder truncates one or both texts in 65 pairs (23.4%); the NLI window truncates 64 pairs (23.0%). These are unweighted sample diagnostics, including truncated scores. High similarity can coexist with changed intent, so no semantic-valid attack rate is reported.
+### Human-validity review coverage
+
+The broad 278-pair audit and the separate 1,318-pair changed-candidate review both await genuine independent judgments. @fig-flip-review shows the staged workload; @tbl-flip-review reports pending evidence and literal bounds. The maximum exact interval endpoint distance for a fully resolved 300-occurrence sample is about 0.85 percentage points of all-attempt yield. This is a property of the sampling design; no completed validity estimate is available.
+
+![Changed-trial sampling precedes pair deduplication. The fixed first stage displays 291 pairs from 300 sampled occurrences; 1,027 further pairs complete the 1,318-pair cohort. Review completion and validity resolution remain separate.](figures/fig_flip_review_coverage.png){#fig-flip-review fig-alt="A simple random sample selects 300 of 1,403 changed trials before deduplication to 291 pairs. The full review has 1,318 pairs, with 1,027 remaining. Human review is pending." width=100%}
+
+{{< include tables/flip_review_outcomes.qmd >}}
+
+Computational screens on the broad 278-pair sample have embedding cosine median 0.851 (interquartile range 0.651 to 0.966) and minimum bidirectional entailment-probability median 0.858 (interquartile range 0.071 to 0.976). The encoder truncates one or both texts in 65 pairs (23.4%); the NLI window truncates 64 pairs (23.0%). These are unweighted sample diagnostics, including truncated scores. High similarity can coexist with changed intent, so no semantic-valid attack rate is reported.
 
 ### Post-hoc sensitivities
 

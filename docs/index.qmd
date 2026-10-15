@@ -2,7 +2,7 @@
 title: "Attack transfer between text safety classifiers"
 author: "Aspen Hazel Olszewska"
 date: "2026-07-14"
-date-modified: "2026-10-14"
+date-modified: "2026-10-15"
 description: "How outcome definitions affect representational similarity and measured attack transfer between text classifiers."
 toc: true
 toc-depth: 2
@@ -98,7 +98,11 @@ The [pure core](https://github.com/turn1a/safety-classifier-transfer-risk/tree/m
 
 `just paper-report` regenerates manuscript tables, figures, fixed-trial associations, and common-source checkpoint comparisons from public aggregates and configuration. `just docs` renders the site. The [implementation page](pipeline.qmd) describes the execution stages and saved-output boundaries.
 
-The [validity guide](validation.qmd) explains the 278-pair independent review and completed local embedding/NLI screens. The scores diagnose text changes; they supply no semantic-validity labels. No downstream application effectiveness rate is available. Clean-input checks also show different behavior: deepset flags 60 of 104 canonical benign inputs, while ProtectAI and Prompt Guard 22M flag none in this sample.
+The [validity guide](validation.qmd) explains the broad 278-pair audit, the separate staged review of 1,318 target-changing pairs, and completed local embedding/NLI screens. A fixed sample of 300 changed trial occurrences is displayed as 291 first-stage pairs, followed by 1,027 remaining pairs. Genuine judgments are pending.
+
+![Sampling selects trial occurrences before deduplicating reviewer display. Completion and validity resolution have separate counts.](figures/fig_flip_review_coverage.png){fig-alt="The staged review draws 300 of 1,403 changed occurrences, displays 291 sampled pairs, and retains 1,027 further pairs for the full 1,318-pair review." width=100%}
+
+ The scores diagnose text changes; they supply no semantic-validity labels. No downstream application effectiveness rate is available. Clean-input checks also show different behavior: deepset flags 60 of 104 canonical benign inputs, while ProtectAI and Prompt Guard 22M flag none in this sample.
 
 ## Limits
 

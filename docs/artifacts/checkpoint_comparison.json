@@ -209,6 +209,21 @@
     "outcome": "all_returned_candidate_target_positive_to_benign_yield"
   },
   "independent_selection_validation": false,
+  "inference_context_check": {
+    "identity_and_settings_agree": true,
+    "checked_fields": [
+      "inference_weights_sha256",
+      "tokenizer_vocab_sha256",
+      "loaded_hub_revision",
+      "inference_dtype",
+      "max_seq_len",
+      "device",
+      "provenance_scope",
+      "positive_label",
+      "benign_label"
+    ],
+    "scope": "Current saved candidate and clean-input contexts; historical weights are unverified."
+  },
   "limitations": [
     "Returned candidates from failed source searches define a separate post-hoc policy.",
     "Different target objectives and operating points prevent a robustness ranking.",

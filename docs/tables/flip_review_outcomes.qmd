@@ -1,0 +1,8 @@
+| Candidate policy | Classifier flips | Valid | Invalid | Unresolved | Valid yield bounds (%) |
+| --- | ---: | ---: | ---: | ---: | ---: |
+| All returned | 1,403 | Pending | Pending | 1,403 | 0.0 to 16.3 |
+| Source-success gate | 998 | Pending | Pending | 998 | 0.0 to 11.6 |
+
+: Human-validity outcomes over all attempted trials. Bounds are logical finite-population bounds. {#tbl-flip-review tbl-colwidths="[23,15,11,11,15,25]"}
+
+Review completion: Pending (0/1,318 pairs with two complete reviews). Validity resolution: Unresolved (0/1,318 pairs). Fixed-sample yield estimates: All returned: Pending; Source-success gate: Pending.
