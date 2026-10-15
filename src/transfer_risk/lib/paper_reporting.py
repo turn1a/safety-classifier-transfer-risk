@@ -14,6 +14,7 @@ if TYPE_CHECKING:
     import pandas as pd
 
 from transfer_risk.lib.association import spearman_association
+from transfer_risk.lib.statistic_display import association_cells, format_number, format_percent
 
 _MIN_SURROGATES = 2
 
@@ -87,16 +88,40 @@ def exclude_surrogates(
         raise ValueError(msg)
     counts = {name: sum(int(row[name]) for row in retained) for name in _COUNTS}
     denominator = counts["target_original_injection"]
+    n_defined = sum(row["true_target_flip_rate_macro_mean"] is not None for row in retained)
+    reason = None
+    if n_defined != len(retained):
+        reason = (
+            f"required surrogate outcomes are undefined ({n_defined} of {len(retained)} defined)"
+        )
+    elif (
+        len({row["mean_cka"] for row in retained}) < _MIN_SURROGATES
+        or len({row["true_target_flip_rate_macro_mean"] for row in retained}) < _MIN_SURROGATES
+    ):
+        reason = "Spearman association is undefined for constant input sequences"
+    association = (
+        {
+            "rho": None,
+            "two_sided_p": None,
+            "n": len(retained),
+            "n_defined": n_defined,
+            "n_required": len(retained),
+            "exact": False,
+            "reason": reason,
+        }
+        if reason is not None
+        else spearman_association(
+            [row["mean_cka"] for row in retained],
+            [row["true_target_flip_rate_macro_mean"] for row in retained],
+        )
+    )
     return {
         "analysis_label": "post-hoc surrogate-excluded sensitivity on saved outcomes",
         "excluded_surrogates": sorted(set(excluded)),
         "n_surrogates": len(retained),
         **counts,
         "true_target_flip_rate": counts["true_target_flips"] / denominator if denominator else None,
-        "mean_cka_association": spearman_association(
-            [row["mean_cka"] for row in retained],
-            [row["true_target_flip_rate_macro_mean"] for row in retained],
-        ),
+        "mean_cka_association": association,
         "interpretation": (
             "Saved predictions and attacks are unchanged. Removing a model does not correct "
             "its historical implementation or provide independent validation. The enumerated "
@@ -169,9 +194,20 @@ def render_surrogate_table(summary: Mapping[str, Any], attempts_per_surrogate: i
                 f"{row['dbs']:.3f}",
                 f"{row['source_successful']:,}",
                 f"{row['true_target_flips']:,} / {denominator:,}",
-                f"{100 * row['true_target_flip_rate_macro_mean']:.1f}",
-                f"{pooled:.1f}" if pooled is not None else "Undefined",
-                f"{100 * row['true_target_flips'] / attempts_per_surrogate:.1f}",
+                format_percent(
+                    row["true_target_flip_rate_macro_mean"], reason="no defined recipe rates"
+                ),
+                format_number(
+                    pooled,
+                    ".1f",
+                    reason="no original target injections",
+                ),
+                format_percent(
+                    row["true_target_flips"] / attempts_per_surrogate
+                    if attempts_per_surrogate
+                    else None,
+                    reason="no attempted trials",
+                ),
             ]
         )
     return (
@@ -207,7 +243,10 @@ def render_recipe_table(cells: pd.DataFrame) -> str:
                 str(recipe),
                 f"{successes:,}",
                 f"{flips:,} / {denominator:,}",
-                f"{100 * flips / denominator:.1f}" if denominator else "Undefined",
+                format_percent(
+                    flips / denominator if denominator else None,
+                    reason="no original target injections",
+                ),
             ]
         )
     return (
@@ -244,9 +283,10 @@ def render_sensitivity_table(
                 label,
                 "10",
                 f"{cohort['true_target_flips']:,} / {cohort['target_original_injection']:,}",
-                f"{100 * cohort['true_target_flip_rate']:.1f}",
-                f"{association['rho']:.3f}",
-                f"{association['two_sided_p']:.2g}",
+                format_percent(
+                    cohort["true_target_flip_rate"], reason="no original target injections"
+                ),
+                *association_cells(association),
             ]
         )
     association = training["true_target_flip_sensitivity"][
@@ -258,9 +298,8 @@ def render_sensitivity_table(
             "Training-only probe, full cohort",
             "10",
             f"{full['true_target_flips']:,} / {full['target_original_injection']:,}",
-            f"{100 * full['true_target_flip_rate']:.1f}",
-            f"{association['rho']:.3f}",
-            f"{association['two_sided_p']:.2g}",
+            format_percent(full["true_target_flip_rate"], reason="no original target injections"),
+            *association_cells(association),
         ]
     )
     association = reduced["mean_cka_association"]
@@ -273,9 +312,10 @@ def render_sensitivity_table(
             f"{excluded} excluded, saved outcomes" if excluded else "Full pool, saved outcomes",
             str(reduced["n_surrogates"]),
             f"{reduced['true_target_flips']:,} / {reduced['target_original_injection']:,}",
-            f"{100 * reduced['true_target_flip_rate']:.1f}",
-            f"{association['rho']:.3f}",
-            f"{association['two_sided_p']:.2g}",
+            format_percent(
+                reduced["true_target_flip_rate"], reason="no original target injections"
+            ),
+            *association_cells(association),
         ]
     )
     return (

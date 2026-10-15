@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from textwrap import fill
 from typing import Any
 
 import matplotlib as mpl
@@ -26,6 +27,7 @@ from transfer_risk.lib.paper_reporting import (
 )
 from transfer_risk.lib.pool_sensitivity import build_pool_sensitivity as calculate_objectives
 from transfer_risk.lib.retrospective_comparison import compare_saved_candidate_policies
+from transfer_risk.lib.statistic_display import association_cells, format_percent
 from transfer_risk.lib.strengthening_tables import (
     render_baseline_table,
     render_coverage_table,
@@ -56,7 +58,7 @@ def build_objective_sensitivity(
     )
 
 
-def build_checkpoint_comparison(
+def build_checkpoint_comparison(  # noqa: PLR0913
     reference: pd.DataFrame,
     deepset: pd.DataFrame,
     prompt_guard: pd.DataFrame,
@@ -65,6 +67,7 @@ def build_checkpoint_comparison(
     manifest: dict[str, Any],
     params: dict[str, Any],
     baseline_check: dict[str, Any],
+    baseline_summary: dict[str, Any],
 ) -> dict[str, Any]:
     """Compare saved local checkpoints using an identical common surrogate pool."""
     if baseline_check.get("counts_agree") is not True:
@@ -81,6 +84,7 @@ def build_checkpoint_comparison(
         attempts_per_cell=int(manifest["attack_attempts_per_cell"]),
         recipes=params["recipes"],
         reference_target="protectai-v2",
+        baseline_context=baseline_summary,
     )
     report["source_baseline_check"] = baseline_check
     return report
@@ -120,8 +124,16 @@ def plot_objective_sensitivity(objectives: dict[str, Any], comparison: dict[str,
             candidate[name][outcome] if all_candidates else row[outcome]
             for name, row in zip(names, rows, strict=True)
         ]
-        axis.scatter([row["mean_cka"] for row in rows], values, color=_BLUE, s=44)
-        axis.set(xlabel="Mean CKA", title=title, ylim=(0, max(values) * 1.23))
+        points = [
+            (row["mean_cka"], value)
+            for row, value in zip(rows, values, strict=True)
+            if value is not None and np.isfinite(value)
+        ]
+        axis.scatter(
+            [point[0] for point in points], [point[1] for point in points], color=_BLUE, s=44
+        )
+        maximum = max((point[1] for point in points), default=0)
+        axis.set(xlabel="Mean CKA", title=title, ylim=(0, maximum * 1.23 if maximum > 0 else 1))
         axis.set_title(title, fontsize=12)
         axis.set_xlabel("Mean CKA", fontsize=12)
         axis.tick_params(labelsize=11)
@@ -133,10 +145,19 @@ def plot_objective_sensitivity(objectives: dict[str, Any], comparison: dict[str,
             if all_candidates
             else objectives["pools"]["surrogate_excluded"]["associations"][outcome]
         )
+        rho, probability = association_cells(stats)
+        annotation = rf"$\rho$ = {rho}" + f"\np = {probability}"
+        if stats is None or stats.get("rho") is None or stats.get("two_sided_p") is None:
+            reason = (stats or {}).get("reason") or "association unavailable"
+            rho = rho if (stats or {}).get("rho") is not None else "Undefined"
+            probability = (
+                probability if (stats or {}).get("two_sided_p") is not None else "Undefined"
+            )
+            annotation = rf"$\rho$ = {rho}" + f"\np = {probability}\n" + fill(reason, width=28)
         axis.text(
             0.04,
             0.95,
-            rf"$\rho$ = {stats['rho']:.3f}" + f"\np = {stats['two_sided_p']:.2g}",
+            annotation,
             transform=axis.transAxes,
             va="top",
             fontsize=12,
@@ -323,13 +344,21 @@ def plot_audit_flow(summary: dict[str, Any], metrics: dict[str, Any]) -> Figure:
         ((0.74, 0.39), (0.89, 0.28)),
     ]:
         _arrow(axis, start, end)
+    primary_rate = format_percent(
+        cohort["true_target_flip_rate"], reason="no original target injections", suffix="%"
+    )
+    historical_rate = format_percent(
+        cohort["conditional_target_benign_rate"], reason="no successful source attacks", suffix="%"
+    )
     rates = (
         f"Primary rate: {cohort['true_target_flips']:,} / {cohort['target_original_injection']:,} "
-        f"= {100 * cohort['true_target_flip_rate']:.1f}%     "
+        f"= {primary_rate}     "
         f"Historical conditional rate: {cohort['target_perturbed_benign']:,} / "
         f"{cohort['source_successful']:,} "
-        f"= {100 * cohort['conditional_target_benign_rate']:.1f}%"
+        f"= {historical_rate}"
     )
+    if cohort["true_target_flip_rate"] is None or cohort["conditional_target_benign_rate"] is None:
+        rates = rates.replace("     Historical", "\nHistorical")
     axis.text(0.5, 0.04, rates, ha="center", color=_INK, fontsize=10)
     return fig
 

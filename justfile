@@ -112,6 +112,23 @@ paper-report:
 prepare-semantic-review:
     uv run kedro run --pipeline semantic_audit
 
+# Freeze the separate saved-flip cohort and generate private staged tools.
+prepare-flip-review:
+    uv run kedro run --pipeline semantic_flip_audit
+
+build-flip-review-tools:
+    uv run kedro run --pipeline semantic_flip_review_tools
+
+# Defaults select separate reviewer origins on ports 8767 and 8768.
+review-flips reviewer="reviewer_1":
+    uv run python -m transfer_risk.scripts.semantic_flip_review_server serve --reviewer {{reviewer}} --open
+
+import-flip-reviews first second:
+    uv run python -m transfer_risk.scripts.semantic_flip_review_server combine --reviewer-1 {{quote(first)}} --reviewer-2 {{quote(second)}} --finalize
+
+flip-review-results:
+    uv run kedro run --pipeline semantic_flip_review
+
 # Summarize independently supplied private annotations; incomplete evidence stays unresolved.
 semantic-review-results:
     uv run kedro run --pipeline semantic_audit_review

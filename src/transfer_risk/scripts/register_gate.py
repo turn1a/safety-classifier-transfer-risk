@@ -8,7 +8,6 @@ from __future__ import annotations
 
 import argparse
 import logging
-import os
 import subprocess
 from pathlib import Path
 from tempfile import TemporaryDirectory
@@ -64,8 +63,8 @@ def run_checks(
 
     Args:
         paths: Authored files or a Git commit-message file.
-        reader: Optional self-contained reader script, primarily for checker tests.
-            The default Codex reader uses rules at ``~/dev/vl-branding``.
+        reader: Optional external gate executable, primarily for checker tests.
+            The default is the installed ``~/dev/vl-branding/checks/register-pass.sh``.
         tier: Reader context recorded with the approval.
         commit_message: Whether to omit Git's comment lines from the subject.
 
@@ -75,10 +74,7 @@ def run_checks(
     if reader is not None and not reader.is_file():
         logger.error("Register reader unavailable: %s. Both passes are required.", reader)
         return 2
-    environment = os.environ.copy()
     cache = Path.cwd() / ".register-cache"
-    environment.setdefault("REGISTER_STATE_DIR", str(cache))
-    environment.setdefault("REGISTER_RECEIPTS", str(cache / "receipts.tsv"))
     cache.mkdir(parents=True, exist_ok=True)
     status = 0
     for path in paths:
@@ -95,15 +91,9 @@ def run_checks(
         with TemporaryDirectory(prefix="risk-register-") as directory:
             subject = Path(directory) / "subject.md"
             subject.write_text(content, encoding="utf-8")
-            if reader is None:
-                outcome = review_with_codex(subject, label=str(path), tier=tier, cache=cache)
-            else:
-                result = subprocess.run(  # noqa: S603
-                    [str(reader), "--tier", tier, "--label", str(path), str(subject)],
-                    env=environment,
-                    check=False,
-                )
-                outcome = 1 if result.returncode else 0
+            outcome = review_with_codex(
+                subject, label=str(path), tier=tier, cache=cache, reader=reader
+            )
             status = max(status, outcome)
             try:
                 unchanged = _subject_content(path, commit_message=commit_message) == content

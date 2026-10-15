@@ -86,9 +86,61 @@ def build_review_dataset(candidates: Sequence[Mapping[str, Any]]) -> dict[str, A
     }
 
 
+def build_staged_review_dataset(
+    candidates: Sequence[Mapping[str, Any]],
+    *,
+    stage_one_pair_count: int,
+    sample_trial_count: int,
+    cohort_binding: str = "",
+) -> dict[str, Any]:
+    """Bind an explicit versioned queue and trial-sample boundary to exact pair texts.
+
+    Args:
+        candidates: Exact private pair rows in the frozen display order.
+        stage_one_pair_count: Distinct pairs appearing in the first trial sample.
+        sample_trial_count: Number of sampled trial occurrences before display deduplication.
+        cohort_binding: Private identity of the full trial frame, draw and input evidence.
+
+    Returns:
+        Private whitelisted dataset with a fingerprint covering queue and stage metadata.
+
+    Raises:
+        ValueError: If the stage boundary or trial count is inconsistent.
+    """
+    checked = build_review_dataset(candidates)
+    if (
+        not 0 < stage_one_pair_count <= checked["pair_count"]
+        or sample_trial_count < stage_one_pair_count
+    ):
+        msg = "staged review requires a valid pair boundary and trial sample count"
+        raise ValueError(msg)
+    by_id = {pair["pair_id"]: pair for pair in checked["pairs"]}
+    value = {
+        "schema_version": "semantic-review-staged-v1",
+        "pair_count": checked["pair_count"],
+        "pairs": [by_id[row["pair_id"]] for row in candidates],
+        "stage_one_pair_count": stage_one_pair_count,
+        "sample_trial_count": sample_trial_count,
+        "cohort_binding": cohort_binding,
+    }
+    return {
+        **value,
+        "dataset_fingerprint": hashlib.sha256(_json(value).encode("utf-8")).hexdigest(),
+    }
+
+
 def _checked_dataset(dataset: Mapping[str, Any]) -> dict[str, Any]:
     """Rebuild a dataset through the whitelist and verify its stored fingerprint."""
-    rebuilt = build_review_dataset(dataset["pairs"])
+    rebuilt = (
+        build_staged_review_dataset(
+            dataset["pairs"],
+            stage_one_pair_count=dataset["stage_one_pair_count"],
+            sample_trial_count=dataset["sample_trial_count"],
+            cohort_binding=dataset.get("cohort_binding", ""),
+        )
+        if dataset.get("schema_version") == "semantic-review-staged-v1"
+        else build_review_dataset(dataset["pairs"])
+    )
     if any(
         dataset.get(key) != rebuilt[key]
         for key in ("schema_version", "dataset_fingerprint", "pair_count")

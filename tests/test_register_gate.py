@@ -2,7 +2,6 @@
 
 from __future__ import annotations
 
-import subprocess
 from pathlib import Path
 from shlex import quote
 
@@ -59,103 +58,78 @@ def test_changes_during_review_cannot_approve_unread_text(tmp_path: Path) -> Non
     assert run_checks([paper], reader=reader) == 1
 
 
-@pytest.mark.parametrize(
-    ("verdict", "events", "expected"),
-    [
-        (
-            '{"read_complete":true,"findings":[]}',
-            '{"type":"turn.completed","usage":{"output_tokens":100}}',
-            0,
-        ),
-        (
-            '{"read_complete":false,"findings":[]}',
-            '{"type":"turn.completed","usage":{"output_tokens":100}}',
-            2,
-        ),
-        (
-            '{"read_complete":true,"findings":[]}',
-            '{"type":"turn.failed","error":{"message":"quota exhausted"}}',
-            2,
-        ),
-        (
-            '{"read_complete":true,"findings":[]}',
-            '{"type":"item.completed","item":{"type":"command_execution"}}',
-            2,
-        ),
-        ("{}", '{"type":"turn.completed","usage":{"output_tokens":100}}', 2),
-        (
-            '{"read_complete":true,"findings":[{"quote":"The audit","kind":"metaphor",'
-            '"why":"A planted finding.","fix":"Replacement."}]}',
-            '{"type":"turn.completed","usage":{"output_tokens":100}}',
-            1,
-        ),
-        (
-            '{"read_complete":true,"findings":[{"quote":"Absent text","kind":"metaphor",'
-            '"why":"A planted finding.","fix":"Replacement."}]}',
-            '{"type":"turn.completed","usage":{"output_tokens":100}}',
-            2,
-        ),
-    ],
-)
-def test_default_reader_uses_codex(
+@pytest.mark.parametrize("reader_status", [0, 1, 2])
+def test_default_reader_delegates_to_installed_gate(
     tmp_path: Path,
     monkeypatch: pytest.MonkeyPatch,
-    caplog: pytest.LogCaptureFixture,
-    verdict: str,
-    events: str,
-    expected: int,
+    reader_status: int,
 ) -> None:
-    """Codex is the sole reader; incomplete, malformed, or ungrounded reads cannot approve."""
+    """The installed gate decides approval, including failures and local receipts."""
     home = tmp_path / "home"
-    root = home / "dev/vl-branding"
-    (root / "checks").mkdir(parents=True)
-    (root / "language").mkdir()
-    (root / "checks/register-pass.sh").write_text(
-        "read -r -d '' BRIEF <<'BRIEF_END'\nRead the whole subject.\nBRIEF_END\n"
+    installed = home / "dev/vl-branding/checks/register-pass.sh"
+    installed.parent.mkdir(parents=True)
+    log = tmp_path / "installed-input.txt"
+    installed.write_text(
+        "#!/bin/sh\nfor subject do :; done\n"
+        f'cat "$subject" > {quote(str(log))}\n'
+        'mkdir -p "$REGISTER_STATE_DIR"\n'
+        'printf "installed-receipt\\n" >> "$REGISTER_RECEIPTS"\n'
+        f"exit {reader_status}\n"
     )
-    (root / "checks/run-all.sh").write_text("#!/bin/sh\nexit 0\n")
-    for name in ("register.md", "ai-tells.md", "sweep.md"):
-        (root / "language" / name).write_text("Use plain engineering prose.\n")
+    installed.chmod(0o755)
     paper = tmp_path / "paper.qmd"
     paper.write_text("The audit records aggregate counts.\n")
-    (tmp_path / ".register-model").write_text("gpt-6.1-sol\n")
     monkeypatch.chdir(tmp_path)
     monkeypatch.setattr(Path, "home", staticmethod(lambda: home))
-    monkeypatch.setattr("shutil.which", lambda _name: "/usr/local/bin/codex")
-    commands = []
+    cache = tmp_path / ".register-cache"
+    cache.mkdir()
+    (cache / "codex-obsolete.json").write_text('{"read_complete": true}')
+    assert run_checks([paper]) == reader_status
+    assert log.read_text() == paper.read_text()
+    assert (cache / "installed/receipts.tsv").read_text() == "installed-receipt\n"
 
-    def fake_run(command: list[str], **_kwargs: object) -> subprocess.CompletedProcess[str]:
-        """Return a complete verdict without contacting an external model."""
-        commands.append(command)
-        if "--output-last-message" in command:
-            answer = Path(command[command.index("--output-last-message") + 1])
-            answer.write_text(verdict)
-        return subprocess.CompletedProcess(command, 0, stdout=events, stderr="")
 
-    monkeypatch.setattr(subprocess, "run", fake_run)
-    assert run_checks([paper]) == expected
-    codex_commands = [command for command in commands if Path(command[0]).name == "codex"]
-    assert len(codex_commands) == 1
-    command = codex_commands[0]
-    assert command[command.index("--model") + 1] == "gpt-6.1-sol"
-    assert command[command.index("--sandbox") + 1] == "read-only"
-    assert "--ephemeral" in command
-    assert not any("claude" in str(argument).lower() for argument in command)
-    if "quota exhausted" in events:
-        assert "quota exhausted" in caplog.text
-    if expected == 0:
-        assert run_checks([paper]) == 0
-        assert sum(Path(cmd[0]).name == "codex" for cmd in commands) == 1
-        paper.write_text("The audit records aggregate counts and rates.\n")
-        assert run_checks([paper]) == 0
-        assert sum(Path(cmd[0]).name == "codex" for cmd in commands) == 2
-        (root / "language/register.md").write_text("Keep numeric denominators.\n")
-        assert run_checks([paper]) == 0
-        assert sum(Path(cmd[0]).name == "codex" for cmd in commands) == 3
-        (tmp_path / ".register-model").write_text("different-model\n")
-        assert run_checks([paper]) == 0
-        assert sum(Path(cmd[0]).name == "codex" for cmd in commands) == 4
-        paper.write_text("This subject has no previous approval.\n")
-        monkeypatch.setattr("shutil.which", lambda _name: None)
-        assert run_checks([paper]) == 2
-        assert sum(Path(cmd[0]).name == "codex" for cmd in commands) == 4
+def test_inherited_provider_overrides_cannot_select_another_reader(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    """Provider, model, effort and credentials cannot change the installed reader."""
+    home = tmp_path / "home"
+    installed = home / "dev/vl-branding/checks/register-pass.sh"
+    installed.parent.mkdir(parents=True)
+    installed.write_text(
+        "#!/bin/sh\n"
+        '[ "$REGISTER_PROVIDER" = codex ] || exit 1\n'
+        '[ -z "${REGISTER_MODEL+x}${REGISTER_EFFORT+x}" ] || exit 1\n'
+        '[ -z "${OPENAI_API_KEY+x}${ANTHROPIC_API_KEY+x}" ] || exit 1\n'
+        '[ "$REGISTER_RECEIPTS" = "$PWD/.register-cache/installed/receipts.tsv" ] || exit 1\n'
+        "exit 0\n"
+    )
+    installed.chmod(0o755)
+    paper = tmp_path / "paper.txt"
+    paper.write_text("The audit records aggregate counts.\n")
+    monkeypatch.chdir(tmp_path)
+    monkeypatch.setattr(Path, "home", staticmethod(lambda: home))
+    for name, value in {
+        "REGISTER_PROVIDER": "claude",
+        "REGISTER_MODEL": "other-model",
+        "REGISTER_EFFORT": "low",
+        "REGISTER_RECEIPTS": str(tmp_path / "old-receipts.tsv"),
+        "OPENAI_API_KEY": "test-placeholder",
+        "ANTHROPIC_API_KEY": "test-placeholder",
+    }.items():
+        monkeypatch.setenv(name, value)
+    assert run_checks([paper]) == 0
+
+
+def test_commit_message_comments_are_excluded(tmp_path: Path) -> None:
+    """Git status comments cannot introduce findings into the reviewed message."""
+    message = tmp_path / "COMMIT_EDITMSG"
+    message.write_text("Validate saved aggregate counts\n# Seamless workflow\n")
+    assert run_checks([message], reader=_checker_only_reader(tmp_path), commit_message=True) == 0
+
+
+def test_svg_entity_declarations_fail_before_reader_execution(tmp_path: Path) -> None:
+    """SVG label extraction refuses entity declarations before parsing."""
+    diagram = tmp_path / "figure.svg"
+    diagram.write_text('<!DOCTYPE svg [<!ENTITY external SYSTEM "file:///etc/passwd">]><svg/>')
+    assert run_checks([diagram], reader=_checker_only_reader(tmp_path)) == 2

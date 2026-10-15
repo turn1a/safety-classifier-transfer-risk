@@ -17,6 +17,7 @@ from transfer_risk.lib.semantic_audit import stable_pair_id
 from transfer_risk.lib.semantic_review_tool import (
     REVIEW_CSV_COLUMNS,
     build_review_dataset,
+    build_staged_review_dataset,
     combine_reviewer_exports,
     render_review_tool_html,
     review_tool_content_security_policy,
@@ -287,3 +288,59 @@ def test_browser_csv_quotes_notes_and_contains_no_sample_text_or_calibration() -
     assert rows[0]["review_status"] == "in_progress"
     assert "A neutral original." not in result
     assert "calibration" not in result
+
+
+def test_staged_dataset_preserves_explicit_queue_and_binds_stage_counts() -> None:
+
+    candidates = _candidates()
+    staged = build_staged_review_dataset(candidates, stage_one_pair_count=1, sample_trial_count=2)
+    assert [pair["pair_id"] for pair in staged["pairs"]] == [row["pair_id"] for row in candidates]
+    assert staged["schema_version"] == "semantic-review-staged-v1"
+    assert staged["dataset_fingerprint"] != build_review_dataset(candidates)["dataset_fingerprint"]
+    assert combine_reviewer_exports(staged, _export(staged, "reviewer_1"), []).shape[0] == 2
+    assert "stage_one_pair_count" in render_review_tool_html(
+        staged, _TEMPLATE.read_text(), "reviewer_1"
+    )
+    with pytest.raises(ValueError):
+        build_staged_review_dataset(candidates, stage_one_pair_count=3, sample_trial_count=2)
+
+
+def test_staged_exports_bind_full_cohort_identity_beyond_the_display_queue() -> None:
+    first = build_staged_review_dataset(
+        _candidates(), stage_one_pair_count=1, sample_trial_count=2, cohort_binding="population-one"
+    )
+    second = build_staged_review_dataset(
+        _candidates(), stage_one_pair_count=1, sample_trial_count=2, cohort_binding="population-two"
+    )
+    assert first["dataset_fingerprint"] != second["dataset_fingerprint"]
+    with pytest.raises(ValueError, match="fingerprint"):
+        combine_reviewer_exports(second, _export(first, "reviewer_1"), [])
+
+
+def test_staged_browser_json_restore_csv_export_and_conflict_protection() -> None:
+    dataset = build_staged_review_dataset(
+        _candidates(),
+        stage_one_pair_count=1,
+        sample_trial_count=2,
+        cohort_binding="synthetic-trial-frame",
+    )
+    result = _run_core(
+        f"const data={json.dumps(dataset)}; const C=globalThis.SemanticReviewCore; "
+        "const state=C.freshState(data,'reviewer_1'); "
+        "state.reviews[data.pairs[0].pair_id]={...C.emptyRow(),semantic_preserved:'yes',"
+        "intent_preserved:'uncertain',original_is_injection:'yes',"
+        "independent_review:'yes',notes:'synthetic only'}; "
+        "const saved=JSON.parse(JSON.stringify(C.exportProgress(data,state))); "
+        "const restored=C.importProgress(data,'reviewer_1',saved); "
+        "const conflict=C.importProgress(data,'reviewer_1',C.exportProgress(data,state)); "
+        "conflict.reviews[data.pairs[0].pair_id].semantic_preserved='no'; "
+        "let rejected=false; try{C.mergeProgress(data,restored,conflict);}catch(_){rejected=true;} "
+        "console.log(JSON.stringify({csv:C.exportCsv(data,restored),rejected,original:C.rowFor(data.pairs[0].pair_id,restored)}));"
+    )
+    rows = list(csv.DictReader(StringIO(result["csv"])))
+    assert rows[0]["dataset_fingerprint"] == dataset["dataset_fingerprint"]
+    assert rows[0]["review_status"] == "complete"
+    assert rows[0]["intent_preserved"] == "uncertain"
+    assert result["rejected"]
+    assert result["original"]["semantic_preserved"] == "yes"
+    assert "A neutral original." not in result["csv"]

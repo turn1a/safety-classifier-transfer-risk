@@ -1,0 +1,7 @@
+# Separate frozen trial sample, followed by the remaining exact-pair census.
+semantic_flip_audit:
+  sample_trials: 300
+  expected_population:
+    attempted_trials: 8595
+    changed_trials: 1403
+    unique_pairs: 1318
