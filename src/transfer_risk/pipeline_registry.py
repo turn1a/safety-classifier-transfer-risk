@@ -24,8 +24,17 @@ from transfer_risk.pipelines.semantic_audit.pipeline import (
     create_review_pipeline,
     create_tools_pipeline,
 )
+from transfer_risk.pipelines.semantic_flip_audit.pipeline import (
+    create_review_pipeline as create_flip_review_pipeline,
+)
+from transfer_risk.pipelines.semantic_flip_audit.pipeline import (
+    create_tools_pipeline as create_flip_tools_pipeline,
+)
 
 _EXCLUDED_FROM_DEFAULT = (
+    "semantic_flip_audit",
+    "semantic_flip_review",
+    "semantic_flip_review_tools",
     "smoke",
     "audit",
     "audit_finalization",
@@ -48,6 +57,8 @@ _DOWNSTREAM = ("transfer", "risk", "reporting")
 def register_pipelines() -> dict[str, Pipeline]:
     """Return a mapping of pipeline name to ``Pipeline`` object."""
     pipelines: dict[str, Pipeline] = find_pipelines()
+    pipelines["semantic_flip_review"] = create_flip_review_pipeline()
+    pipelines["semantic_flip_review_tools"] = create_flip_tools_pipeline()
     pipelines["audit_finalization"] = create_finalization_pipeline()
     pipelines["semantic_audit_review"] = create_review_pipeline()
     pipelines["semantic_review_tools"] = create_tools_pipeline()

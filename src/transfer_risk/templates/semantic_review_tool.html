@@ -67,6 +67,7 @@
       <p>Your answers stay in this browser until you export them. This fixed-role tool loads only your own saved answers. Your partner uses a separate reviewer tool and local address.</p>
       <p class="muted">Complete the sample independently before comparing labels. The page makes no network requests after it loads. Save a progress JSON backup before changing browser profiles or clearing browser data.</p>
       <p id="dataset-description" class="muted"></p>
+      <p id="stage-description" class="muted"></p>
     </section>
     <details class="card" id="rubric" open>
       <summary>Review rubric</summary>
@@ -292,6 +293,12 @@ globalThis.SemanticReviewCore = (() => {
   function sampleIndex() { return data.pairs.findIndex(pair => pair.pair_id === state.current_pair_id); }
   function updateProgress() {
     const complete = data.pairs.filter(pair => Core.status(Core.rowFor(pair.pair_id,state)) === "complete").length;
+    if (data.schema_version === "semantic-review-staged-v1") {
+      const first = data.pairs.slice(0,data.stage_one_pair_count);
+      const done = first.filter(pair => Core.status(Core.rowFor(pair.pair_id,state)) === "complete").length;
+      const remainder = complete - done;
+      byId("stage-description").textContent = `Stage 1: ${done} of ${first.length} pairs complete. Stage 2: ${remainder} of ${data.pairs.length - first.length} remaining pairs complete. Uncertain answers remain unresolved in analysis.`;
+    }
     byId("progress").max = data.pairs.length;
     byId("progress").value = complete;
     byId("progress-description").textContent = `${complete} of ${data.pairs.length} pairs have three answers and your independence attestation.`;

@@ -1,0 +1,2224 @@
+{
+  "schema_version": "semantic-flip-review-v1",
+  "review_status": "pending",
+  "attempted_trials": 8595,
+  "classifier_flip_trials": 1403,
+  "distinct_pair_workload": 1318,
+  "resolved_pairs": 0,
+  "reviewed_pairs": 0,
+  "two_reviewer_complete_pairs": 0,
+  "unresolved_pairs": 1318,
+  "stage_one_sample_trials": 300,
+  "stage_one_distinct_pairs": 291,
+  "resolved_sample_maximum_interval_margin": 0.008452588714368816,
+  "margin_is_design_property": true,
+  "interim_cell_rates_estimated": false,
+  "interim_original_union_estimated": false,
+  "census_bounds_are_confidence_intervals": false,
+  "policies": {
+    "all_returned_candidates": {
+      "attempted_trials": 8595,
+      "classifier_flip_trials": 1403,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 1403,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 1403
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.1632344386271088
+      },
+      "interim": {
+        "sample_trials": 300,
+        "sample_confirmed_valid_trials": 0,
+        "sample_unknown_trials": 300,
+        "point_estimate": null,
+        "population_count_interval": {
+          "lower": 0,
+          "upper": 1403
+        },
+        "yield_interval": {
+          "lower": 0.0,
+          "upper": 0.1632344386271088
+        },
+        "method": "exact equal-tailed hypergeometric 95% interval; unresolved count envelope",
+        "sampling_frame": "all target-changing trial occurrences for both policies",
+        "known_gating_count_bound_applied": false
+      },
+      "original_union": {
+        "originals": 191,
+        "target_original_positive_originals": 167,
+        "valid_original_count_bounds": {
+          "lower": 0,
+          "upper": 137
+        },
+        "coverage_bounds": {
+          "lower": 0.0,
+          "upper": 0.7172774869109948
+        },
+        "point_estimate": null
+      },
+      "association": {
+        "rho": null,
+        "two_sided_p": null,
+        "reason": "Human validity remains unresolved",
+        "n": 9
+      }
+    },
+    "source_success_gated": {
+      "attempted_trials": 8595,
+      "classifier_flip_trials": 998,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 998,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 998
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.11611401977894124
+      },
+      "interim": {
+        "sample_trials": 300,
+        "sample_confirmed_valid_trials": 0,
+        "sample_unknown_trials": 227,
+        "point_estimate": null,
+        "population_count_interval": {
+          "lower": 0,
+          "upper": 998
+        },
+        "yield_interval": {
+          "lower": 0.0,
+          "upper": 0.11611401977894124
+        },
+        "method": "exact equal-tailed hypergeometric 95% interval; unresolved count envelope",
+        "sampling_frame": "all target-changing trial occurrences for both policies",
+        "known_gating_count_bound_applied": true
+      },
+      "original_union": {
+        "originals": 191,
+        "target_original_positive_originals": 167,
+        "valid_original_count_bounds": {
+          "lower": 0,
+          "upper": 123
+        },
+        "coverage_bounds": {
+          "lower": 0.0,
+          "upper": 0.643979057591623
+        },
+        "point_estimate": null
+      },
+      "association": {
+        "rho": null,
+        "two_sided_p": null,
+        "reason": "Human validity remains unresolved",
+        "n": 9
+      }
+    }
+  },
+  "cells": [
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "bert-base-ft",
+      "recipe": "bae",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 55,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 55,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 55
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.2879581151832461
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "bert-base-ft",
+      "recipe": "bert-attack",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 51,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 51,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 51
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.2670157068062827
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "bert-base-ft",
+      "recipe": "deepwordbug",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 10,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 10,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 10
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.05235602094240838
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "bert-base-ft",
+      "recipe": "pwws",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 48,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 48,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 48
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.2513089005235602
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "bert-base-ft",
+      "recipe": "textfooler",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 32,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 32,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 32
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.16753926701570682
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "deberta-base-ft-seed",
+      "recipe": "bae",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 53,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 53,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 53
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.2774869109947644
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "deberta-base-ft-seed",
+      "recipe": "bert-attack",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 59,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 59,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 59
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.3089005235602094
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "deberta-base-ft-seed",
+      "recipe": "deepwordbug",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 22,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 22,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 22
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.11518324607329843
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "deberta-base-ft-seed",
+      "recipe": "pwws",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 39,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 39,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 39
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.20418848167539266
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "deberta-base-ft-seed",
+      "recipe": "textfooler",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 42,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 42,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 42
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.2198952879581152
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "deberta-base-pi-v1",
+      "recipe": "bae",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 24,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 24,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 24
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.1256544502617801
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "deberta-base-pi-v1",
+      "recipe": "bert-attack",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 18,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 18,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 18
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.09424083769633508
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "deberta-base-pi-v1",
+      "recipe": "deepwordbug",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 13,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 13,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 13
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.06806282722513089
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "deberta-base-pi-v1",
+      "recipe": "pwws",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 28,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 28,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 28
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.14659685863874344
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "deberta-base-pi-v1",
+      "recipe": "textfooler",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 18,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 18,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 18
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.09424083769633508
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "deberta-small-pi-v2",
+      "recipe": "bae",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 61,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 61,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 61
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.3193717277486911
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "deberta-small-pi-v2",
+      "recipe": "bert-attack",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 48,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 48,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 48
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.2513089005235602
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "deberta-small-pi-v2",
+      "recipe": "deepwordbug",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 19,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 19,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 19
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.09947643979057591
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "deberta-small-pi-v2",
+      "recipe": "pwws",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 55,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 55,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 55
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.2879581151832461
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "deberta-small-pi-v2",
+      "recipe": "textfooler",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 42,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 42,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 42
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.2198952879581152
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "deepset-deberta-injection",
+      "recipe": "bae",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 47,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 47,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 47
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.24607329842931938
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "deepset-deberta-injection",
+      "recipe": "bert-attack",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 35,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 35,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 35
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.18324607329842932
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "deepset-deberta-injection",
+      "recipe": "deepwordbug",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 10,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 10,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 10
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.05235602094240838
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "deepset-deberta-injection",
+      "recipe": "pwws",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 22,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 22,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 22
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.11518324607329843
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "deepset-deberta-injection",
+      "recipe": "textfooler",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 18,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 18,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 18
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.09424083769633508
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "electra-small-ft",
+      "recipe": "bae",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 59,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 59,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 59
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.3089005235602094
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "electra-small-ft",
+      "recipe": "bert-attack",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 50,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 50,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 50
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.2617801047120419
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "electra-small-ft",
+      "recipe": "deepwordbug",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 12,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 12,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 12
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.06282722513089005
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "electra-small-ft",
+      "recipe": "pwws",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 40,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 40,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 40
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.2094240837696335
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "electra-small-ft",
+      "recipe": "textfooler",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 32,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 32,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 32
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.16753926701570682
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "llama-prompt-guard-22m",
+      "recipe": "bae",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 5,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 5,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 5
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.02617801047120419
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "llama-prompt-guard-22m",
+      "recipe": "bert-attack",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 1,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 1,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 1
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.005235602094240838
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "llama-prompt-guard-22m",
+      "recipe": "deepwordbug",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 2,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 2,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 2
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.010471204188481676
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "llama-prompt-guard-22m",
+      "recipe": "pwws",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 5,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 5,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 5
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.02617801047120419
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "llama-prompt-guard-22m",
+      "recipe": "textfooler",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 5,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 5,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 5
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.02617801047120419
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "llama-prompt-guard-86m",
+      "recipe": "bae",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 22,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 22,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 22
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.11518324607329843
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "llama-prompt-guard-86m",
+      "recipe": "bert-attack",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 17,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 17,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 17
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.08900523560209424
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "llama-prompt-guard-86m",
+      "recipe": "deepwordbug",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 12,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 12,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 12
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.06282722513089005
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "llama-prompt-guard-86m",
+      "recipe": "pwws",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 34,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 34,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 34
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.17801047120418848
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "llama-prompt-guard-86m",
+      "recipe": "textfooler",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 25,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 25,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 25
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.13089005235602094
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "roberta-base-ft",
+      "recipe": "bae",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 62,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 62,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 62
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.32460732984293195
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "roberta-base-ft",
+      "recipe": "bert-attack",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 49,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 49,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 49
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.25654450261780104
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "roberta-base-ft",
+      "recipe": "deepwordbug",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 23,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 23,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 23
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.12041884816753927
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "roberta-base-ft",
+      "recipe": "pwws",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 46,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 46,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 46
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.24083769633507854
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "roberta-base-ft",
+      "recipe": "textfooler",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 33,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 33,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 33
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.17277486910994763
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "bert-base-ft",
+      "recipe": "bae",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 41,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 41,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 41
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.21465968586387435
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "bert-base-ft",
+      "recipe": "bert-attack",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 25,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 25,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 25
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.13089005235602094
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "bert-base-ft",
+      "recipe": "deepwordbug",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 5,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 5,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 5
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.02617801047120419
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "bert-base-ft",
+      "recipe": "pwws",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 20,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 20,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 20
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.10471204188481675
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "bert-base-ft",
+      "recipe": "textfooler",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 22,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 22,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 22
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.11518324607329843
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "deberta-base-ft-seed",
+      "recipe": "bae",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 39,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 39,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 39
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.20418848167539266
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "deberta-base-ft-seed",
+      "recipe": "bert-attack",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 43,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 43,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 43
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.225130890052356
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "deberta-base-ft-seed",
+      "recipe": "deepwordbug",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 11,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 11,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 11
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.05759162303664921
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "deberta-base-ft-seed",
+      "recipe": "pwws",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 21,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 21,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 21
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.1099476439790576
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "deberta-base-ft-seed",
+      "recipe": "textfooler",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 26,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 26,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 26
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.13612565445026178
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "deberta-base-pi-v1",
+      "recipe": "bae",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 22,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 22,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 22
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.11518324607329843
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "deberta-base-pi-v1",
+      "recipe": "bert-attack",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 18,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 18,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 18
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.09424083769633508
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "deberta-base-pi-v1",
+      "recipe": "deepwordbug",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 9,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 9,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 9
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.04712041884816754
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "deberta-base-pi-v1",
+      "recipe": "pwws",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 28,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 28,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 28
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.14659685863874344
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "deberta-base-pi-v1",
+      "recipe": "textfooler",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 14,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 14,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 14
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.07329842931937172
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "deberta-small-pi-v2",
+      "recipe": "bae",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 61,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 61,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 61
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.3193717277486911
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "deberta-small-pi-v2",
+      "recipe": "bert-attack",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 48,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 48,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 48
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.2513089005235602
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "deberta-small-pi-v2",
+      "recipe": "deepwordbug",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 18,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 18,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 18
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.09424083769633508
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "deberta-small-pi-v2",
+      "recipe": "pwws",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 52,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 52,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 52
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.27225130890052357
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "deberta-small-pi-v2",
+      "recipe": "textfooler",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 38,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 38,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 38
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.19895287958115182
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "deepset-deberta-injection",
+      "recipe": "bae",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 28,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 28,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 28
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.14659685863874344
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "deepset-deberta-injection",
+      "recipe": "bert-attack",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 16,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 16,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 16
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.08376963350785341
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "deepset-deberta-injection",
+      "recipe": "deepwordbug",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 2,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 2,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 2
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.010471204188481676
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "deepset-deberta-injection",
+      "recipe": "pwws",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 9,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 9,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 9
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.04712041884816754
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "deepset-deberta-injection",
+      "recipe": "textfooler",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 12,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 12,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 12
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.06282722513089005
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "electra-small-ft",
+      "recipe": "bae",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 36,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 36,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 36
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.18848167539267016
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "electra-small-ft",
+      "recipe": "bert-attack",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 28,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 28,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 28
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.14659685863874344
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "electra-small-ft",
+      "recipe": "deepwordbug",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 7,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 7,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 7
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.03664921465968586
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "electra-small-ft",
+      "recipe": "pwws",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 22,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 22,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 22
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.11518324607329843
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "electra-small-ft",
+      "recipe": "textfooler",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 22,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 22,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 22
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.11518324607329843
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "llama-prompt-guard-22m",
+      "recipe": "bae",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 5,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 5,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 5
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.02617801047120419
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "llama-prompt-guard-22m",
+      "recipe": "bert-attack",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 1,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 1,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 1
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.005235602094240838
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "llama-prompt-guard-22m",
+      "recipe": "deepwordbug",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 2,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 2,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 2
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.010471204188481676
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "llama-prompt-guard-22m",
+      "recipe": "pwws",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 5,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 5,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 5
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.02617801047120419
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "llama-prompt-guard-22m",
+      "recipe": "textfooler",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 5,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 5,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 5
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.02617801047120419
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "llama-prompt-guard-86m",
+      "recipe": "bae",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 17,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 17,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 17
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.08900523560209424
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "llama-prompt-guard-86m",
+      "recipe": "bert-attack",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 17,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 17,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 17
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.08900523560209424
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "llama-prompt-guard-86m",
+      "recipe": "deepwordbug",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 8,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 8,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 8
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.041884816753926704
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "llama-prompt-guard-86m",
+      "recipe": "pwws",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 26,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 26,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 26
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.13612565445026178
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "llama-prompt-guard-86m",
+      "recipe": "textfooler",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 19,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 19,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 19
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.09947643979057591
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "roberta-base-ft",
+      "recipe": "bae",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 53,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 53,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 53
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.2774869109947644
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "roberta-base-ft",
+      "recipe": "bert-attack",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 37,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 37,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 37
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.193717277486911
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "roberta-base-ft",
+      "recipe": "deepwordbug",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 7,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 7,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 7
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.03664921465968586
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "roberta-base-ft",
+      "recipe": "pwws",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 27,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 27,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 27
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.14136125654450263
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "roberta-base-ft",
+      "recipe": "textfooler",
+      "attempted_trials": 191,
+      "classifier_flip_trials": 26,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 26,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 26
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.13612565445026178
+      }
+    }
+  ],
+  "surrogates": [
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "bert-base-ft",
+      "attempted_trials": 955,
+      "classifier_flip_trials": 196,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 196,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 196
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.20523560209424083
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "deberta-base-ft-seed",
+      "attempted_trials": 955,
+      "classifier_flip_trials": 215,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 215,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 215
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.225130890052356
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "deberta-base-pi-v1",
+      "attempted_trials": 955,
+      "classifier_flip_trials": 101,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 101,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 101
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.10575916230366492
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "deberta-small-pi-v2",
+      "attempted_trials": 955,
+      "classifier_flip_trials": 225,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 225,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 225
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.2356020942408377
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "deepset-deberta-injection",
+      "attempted_trials": 955,
+      "classifier_flip_trials": 132,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 132,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 132
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.1382198952879581
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "electra-small-ft",
+      "attempted_trials": 955,
+      "classifier_flip_trials": 193,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 193,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 193
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.20209424083769634
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "llama-prompt-guard-22m",
+      "attempted_trials": 955,
+      "classifier_flip_trials": 18,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 18,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 18
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.018848167539267015
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "llama-prompt-guard-86m",
+      "attempted_trials": 955,
+      "classifier_flip_trials": 110,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 110,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 110
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.11518324607329843
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "surrogate": "roberta-base-ft",
+      "attempted_trials": 955,
+      "classifier_flip_trials": 213,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 213,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 213
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.22303664921465968
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "bert-base-ft",
+      "attempted_trials": 955,
+      "classifier_flip_trials": 113,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 113,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 113
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.11832460732984293
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "deberta-base-ft-seed",
+      "attempted_trials": 955,
+      "classifier_flip_trials": 140,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 140,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 140
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.14659685863874344
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "deberta-base-pi-v1",
+      "attempted_trials": 955,
+      "classifier_flip_trials": 91,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 91,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 91
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.09528795811518324
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "deberta-small-pi-v2",
+      "attempted_trials": 955,
+      "classifier_flip_trials": 217,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 217,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 217
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.22722513089005236
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "deepset-deberta-injection",
+      "attempted_trials": 955,
+      "classifier_flip_trials": 67,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 67,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 67
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.07015706806282722
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "electra-small-ft",
+      "attempted_trials": 955,
+      "classifier_flip_trials": 115,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 115,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 115
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.12041884816753927
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "llama-prompt-guard-22m",
+      "attempted_trials": 955,
+      "classifier_flip_trials": 18,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 18,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 18
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.018848167539267015
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "llama-prompt-guard-86m",
+      "attempted_trials": 955,
+      "classifier_flip_trials": 87,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 87,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 87
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.09109947643979058
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "surrogate": "roberta-base-ft",
+      "attempted_trials": 955,
+      "classifier_flip_trials": 150,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 150,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 150
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.15706806282722513
+      }
+    }
+  ],
+  "recipes": [
+    {
+      "policy": "all_returned_candidates",
+      "recipe": "bae",
+      "attempted_trials": 1719,
+      "classifier_flip_trials": 388,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 388,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 388
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.2257126236183828
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "recipe": "bert-attack",
+      "attempted_trials": 1719,
+      "classifier_flip_trials": 328,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 328,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 328
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.1908086096567772
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "recipe": "deepwordbug",
+      "attempted_trials": 1719,
+      "classifier_flip_trials": 123,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 123,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 123
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.07155322862129145
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "recipe": "pwws",
+      "attempted_trials": 1719,
+      "classifier_flip_trials": 317,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 317,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 317
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.18440954043048283
+      }
+    },
+    {
+      "policy": "all_returned_candidates",
+      "recipe": "textfooler",
+      "attempted_trials": 1719,
+      "classifier_flip_trials": 247,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 247,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 247
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.14368819080860964
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "recipe": "bae",
+      "attempted_trials": 1719,
+      "classifier_flip_trials": 302,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 302,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 302
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.17568353694008143
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "recipe": "bert-attack",
+      "attempted_trials": 1719,
+      "classifier_flip_trials": 233,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 233,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 233
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.13554392088423503
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "recipe": "deepwordbug",
+      "attempted_trials": 1719,
+      "classifier_flip_trials": 69,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 69,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 69
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.04013961605584642
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "recipe": "pwws",
+      "attempted_trials": 1719,
+      "classifier_flip_trials": 210,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 210,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 210
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.12216404886561955
+      }
+    },
+    {
+      "policy": "source_success_gated",
+      "recipe": "textfooler",
+      "attempted_trials": 1719,
+      "classifier_flip_trials": 184,
+      "confirmed_valid_flip_trials": 0,
+      "confirmed_invalid_flip_trials": 0,
+      "unresolved_flip_trials": 184,
+      "valid_flip_count_bounds": {
+        "lower": 0,
+        "upper": 184
+      },
+      "valid_flip_yield_bounds": {
+        "lower": 0.0,
+        "upper": 0.1070389761489238
+      }
+    }
+  ]
+}
