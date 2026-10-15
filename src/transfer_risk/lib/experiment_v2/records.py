@@ -24,6 +24,7 @@ if TYPE_CHECKING:
         ModelRealization,
         Protocol,
         RegistrationEvidence,
+        TokenizationDiagnostic,
     )
 
 
@@ -163,6 +164,25 @@ def _realizations(
     return identities
 
 
+def validate_tokenization_window(
+    protocol: Protocol, model_id: str, diagnostic: TokenizationDiagnostic | None
+) -> None:
+    """Bind any supplied tokenization evidence to its registered model window.
+
+    Args:
+        protocol: Registered model and tokenizer inference policy.
+        model_id: Model whose tokenizer produced the measurement.
+        diagnostic: Optional saved diagnostic; absence remains missing evidence.
+
+    Raises:
+        ValueError: If the recorded token window differs from the registered model.
+    """
+    if diagnostic is not None:
+        model = next(item for item in protocol.models if item.id == model_id)
+        if diagnostic.max_tokens != model.max_tokens:
+            _fail("registered model token window differs from supplied tokenization evidence")
+
+
 def _clean_predictions(
     protocol: Protocol,
     records: ExperimentRecords,
@@ -190,6 +210,7 @@ def _clean_predictions(
         identity = (item.checkpoint_sha256, item.tokenizer_sha256)
         if key in clean or key not in expected or identities[key[:2]] != identity:
             _fail("clean prediction coverage or identity is invalid")
+        validate_tokenization_window(protocol, item.model_id, item.tokenization)
         clean[key] = canonical_label(protocol, item.model_id, item.raw_label)
     if set(clean) != expected:
         _fail("clean prediction coverage is incomplete")
@@ -270,6 +291,8 @@ def _candidate_predictions(
         ValueError: If output status, source transition, or frozen-target identity is inconsistent.
     """
     source_original = clean[attempt.source_id, attempt.replicate, attempt.original_id]
+    validate_tokenization_window(protocol, attempt.source_id, attempt.source_original_tokenization)
+    validate_tokenization_window(protocol, attempt.source_id, attempt.source_candidate_tokenization)
     if attempt.candidate_sha256 is None:
         if attempt.source_raw_perturbed is not None or attempt.target_predictions:
             _fail("a no-candidate attempt contains perturbed predictions")
@@ -321,6 +344,7 @@ def _target_predictions(
         ):
             _fail("perturbed target identity differs from its clean baseline")
         canonical_label(protocol, item.model_id, item.raw_label)
+        validate_tokenization_window(protocol, item.model_id, item.tokenization)
     if attempt.mechanical_screen != "unassessable" and not is_digest(
         attempt.mechanical_evidence_sha256
     ):

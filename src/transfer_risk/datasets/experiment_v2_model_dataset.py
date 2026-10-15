@@ -61,6 +61,111 @@ def _weight_artifact(path: Path) -> bool:
     )
 
 
+def _tokenizer_payload_present(path: Path) -> bool:
+    """Require tokenizer data independently of configuration and auxiliary text files.
+
+    Args:
+        path: Model payload directory.
+
+    Returns:
+        Whether a supported fast, WordPiece, BPE, or SentencePiece payload is present.
+    """
+    present = {item.name for item in path.iterdir() if item.is_file() and item.stat().st_size > 0}
+    return bool(
+        present
+        & {
+            "tokenizer.json",
+            "vocab.txt",
+            "spm.model",
+            "spiece.model",
+            "sentencepiece.bpe.model",
+            "tokenizer.model",
+        }
+    ) or {"vocab.json", "merges.txt"}.issubset(present)
+
+
+def _check_transformer_weights(path: Path) -> None:
+    """Require weight payloads and every shard referenced by a saved weight index.
+
+    Args:
+        path: Model payload directory with all symlinks already rejected.
+
+    Raises:
+        DatasetError: If weights or referenced shard payloads are absent or empty.
+    """
+    weights = {
+        item.name
+        for item in path.iterdir()
+        if item.is_file()
+        and item.stat().st_size > 0
+        and (
+            item.suffix == ".safetensors"
+            or (item.name.startswith("pytorch_model") and item.suffix == ".bin")
+        )
+    }
+    if not weights:
+        message = "v2 checkpoint requires actual saved model weights"
+        raise DatasetError(message)
+    for index in path.glob("*.index.json"):
+        if not index.name.endswith((".safetensors.index.json", ".bin.index.json")):
+            continue
+        try:
+            manifest = json.loads(index.read_text())
+            mapping = manifest.get("weight_map") if isinstance(manifest, dict) else None
+            valid = (
+                isinstance(mapping, dict)
+                and bool(mapping)
+                and all(isinstance(name, str) and name in weights for name in mapping.values())
+            )
+        except (OSError, ValueError):
+            valid = False
+        if not valid:
+            message = "v2 checkpoint weight index requires every referenced shard payload"
+            raise DatasetError(message)
+
+
+def _check_required_components(path: Path) -> dict[str, Any]:
+    """Validate model configuration, actual weights, and tokenizer payload components.
+
+    Args:
+        path: Model payload directory with all symlinks already rejected.
+
+    Returns:
+        Parsed model configuration for the optional BiLSTM virtual tokenizer.
+
+    Raises:
+        DatasetError: If required model or tokenizer material is missing or invalid.
+    """
+    try:
+        config = json.loads((path / "config.json").read_text())
+    except (OSError, ValueError) as error:
+        message = "v2 checkpoint requires a saved model configuration and payload components"
+        raise DatasetError(message) from error
+    if not isinstance(config, dict):
+        message = "v2 checkpoint model configuration must be an object"
+        raise DatasetError(message)
+    if "vocab" in config:
+        vocabulary, window = config["vocab"], config.get("max_seq_len")
+        if (
+            not isinstance(vocabulary, dict)
+            or not vocabulary
+            or type(window) is not int
+            or window <= 0
+        ):
+            message = "v2 BiLSTM requires saved tokenizer vocabulary and positive token window"
+            raise DatasetError(message)
+        weights = path / "model.pt"
+        if not weights.is_file() or weights.stat().st_size == 0:
+            message = "v2 BiLSTM requires actual saved model weights"
+            raise DatasetError(message)
+    else:
+        _check_transformer_weights(path)
+        if not _tokenizer_payload_present(path):
+            message = "v2 checkpoint requires actual tokenizer payload components"
+            raise DatasetError(message)
+    return config
+
+
 def checkpoint_descriptor(path: Path) -> dict[str, str]:
     """Fingerprint a local checkpoint and every saved tokenizer or vocabulary artifact.
 
@@ -86,28 +191,20 @@ def checkpoint_descriptor(path: Path) -> dict[str, str]:
     if any(item.is_symlink() for item in files):
         msg = "v2 checkpoint cannot contain a symlink"
         raise DatasetError(msg)
+    config = _check_required_components(path)
     weights: list[dict[str, str]] = []
     tokenizer: list[dict[str, str]] = []
     for item in files:
         if item.is_file():
             entry = {"path": item.relative_to(path).as_posix(), "sha256": _file_digest(item)}
             (weights if _weight_artifact(item) else tokenizer).append(entry)
-    config_path = path / "config.json"
-    if config_path.is_file():
-        config = json.loads(config_path.read_text())
-        if "vocab" in config:
-            token_bytes = _canonical_bytes(
-                {"vocab": config["vocab"], "max_seq_len": config["max_seq_len"]}
-            )
-            tokenizer.append(
-                {
-                    "path": "$bilstm_tokenizer.json",
-                    "sha256": hashlib.sha256(token_bytes).hexdigest(),
-                }
-            )
-    if not weights or not tokenizer or not config_path.is_file():
-        msg = "v2 checkpoint requires saved weights, configuration, and tokenizer artifacts"
-        raise DatasetError(msg)
+    if "vocab" in config:
+        token_bytes = _canonical_bytes(
+            {"vocab": config["vocab"], "max_seq_len": config["max_seq_len"]}
+        )
+        tokenizer.append(
+            {"path": "$bilstm_tokenizer.json", "sha256": hashlib.sha256(token_bytes).hexdigest()}
+        )
     return {
         "path": str(path.absolute()),
         "checkpoint_sha256": hashlib.sha256(_canonical_bytes(weights)).hexdigest(),

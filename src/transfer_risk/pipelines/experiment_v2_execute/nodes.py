@@ -30,6 +30,7 @@ from transfer_risk.lib.experiment_v2.records import (
     remember_prediction,
     validate_generation_shard,
     validate_records,
+    validate_tokenization_window,
 )
 from transfer_risk.lib.experiment_v2.schemas import (
     AttackAttempt,
@@ -890,6 +891,12 @@ def score_phase_originals(
             if diagnostics and len(diagnostics) != len(frame):
                 _fail("original tokenizer diagnostic coverage is incomplete")
             for index, (original, raw) in enumerate(zip(frame["id"], labels, strict=True)):
+                diagnostic = (
+                    TokenizationDiagnostic.model_validate(diagnostics[index])
+                    if diagnostics
+                    else None
+                )
+                validate_tokenization_window(protocol, model.id, diagnostic)
                 result.append(
                     {
                         **CleanPrediction(
@@ -899,9 +906,7 @@ def score_phase_originals(
                             raw_label=raw,
                             checkpoint_sha256=descriptor["checkpoint_sha256"],
                             tokenizer_sha256=descriptor["tokenizer_sha256"],
-                            tokenization=TokenizationDiagnostic.model_validate(diagnostics[index])
-                            if diagnostics
-                            else None,
+                            tokenization=diagnostic,
                         ).model_dump(),
                         "_execution": execution_header(receipt),
                     }
@@ -1099,6 +1104,7 @@ def audit_attack_shard(
         ):
             _fail("clean audit control has an invalid identity or coverage")
         clean[key] = canonical_label(protocol, item.model_id, item.raw_label)
+        validate_tokenization_window(protocol, item.model_id, item.tokenization)
         remember_prediction(
             predictions_seen,
             originals[item.original_id].content_sha256,
@@ -1152,6 +1158,12 @@ def audit_attack_shard(
             if diagnostics and len(diagnostics) != len(texts):
                 _fail("candidate tokenizer diagnostic coverage is incomplete")
             for position, ((index, _text), raw) in enumerate(zip(subset, labels, strict=True)):
+                diagnostic = (
+                    TokenizationDiagnostic.model_validate(diagnostics[position])
+                    if diagnostics
+                    else None
+                )
+                validate_tokenization_window(protocol, target_id, diagnostic)
                 remember_prediction(
                     predictions_seen,
                     str(attempts[index].candidate_sha256),
@@ -1165,9 +1177,7 @@ def audit_attack_shard(
                         raw_label=raw,
                         checkpoint_sha256=descriptor["checkpoint_sha256"],
                         tokenizer_sha256=descriptor["tokenizer_sha256"],
-                        tokenization=TokenizationDiagnostic.model_validate(diagnostics[position])
-                        if diagnostics
-                        else None,
+                        tokenization=diagnostic,
                     )
                 )
     return [

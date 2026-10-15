@@ -376,3 +376,32 @@ def test_tokenization_evidence_rejects_inconsistent_truncation_flag():
 
     with pytest.raises(ValueError, match="truncation"):
         TokenizationDiagnostic(input_tokens=600, max_tokens=512, truncated=False)
+
+
+@pytest.mark.parametrize("location", ["clean", "source_original", "source_candidate", "target"])
+def test_supplied_tokenization_window_must_match_registered_model(location):
+    protocol, corpus, registration = evidence()
+    records = records_for("evaluation", protocol, corpus)
+    attempt = records.attempts[0]
+    model_id = (
+        records.clean_predictions[0].model_id
+        if location == "clean"
+        else (attempt.target_predictions[0].model_id if location == "target" else attempt.source_id)
+    )
+    model = next(item for item in protocol.models if item.id == model_id)
+    diagnostic = TokenizationDiagnostic(
+        input_tokens=model.max_tokens + 1, max_tokens=model.max_tokens + 10, truncated=False
+    )
+    if location == "clean":
+        records.clean_predictions[0] = records.clean_predictions[0].model_copy(
+            update={"tokenization": diagnostic}
+        )
+    elif location == "target":
+        prediction = attempt.target_predictions[0].model_copy(update={"tokenization": diagnostic})
+        records.attempts[0] = attempt.model_copy(
+            update={"target_predictions": [prediction, *attempt.target_predictions[1:]]}
+        )
+    else:
+        records.attempts[0] = attempt.model_copy(update={f"{location}_tokenization": diagnostic})
+    with pytest.raises(ValueError, match=r"registered.*token.*window"):
+        validate_records(protocol, corpus, registration, records, protocol.root_seed)

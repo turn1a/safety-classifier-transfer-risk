@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import importlib
 import json
 from pathlib import Path
@@ -189,3 +190,154 @@ def test_bundle_cannot_complete_without_training_metadata(tmp_path, monkeypatch)
             {"kind": "transformer", "model": _SyntheticPayload(), "tokenizer": _SyntheticPayload()}
         )
     assert not root.exists()
+
+
+class _FilesPayload:
+    def __init__(self, files):
+        self.files = files
+
+    def save_pretrained(self, destination):
+        for name, content in self.files.items():
+            (destination / name).write_bytes(content)
+
+
+@pytest.mark.parametrize("missing", ["weights", "tokenizer"])
+@pytest.mark.parametrize("operation", ["save", "load", "exists"])
+def test_bundle_requires_real_model_and_tokenizer_components(
+    tmp_path, monkeypatch, missing, operation
+):
+    monkeypatch.chdir(tmp_path)
+    root = tmp_path / "data/experiment_v2/test-run/models/model"
+    model_files = {"config.json": b'{"num_labels":2}'}
+    tokenizer_files = {"tokenizer.json": b'{"vocab":{"token":0}}'}
+    if missing == "tokenizer":
+        model_files["model.safetensors"] = b"synthetic weights"
+        tokenizer_files = {"README.md": b"not tokenizer data", "tokenizer_config.json": b"{}"}
+    metadata = {"training_seed": 123}
+    dataset = _dataset_type()(filepath=str(root), run_id="test-run")
+    if operation != "save":
+        payload = root / "payload"
+        payload.mkdir(parents=True)
+        for name, content in {**model_files, **tokenizer_files}.items():
+            (payload / name).write_bytes(content)
+
+        # This fixture reproduces completion hashes accepted by the previous bundle writer.
+        def digest(value):
+            return hashlib.sha256(
+                json.dumps(value, sort_keys=True, separators=(",", ":")).encode()
+            ).hexdigest()
+
+        def manifest(files):
+            return [
+                {"path": name, "sha256": hashlib.sha256(content).hexdigest()}
+                for name, content in sorted(files.items())
+            ]
+
+        (root / "metadata.json").write_text(json.dumps(metadata))
+        (root / "complete.json").write_text(
+            json.dumps(
+                {
+                    "checkpoint_sha256": digest(manifest(model_files)),
+                    "tokenizer_sha256": digest(manifest(tokenizer_files)),
+                    "metadata_sha256": digest(metadata),
+                }
+            )
+        )
+    with pytest.raises(DatasetError, match=r"weights|tokenizer|components"):
+        if operation == "save":
+            dataset.save(
+                {
+                    "kind": "transformer",
+                    "model": _FilesPayload(model_files),
+                    "tokenizer": _FilesPayload(tokenizer_files),
+                    "_metadata": metadata,
+                }
+            )
+        else:
+            getattr(dataset, operation)()
+    if operation == "save":
+        assert not (root / "complete.json").exists()
+        assert not (root.with_name(f".{root.name}.staging") / "complete.json").exists()
+
+
+@pytest.mark.parametrize(
+    "weight_format", ["safetensors", "pytorch_bin", "sharded_safetensors", "sharded_bin"]
+)
+@pytest.mark.parametrize("tokenizer_format", ["fast", "wordpiece", "bpe", "sentencepiece"])
+def test_bundle_preserves_supported_transformer_payload_formats(
+    tmp_path, monkeypatch, weight_format, tokenizer_format
+):
+    monkeypatch.chdir(tmp_path)
+    root = tmp_path / "data/experiment_v2/test-run/models/model"
+    files = {"config.json": b'{"num_labels":2}'}
+    if weight_format == "safetensors":
+        files["model.safetensors"] = b"synthetic weights"
+    elif weight_format == "pytorch_bin":
+        files["pytorch_model.bin"] = b"synthetic weights"
+    else:
+        prefix, suffix = (
+            ("model", "safetensors")
+            if weight_format == "sharded_safetensors"
+            else ("pytorch_model", "bin")
+        )
+        shard = f"{prefix}-00001-of-00001.{suffix}"
+        files[shard] = b"synthetic shard"
+        files[f"{prefix}.{suffix}.index.json"] = json.dumps(
+            {"weight_map": {"layer.weight": shard}}
+        ).encode()
+    tokenizer_files = {
+        "fast": {"tokenizer.json": b'{"vocab":{"token":0}}'},
+        "wordpiece": {"vocab.txt": b"[UNK]\ntoken\n"},
+        "bpe": {"vocab.json": b'{"token":0}', "merges.txt": b"#version: 0.2\nt o\n"},
+        "sentencepiece": {"spm.model": b"synthetic sentencepiece bytes"},
+    }[tokenizer_format]
+    dataset = _dataset_type()(filepath=str(root), run_id="test-run")
+    dataset.save(
+        {
+            "kind": "transformer",
+            "model": _FilesPayload(files),
+            "tokenizer": _FilesPayload(tokenizer_files),
+            "_metadata": {"training_seed": 123},
+        }
+    )
+    assert dataset.exists()
+    assert dataset.load()["path"] == str(root / "payload")
+
+
+@pytest.mark.parametrize("missing", ["all_weights", "referenced_shard", "tokenizer_payload"])
+def test_index_and_tokenizer_metadata_do_not_substitute_for_required_payloads(
+    tmp_path, monkeypatch, missing
+):
+    monkeypatch.chdir(tmp_path)
+    root = tmp_path / "data/experiment_v2/test-run/models/model"
+    files = {
+        "config.json": b'{"num_labels":2}',
+        "model.safetensors.index.json": json.dumps(
+            {
+                "weight_map": {
+                    "layer.a": "model-00001-of-00002.safetensors",
+                    "layer.b": "model-00002-of-00002.safetensors",
+                }
+            }
+        ).encode(),
+    }
+    if missing != "all_weights":
+        files["model-00001-of-00002.safetensors"] = b"synthetic shard"
+    if missing == "tokenizer_payload":
+        files["model-00002-of-00002.safetensors"] = b"synthetic shard"
+    tokens = (
+        {"tokenizer_config.json": b"{}"}
+        if missing == "tokenizer_payload"
+        else {"tokenizer.json": b'{"vocab":{"token":0}}'}
+    )
+    dataset = _dataset_type()(filepath=str(root), run_id="test-run")
+    with pytest.raises(DatasetError, match=r"weights|tokenizer|shard|components"):
+        dataset.save(
+            {
+                "kind": "transformer",
+                "model": _FilesPayload(files),
+                "tokenizer": _FilesPayload(tokens),
+                "_metadata": {"training_seed": 123},
+            }
+        )
+    assert not (root / "complete.json").exists()

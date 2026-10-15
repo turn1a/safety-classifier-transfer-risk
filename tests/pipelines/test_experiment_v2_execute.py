@@ -1423,7 +1423,10 @@ def test_production_model_graph_resumes_missing_metadata_without_retraining(
     assert calls == {"trainer": 1, "gate": 3}
 
 
-@pytest.mark.parametrize("corruption", ["hash", "budget", "source_identity", "target_queries"])
+@pytest.mark.parametrize(
+    "corruption",
+    ["hash", "budget", "source_identity", "target_queries", "source_window", "clean_window"],
+)
 def test_candidate_corruption_is_rejected_before_any_target_prediction(corruption):
     module = _nodes()
     protocol, corpus, registration = _execution_evidence()
@@ -1457,12 +1460,21 @@ def test_candidate_corruption_is_rejected_before_any_target_prediction(corruptio
             "source_raw_perturbed": "1",
         },
     )
+    clean = _clean_rows(protocol, corpus, receipt)
     if corruption == "hash":
         private[-1]["candidate_text"] = "corrupted synthetic candidate"
     elif corruption == "budget":
         private[-1]["attempt"]["source_queries"] = protocol.source_query_budget + 1
     elif corruption == "source_identity":
         private[-1]["attempt"]["source_checkpoint_sha256"] = digest("wrong")
+    elif corruption == "source_window":
+        private[-1]["attempt"]["source_candidate_tokenization"] = {
+            "input_tokens": 513,
+            "max_tokens": 522,
+            "truncated": False,
+        }
+    elif corruption == "clean_window":
+        clean[-1]["tokenization"] = {"input_tokens": 513, "max_tokens": 522, "truncated": False}
     else:
         private[-1]["attempt"]["target_search_queries"] = 1
     predictor = Mock(return_value=["0"] * len(private))
@@ -1474,7 +1486,7 @@ def test_candidate_corruption_is_rejected_before_any_target_prediction(corruptio
             private,
             _execution_parameters(),
             corpus.model_dump(),
-            _clean_rows(protocol, corpus, receipt),
+            clean,
             predict_fn=predictor,
         )
     predictor.assert_not_called()
