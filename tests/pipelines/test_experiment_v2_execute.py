@@ -454,7 +454,8 @@ def test_attempt_shard_retains_failures_skips_errors_and_private_candidates():
     assert all(row["attempt"]["mechanical_screen"] == "unassessable" for row in result)
 
 
-def test_target_audit_includes_every_failure_candidate_without_publishing_text():
+@pytest.mark.parametrize("screen", ["unassessable", "passed", "failed"])
+def test_target_audit_includes_every_failure_candidate_without_publishing_text(screen):
     protocol, corpus, registration = _execution_evidence()
     receipt = _nodes().gate_calibration(
         protocol.model_dump(),
@@ -482,6 +483,11 @@ def test_target_audit_includes_every_failure_candidate_without_publishing_text()
             "error_type": None,
         },
     )
+    for row in private:
+        row["attempt"]["mechanical_screen"] = screen
+        row["attempt"]["mechanical_evidence_sha256"] = (
+            None if screen == "unassessable" else digest("synthetic_screen_evidence")
+        )
     audited = _nodes().audit_attack_shard(
         receipt,
         protocol.model_dump(),
@@ -495,6 +501,7 @@ def test_target_audit_includes_every_failure_candidate_without_publishing_text()
     assert len(audited) == 4
     assert all(len(row["target_predictions"]) == 2 for row in audited)
     assert all(row["status"] == "failed" for row in audited)
+    assert all(row["mechanical_screen"] == screen for row in audited)
     assert all("candidate_text" not in row and "text" not in row for row in audited)
 
 
@@ -1425,7 +1432,18 @@ def test_production_model_graph_resumes_missing_metadata_without_retraining(
 
 @pytest.mark.parametrize(
     "corruption",
-    ["hash", "budget", "source_identity", "target_queries", "source_window", "clean_window"],
+    [
+        "hash",
+        "budget",
+        "source_identity",
+        "target_queries",
+        "source_window",
+        "clean_window",
+        "screen_passed_missing",
+        "screen_passed_malformed",
+        "screen_failed_missing",
+        "screen_failed_malformed",
+    ],
 )
 def test_candidate_corruption_is_rejected_before_any_target_prediction(corruption):
     module = _nodes()
@@ -1475,6 +1493,12 @@ def test_candidate_corruption_is_rejected_before_any_target_prediction(corruptio
         }
     elif corruption == "clean_window":
         clean[-1]["tokenization"] = {"input_tokens": 513, "max_tokens": 522, "truncated": False}
+    elif corruption.startswith("screen_"):
+        _, verdict, evidence_state = corruption.split("_")
+        private[-1]["attempt"]["mechanical_screen"] = verdict
+        private[-1]["attempt"]["mechanical_evidence_sha256"] = (
+            None if evidence_state == "missing" else "malformed_digest"
+        )
     else:
         private[-1]["attempt"]["target_search_queries"] = 1
     predictor = Mock(return_value=["0"] * len(private))

@@ -288,7 +288,7 @@ def _candidate_predictions(
         require_target_audit: Require completed target coverage after generation.
 
     Raises:
-        ValueError: If output status, source transition, or frozen-target identity is inconsistent.
+        ValueError: If output accounting, mechanical evidence, or prediction identity differs.
     """
     source_original = clean[attempt.source_id, attempt.replicate, attempt.original_id]
     validate_tokenization_window(protocol, attempt.source_id, attempt.source_original_tokenization)
@@ -310,6 +310,10 @@ def _candidate_predictions(
     perturbed = canonical_label(protocol, attempt.source_id, str(attempt.source_raw_perturbed))
     if (attempt.status == "success") != (perturbed == 0):
         _fail("source success does not match its actual classifier transition")
+    if attempt.mechanical_screen != "unassessable" and not is_digest(
+        attempt.mechanical_evidence_sha256
+    ):
+        _fail("mechanical screening verdict requires separate evidence")
     if not require_target_audit:
         if attempt.target_predictions:
             _fail("generation output already contains target predictions")
@@ -330,7 +334,7 @@ def _target_predictions(
         identities: Realized model/tokenizer hashes.
 
     Raises:
-        ValueError: If target coverage, identity, or mechanical evidence differs.
+        ValueError: If target coverage or identity differs.
     """
     expected_targets = {role.model_id for role in protocol.target_roles}
     if {item.model_id for item in attempt.target_predictions} != expected_targets or (
@@ -345,10 +349,6 @@ def _target_predictions(
             _fail("perturbed target identity differs from its clean baseline")
         canonical_label(protocol, item.model_id, item.raw_label)
         validate_tokenization_window(protocol, item.model_id, item.tokenization)
-    if attempt.mechanical_screen != "unassessable" and not is_digest(
-        attempt.mechanical_evidence_sha256
-    ):
-        _fail("mechanical screening verdict requires separate evidence")
 
 
 def _attempts(
