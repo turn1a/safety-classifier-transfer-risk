@@ -1,5 +1,7 @@
-# All runtime gate receipts are ephemeral so resumed runs revalidate current evidence.
-# Checkpoint metadata is outside checkpoint directories to keep fingerprints stable.
+# Runtime gate outputs are ephemeral; no-output verification nodes also run on resume.
+# Each transactional bundle contains payload/, metadata.json, and complete.json.
+# Separate catalog metadata projections are derived from verified bundled metadata.
+# Payload fingerprints exclude transactional files through the payload subdirectory.
 v2_corpus_evidence:
   type: json.JSONDataset
   filepath: ${globals:v2_evidence_root}/corpus.json
