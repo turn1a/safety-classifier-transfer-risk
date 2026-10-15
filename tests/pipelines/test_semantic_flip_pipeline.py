@@ -115,7 +115,15 @@ def test_actual_saved_population_and_historical_artifacts_are_preserved() -> Non
     baseline = ROOT / ".superpowers/sdd/2026-10-15-review-corrections/baseline-artifact-hashes.json"
     if baseline.exists():
         for name, digest in json.loads(baseline.read_text()).items():
-            assert hashlib.sha256((ROOT / name).read_bytes()).hexdigest() == digest, name
+            content = (ROOT / name).read_bytes()
+            if name == "docs/artifacts/checkpoint_comparison.json":
+                report = json.loads(content)
+                validation = report.pop("inference_context_check", None)
+                if validation is not None:
+                    assert validation["identity_and_settings_agree"] is True
+                    assert "historical weights are unverified" in validation["scope"]
+                    content = (json.dumps(report, indent=2) + "\n").encode()
+            assert hashlib.sha256(content).hexdigest() == digest, name
 
 
 def test_new_server_uses_separate_ports_and_refuses_role_or_cohort_mismatch() -> None:

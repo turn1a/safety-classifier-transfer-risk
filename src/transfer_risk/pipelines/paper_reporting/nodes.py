@@ -41,6 +41,143 @@ _GRAY = "#707070"
 _DARK_CELL_THRESHOLD = 0.72
 
 
+def build_review_reporting(
+    preparation: dict[str, Any], finalized: dict[str, Any] | None
+) -> tuple[str, Figure]:
+    """Render aggregate review coverage while retaining absent and unresolved evidence.
+
+    Args:
+        preparation: Catalog-generated frozen sampling and population summary.
+        finalized: Optional explicitly finalized human-review aggregate.
+
+    Returns:
+        A compact manuscript table and a page-width review-coverage figure.
+
+    Raises:
+        ValueError: If finalized evidence belongs to a different preparation.
+    """
+    if finalized is not None:
+        identity_fields = (
+            "schema_version",
+            "review_preparation_id",
+            "sampling_design",
+            "attempted_trials",
+            "classifier_flip_trials",
+            "distinct_pair_workload",
+            "stage_one_sample_trials",
+            "stage_one_distinct_pairs",
+            "resolved_sample_maximum_interval_margin",
+            "margin_is_design_property",
+            "interim_cell_rates_estimated",
+            "interim_original_union_estimated",
+            "census_bounds_are_confidence_intervals",
+        )
+        if any(
+            field not in preparation or finalized.get(field) != preparation[field]
+            for field in identity_fields
+        ):
+            msg = "final review summary differs from its frozen preparation identity or design"
+            raise ValueError(msg)
+        for policy in preparation["policies"]:
+            for field in ("attempted_trials", "classifier_flip_trials"):
+                if (
+                    finalized.get("policies", {}).get(policy, {}).get(field)
+                    != preparation["policies"][policy][field]
+                ):
+                    msg = "final review policy differs from its preparation population"
+                    raise ValueError(msg)
+    summary = preparation if finalized is None else finalized
+    pending = summary["review_status"] == "pending"
+    status = summary["review_status"].replace("_", " ").capitalize()
+    validity = summary["validity_status"].replace("_", " ").capitalize()
+    workload = summary["distinct_pair_workload"]
+    complete = summary["two_reviewer_complete_pairs"]
+    rows = [
+        "| Candidate policy | Classifier flips | Valid | Invalid | Unresolved | "
+        "Valid yield bounds (%) |",
+        "| --- | ---: | ---: | ---: | ---: | ---: |",
+    ]
+    estimates = []
+    for name, title in (
+        ("all_returned_candidates", "All returned"),
+        ("source_success_gated", "Source-success gate"),
+    ):
+        policy = summary["policies"][name]
+        bounds = policy["valid_flip_yield_bounds"]
+        valid = "Pending" if pending else f"{policy['confirmed_valid_flip_trials']:,}"
+        invalid = "Pending" if pending else f"{policy['confirmed_invalid_flip_trials']:,}"
+        rows.append(
+            f"| {title} | {policy['classifier_flip_trials']:,} | {valid} | {invalid} | "
+            f"{policy['unresolved_flip_trials']:,} | {bounds['lower'] * 100:.1f} to "
+            f"{bounds['upper'] * 100:.1f} |"
+        )
+        point = policy["interim"]["point_estimate"]
+        display = "Pending" if pending else ("Unidentified" if point is None else f"{point:.1%}")
+        estimates.append(f"{title}: {display}")
+    rows.extend(
+        [
+            "",
+            ": Human-validity outcomes over all attempted trials. "
+            "Bounds are logical finite-population bounds. "
+            '{#tbl-flip-review tbl-colwidths="[23,15,11,11,15,25]"}',
+            "",
+            f"Review completion: {status} "
+            f"({complete:,}/{workload:,} pairs with two complete reviews). "
+            f"Validity resolution: {validity} ({summary['resolved_pairs']:,}/{workload:,} pairs). "
+            f"Fixed-sample yield estimates: {'; '.join(estimates)}.",
+            "",
+        ]
+    )
+    return "\n".join(rows), _review_coverage_figure(summary, status)
+
+
+def _review_coverage_figure(summary: dict[str, Any], status: str) -> Figure:
+    """Show occurrence sampling before display deduplication and separate review states."""
+    fig, axis = plt.subplots(figsize=(7.0, 4.6), layout="constrained")
+    axis.set(xlim=(0, 1), ylim=(0, 1))
+    axis.axis("off")
+    count = summary["classifier_flip_trials"]
+    sample = summary["stage_one_sample_trials"]
+    first = summary["stage_one_distinct_pairs"]
+    pairs = summary["distinct_pair_workload"]
+    _box(
+        axis,
+        0.02,
+        0.72,
+        0.28,
+        0.21,
+        f"Changed trials\n{count:,} of {summary['attempted_trials']:,}",
+    )
+    _box(axis, 0.36, 0.72, 0.28, 0.21, f"SRS of trials\n{sample:,} occurrences")
+    _box(axis, 0.70, 0.72, 0.28, 0.21, f"Deduplicate\n{first:,} display pairs", accent=True)
+    _arrow(axis, (0.30, 0.825), (0.36, 0.825))
+    _arrow(axis, (0.64, 0.825), (0.70, 0.825))
+    _box(axis, 0.02, 0.39, 0.28, 0.21, f"Full review cohort\n{pairs:,} distinct pairs")
+    _box(axis, 0.36, 0.39, 0.28, 0.21, f"Stage one\n{first:,} display pairs", accent=True)
+    _box(axis, 0.70, 0.39, 0.28, 0.21, f"Stage two\n{pairs - first:,} remaining pairs")
+    axis.text(0.5, 0.29, f"Review completion: {status}", ha="center", fontsize=12, color=_INK)
+    axis.text(
+        0.5,
+        0.19,
+        f"Two complete reviews: {summary['two_reviewer_complete_pairs']:,}/{pairs:,} pairs\n"
+        f"Validity resolved: {summary['resolved_pairs']:,}/{pairs:,} pairs",
+        ha="center",
+        va="center",
+        fontsize=11,
+        color=_INK,
+        linespacing=1.5,
+    )
+    axis.text(
+        0.5,
+        0.04,
+        "Unresolved judgments retain validity bounds",
+        ha="center",
+        fontsize=11,
+        color=_GRAY,
+    )
+    return fig
+
+
 def build_objective_sensitivity(
     cells: pd.DataFrame,
     similarity: pd.DataFrame,
@@ -217,7 +354,7 @@ def _box(
         label,
         ha="center",
         va="center",
-        fontsize=10,
+        fontsize=11,
         color=_INK,
         linespacing=1.6,
     )
@@ -243,7 +380,7 @@ def plot_audit_flow(summary: dict[str, Any], metrics: dict[str, Any]) -> Figure:
     """Show source eligibility and the target baselines defining the primary denominator."""
     transitions = audit_transition_counts(summary)
     cohort, attacks = summary["full_cohort"], metrics["attack_outcomes"]
-    fig, axis = plt.subplots(figsize=(11.5, 6.4), layout="constrained")
+    fig, axis = plt.subplots(figsize=(7.0, 6.4), layout="constrained")
     axis.set(xlim=(0, 1), ylim=(0, 1))
     axis.axis("off")
     _box(axis, 0.02, 0.79, 0.27, 0.13, f"Source evaluations\n{attacks['attempted']:,} records")
@@ -267,7 +404,7 @@ def plot_audit_flow(summary: dict[str, Any], metrics: dict[str, Any]) -> Figure:
         f"{attacks['skipped']:,} baseline misses skipped",
         ha="center",
         color=_GRAY,
-        fontsize=9,
+        fontsize=10,
     )
     axis.text(
         0.84,
@@ -275,7 +412,7 @@ def plot_audit_flow(summary: dict[str, Any], metrics: dict[str, Any]) -> Figure:
         f"{attacks['failed']:,} eligible attacks failed",
         ha="center",
         color=_GRAY,
-        fontsize=9,
+        fontsize=10,
     )
     axis.text(
         0.5,
@@ -291,7 +428,7 @@ def plot_audit_flow(summary: dict[str, Any], metrics: dict[str, Any]) -> Figure:
         0.39,
         0.36,
         0.14,
-        f"Original target prediction: injection\n{cohort['target_original_injection']:,} records",
+        f"Original target:\ninjection\n{cohort['target_original_injection']:,} records",
         accent=True,
     )
     _box(
@@ -300,7 +437,7 @@ def plot_audit_flow(summary: dict[str, Any], metrics: dict[str, Any]) -> Figure:
         0.39,
         0.34,
         0.14,
-        f"Original target prediction: benign\n{cohort['target_original_benign']:,} records",
+        f"Original target:\nbenign\n{cohort['target_original_benign']:,} records",
     )
     _arrow(axis, (0.5, 0.58), (0.27, 0.54))
     _arrow(axis, (0.5, 0.58), (0.74, 0.54))
@@ -310,7 +447,7 @@ def plot_audit_flow(summary: dict[str, Any], metrics: dict[str, Any]) -> Figure:
         0.13,
         0.23,
         0.14,
-        f"Perturbed benign\n{transitions['injection_to_benign']:,} verified flips",
+        f"Perturbed benign\n{transitions['injection_to_benign']:,}\nverified flips",
         accent=True,
     )
     _box(
@@ -319,7 +456,7 @@ def plot_audit_flow(summary: dict[str, Any], metrics: dict[str, Any]) -> Figure:
         0.13,
         0.23,
         0.14,
-        f"Perturbed injection\n{transitions['injection_to_injection']:,} records",
+        f"Perturbed\ninjection\n{transitions['injection_to_injection']:,} records",
     )
     _box(
         axis,
@@ -327,7 +464,7 @@ def plot_audit_flow(summary: dict[str, Any], metrics: dict[str, Any]) -> Figure:
         0.13,
         0.19,
         0.14,
-        f"Perturbed benign\n{transitions['benign_to_benign']:,} records",
+        f"Perturbed\nbenign\n{transitions['benign_to_benign']:,} records",
     )
     _box(
         axis,
@@ -335,7 +472,7 @@ def plot_audit_flow(summary: dict[str, Any], metrics: dict[str, Any]) -> Figure:
         0.13,
         0.18,
         0.14,
-        f"Perturbed injection\n{transitions['benign_to_injection']:,} records",
+        f"Perturbed\ninjection\n{transitions['benign_to_injection']:,} records",
     )
     for start, end in [
         ((0.27, 0.39), (0.135, 0.28)),
@@ -352,7 +489,7 @@ def plot_audit_flow(summary: dict[str, Any], metrics: dict[str, Any]) -> Figure:
     )
     rates = (
         f"Primary rate: {cohort['true_target_flips']:,} / {cohort['target_original_injection']:,} "
-        f"= {primary_rate}     "
+        f"= {primary_rate}\n"
         f"Historical conditional rate: {cohort['target_perturbed_benign']:,} / "
         f"{cohort['source_successful']:,} "
         f"= {historical_rate}"

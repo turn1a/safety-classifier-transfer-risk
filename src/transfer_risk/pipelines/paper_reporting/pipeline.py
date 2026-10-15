@@ -7,6 +7,7 @@ from transfer_risk.pipelines.paper_reporting.nodes import (
     build_objective_sensitivity,
     build_paper_tables,
     build_pool_sensitivity,
+    build_review_reporting,
     build_strengthening_tables,
     plot_audit_flow,
     plot_dbs_geometry,
@@ -20,6 +21,12 @@ def create_pipeline() -> Pipeline:
     """Return a target-free pipeline with no attack, checkpoint, or text inputs."""
     return Pipeline(
         [
+            node(
+                build_review_reporting,
+                inputs=["pub_semantic_flip_preparation", "pub_semantic_flip_review"],
+                outputs=["paper_flip_review_table", "fig_flip_review_coverage"],
+                name="paper_flip_review_reporting",
+            ),
             node(
                 build_objective_sensitivity,
                 inputs=[

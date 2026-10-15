@@ -1,6 +1,9 @@
 {
   "schema_version": "semantic-flip-review-v1",
+  "review_preparation_id": "247970c3e5d84d801514caffc45cecf083e3577f7705cbf5b4808ae30dd8b224",
+  "sampling_design": "SRS without replacement of changed trial occurrences; pair deduplication after sampling",
   "review_status": "pending",
+  "validity_status": "unresolved",
   "attempted_trials": 8595,
   "classifier_flip_trials": 1403,
   "distinct_pair_workload": 1318,

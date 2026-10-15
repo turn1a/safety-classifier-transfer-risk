@@ -131,9 +131,22 @@ def test_missing_reviews_widen_interim_intervals_and_keep_census_denominators() 
             assert result["interim"]["point_estimate"] is None
         assert result["association"]["rho"] is None
     assert "pair_id" not in json.dumps(summary)
+    assert saved["cohort_fingerprint"] not in json.dumps(summary)
     assert not any(
         pair["original"] in json.dumps(summary) for pair in saved["review_dataset"]["pairs"]
     )
+
+
+def test_public_preparation_binding_distinguishes_equal_sized_cohorts() -> None:
+    """Opaque aggregate provenance changes with a private frame of the same size."""
+    first = cohort()
+    second = build_flip_cohort(*inputs(), seed=15, sample_size=3)
+    empty = pd.DataFrame(columns=["pair_id", "status"])
+    one = summarize_flip_review(first, empty)
+    two = summarize_flip_review(second, empty)
+    assert one["attempted_trials"] == two["attempted_trials"]
+    assert one["distinct_pair_workload"] == two["distinct_pair_workload"]
+    assert one["review_preparation_id"] != two["review_preparation_id"]
 
 
 def test_census_counts_cells_original_union_and_null_outcome_are_exact() -> None:
@@ -145,7 +158,7 @@ def test_census_counts_cells_original_union_and_null_outcome_are_exact() -> None
     summary = summarize_flip_review(
         saved, statuses, pd.DataFrame({"surrogate": ["a", "b"], "mean_cka": [0.2, 0.7]})
     )
-    assert summary["review_status"] == "census_resolved"
+    assert summary["validity_status"] == "census_resolved"
     result = summary["policies"]["all_returned_candidates"]
     assert result["confirmed_valid_flip_trials"] == 6
     assert result["interim"]["population_count_interval"] == {"lower": 6, "upper": 6}
@@ -205,6 +218,8 @@ def test_review_completion_and_stage_two_preserve_resolution_and_sample_size() -
     )
     summary = summarize_flip_review(saved, statuses)
     assert summary["two_reviewer_complete_pairs"] == 3
+    assert summary["review_status"] == "complete"
+    assert summary["validity_status"] == "unresolved"
     assert summary["resolved_pairs"] == 0
     assert all(value["interim"]["sample_trials"] == 3 for value in summary["policies"].values())
     assert (
