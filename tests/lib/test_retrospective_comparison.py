@@ -265,3 +265,110 @@ def test_constant_candidate_outcomes_retain_undefined_association_reason() -> No
     assert association["rho"] is None
     assert association["two_sided_p"] is None
     assert "constant" in association["reason"]
+
+
+@pytest.mark.parametrize("field", ["inference_weights_sha256", "tokenizer_vocab_sha256"])
+@pytest.mark.parametrize("value", [None, "", " ", "a" * 63, "g" * 64, 123, [], True])
+def test_matching_invalid_identity_evidence_cannot_certify_comparison(
+    field: str, value: object
+) -> None:
+    """Equal missing or malformed fingerprints provide no checkpoint/tokenizer identity."""
+    frames, similarity, context = _evidence()
+    baseline = _baseline(context)
+    context["reports"][0][field] = value
+    baseline["reports"][0][field] = value
+    with pytest.raises(ValueError, match=field):
+        compare_saved_candidate_policies(
+            frames,
+            similarity,
+            context,
+            attempts_per_cell=10,
+            recipes=["recipe"],
+            reference_target="reference",
+            baseline_context=baseline,
+        )
+
+
+@pytest.mark.parametrize("field", ["inference_dtype", "device", "provenance_scope"])
+@pytest.mark.parametrize("value", [None, "", " ", 123, []])
+def test_matching_invalid_inference_strings_cannot_certify_comparison(
+    field: str, value: object
+) -> None:
+    """A shared empty or non-string inference setting cannot certify the saved context."""
+    frames, similarity, context = _evidence()
+    baseline = _baseline(context)
+    context["reports"][0][field] = value
+    baseline["reports"][0][field] = value
+    with pytest.raises(ValueError, match=field):
+        compare_saved_candidate_policies(
+            frames,
+            similarity,
+            context,
+            attempts_per_cell=10,
+            recipes=["recipe"],
+            reference_target="reference",
+            baseline_context=baseline,
+        )
+
+
+@pytest.mark.parametrize("value", [None, 0, -1, True, "512", 512.0])
+def test_matching_invalid_token_limit_cannot_certify_comparison(value: object) -> None:
+    """The certified token window requires a positive integer limit."""
+    frames, similarity, context = _evidence()
+    baseline = _baseline(context)
+    context["reports"][0]["max_seq_len"] = value
+    baseline["reports"][0]["max_seq_len"] = value
+    with pytest.raises(ValueError, match="max_seq_len"):
+        compare_saved_candidate_policies(
+            frames,
+            similarity,
+            context,
+            attempts_per_cell=10,
+            recipes=["recipe"],
+            reference_target="reference",
+            baseline_context=baseline,
+        )
+
+
+@pytest.mark.parametrize("value", ["", " ", 123, []])
+def test_present_hub_revision_requires_nonempty_string(value: object) -> None:
+    """Hub revisions may be absent, while a present revision must name an identity."""
+    frames, similarity, context = _evidence()
+    baseline = _baseline(context)
+    context["reports"][0]["loaded_hub_revision"] = value
+    baseline["reports"][0]["loaded_hub_revision"] = value
+    with pytest.raises(ValueError, match="loaded_hub_revision"):
+        compare_saved_candidate_policies(
+            frames,
+            similarity,
+            context,
+            attempts_per_cell=10,
+            recipes=["recipe"],
+            reference_target="reference",
+            baseline_context=baseline,
+        )
+
+
+@pytest.mark.parametrize(
+    "label,canonical",
+    [("positive_label", "canonical_positive"), ("benign_label", "canonical_negative")],
+)
+@pytest.mark.parametrize("value", [None, "", True, 1.0, -1])
+def test_matching_invalid_label_types_cannot_certify_comparison(
+    label: str, canonical: str, value: object
+) -> None:
+    """Matching null, boolean or noninteger class indices are invalid label evidence."""
+    frames, similarity, context = _evidence()
+    baseline = _baseline(context)
+    context["reports"][0][label] = value
+    baseline["reports"][0]["label_values"][canonical] = value
+    with pytest.raises(ValueError, match="label"):
+        compare_saved_candidate_policies(
+            frames,
+            similarity,
+            context,
+            attempts_per_cell=10,
+            recipes=["recipe"],
+            reference_target="reference",
+            baseline_context=baseline,
+        )

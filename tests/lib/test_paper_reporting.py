@@ -115,3 +115,31 @@ def test_surrogate_exclusion_keeps_undefined_constant_association(outcome: float
     assert stats["rho"] is None
     assert stats["two_sided_p"] is None
     assert "defined" in stats["reason"] if outcome is None else "constant" in stats["reason"]
+
+
+def test_one_missing_macro_outcome_preserves_the_declared_sensitivity_pool() -> None:
+    """A missing outcome cannot silently redefine the nine-model association as eight models."""
+    summary = _saved_summary()
+    missing = next(
+        row
+        for row in summary["full_cohort"]["surrogate_macro"]["rows"]
+        if row["surrogate"] == "bert-base-ft"
+    )
+    missing["true_target_flip_rate_macro_mean"] = None
+    reduced = exclude_surrogates(summary, ["bilstm-attention"])
+    stats = reduced["mean_cka_association"]
+    assert reduced["n_surrogates"] == 9
+    assert stats["n"] == 9
+    assert stats["n_defined"] == 8
+    assert stats["n_required"] == 9
+    assert stats["rho"] is None
+    assert stats["two_sided_p"] is None
+    assert "defined" in stats["reason"]
+    training = json.loads(
+        (_ROOT / "docs/artifacts/training_probe_similarity_sensitivity.json").read_text()
+    )
+    table = render_sensitivity_table(summary, training, reduced)
+    reduced_row = next(line for line in table.splitlines() if line.startswith("| BiLSTM excluded"))
+    assert "| 9 |" in reduced_row
+    assert "Undefined" in reduced_row
+    assert "defined" in reduced_row

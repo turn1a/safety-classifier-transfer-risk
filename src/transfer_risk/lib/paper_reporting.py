@@ -88,21 +88,31 @@ def exclude_surrogates(
         raise ValueError(msg)
     counts = {name: sum(int(row[name]) for row in retained) for name in _COUNTS}
     denominator = counts["target_original_injection"]
-    complete = [row for row in retained if row["true_target_flip_rate_macro_mean"] is not None]
+    n_defined = sum(row["true_target_flip_rate_macro_mean"] is not None for row in retained)
     reason = None
-    if len(complete) < _MIN_SURROGATES:
-        reason = "fewer than two surrogates with defined outcomes"
+    if n_defined != len(retained):
+        reason = (
+            f"required surrogate outcomes are undefined ({n_defined} of {len(retained)} defined)"
+        )
     elif (
-        len({row["mean_cka"] for row in complete}) < _MIN_SURROGATES
-        or len({row["true_target_flip_rate_macro_mean"] for row in complete}) < _MIN_SURROGATES
+        len({row["mean_cka"] for row in retained}) < _MIN_SURROGATES
+        or len({row["true_target_flip_rate_macro_mean"] for row in retained}) < _MIN_SURROGATES
     ):
         reason = "Spearman association is undefined for constant input sequences"
     association = (
-        {"rho": None, "two_sided_p": None, "n": len(complete), "exact": False, "reason": reason}
+        {
+            "rho": None,
+            "two_sided_p": None,
+            "n": len(retained),
+            "n_defined": n_defined,
+            "n_required": len(retained),
+            "exact": False,
+            "reason": reason,
+        }
         if reason is not None
         else spearman_association(
-            [row["mean_cka"] for row in complete],
-            [row["true_target_flip_rate_macro_mean"] for row in complete],
+            [row["mean_cka"] for row in retained],
+            [row["true_target_flip_rate_macro_mean"] for row in retained],
         )
     )
     return {

@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import re
 from typing import TYPE_CHECKING, Any
 
 import numpy as np
@@ -37,6 +38,28 @@ _INFERENCE_FIELDS = (
 )
 
 
+def _validate_inference_values(record: Mapping[str, Any], *, target: str) -> None:
+    """Require usable saved identities and typed inference settings before comparing them."""
+    for field in ("inference_weights_sha256", "tokenizer_vocab_sha256"):
+        value = record.get(field)
+        if not isinstance(value, str) or re.fullmatch(r"[0-9a-fA-F]{64}", value) is None:
+            msg = f"independent inference context lacks a valid SHA-256 for {target}: {field}"
+            raise ValueError(msg)
+    for field in ("inference_dtype", "device", "provenance_scope"):
+        value = record.get(field)
+        if not isinstance(value, str) or not value.strip():
+            msg = f"independent inference context requires a nonempty string for {target}: {field}"
+            raise ValueError(msg)
+    revision = record.get("loaded_hub_revision")
+    if revision is not None and (not isinstance(revision, str) or not revision.strip()):
+        msg = f"independent inference context has an invalid loaded_hub_revision for {target}"
+        raise ValueError(msg)
+    limit = record.get("max_seq_len")
+    if type(limit) is not int or limit <= 0:
+        msg = f"independent inference context requires a positive integer max_seq_len for {target}"
+        raise ValueError(msg)
+
+
 def _validate_inference_context(
     context: Mapping[str, Any], baseline_context: Mapping[str, Any]
 ) -> None:
@@ -52,14 +75,21 @@ def _validate_inference_context(
         if baseline is None:
             msg = f"independent inference context is missing target {target}"
             raise ValueError(msg)
+        _validate_inference_values(report, target=target)
+        _validate_inference_values(baseline, target=target)
         for field in _INFERENCE_FIELDS:
             if field not in report or field not in baseline or report[field] != baseline[field]:
                 msg = f"independent inference context differs for {target}: {field}"
                 raise ValueError(msg)
         labels = baseline.get("label_values", {})
+        label_values = (
+            report.get("positive_label"),
+            report.get("benign_label"),
+            labels.get("canonical_positive"),
+            labels.get("canonical_negative"),
+        )
         if (
-            "positive_label" not in report
-            or "benign_label" not in report
+            any(type(value) is not int or value < 0 for value in label_values)
             or report["positive_label"] != labels.get("canonical_positive")
             or report["benign_label"] != labels.get("canonical_negative")
             or report["positive_label"] == report["benign_label"]
