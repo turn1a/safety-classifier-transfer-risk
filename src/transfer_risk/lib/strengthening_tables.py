@@ -4,6 +4,8 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
+from transfer_risk.lib.statistic_display import association_cells, format_percent
+
 if TYPE_CHECKING:
     from collections.abc import Mapping, Sequence
 
@@ -30,14 +32,23 @@ def render_baseline_table(summary: Mapping[str, Any]) -> str:
     for report in summary["reports"]:
         counts = report["pooled"]
         positive, negative = counts["canonical_positive_count"], counts["canonical_negative_count"]
+        recall = format_percent(
+            counts["canonical_positive_recall"], reason="no canonical-positive inputs", suffix="%"
+        )
+        false_positive = format_percent(
+            counts["canonical_negative_false_positive_rate"],
+            reason="no canonical-benign inputs",
+            suffix="%",
+        )
         rows.append(
             [
                 _model_link(report["target_id"]),
-                f"{counts['canonical_positive_predicted_positive_count']}/{positive} "
-                f"({100 * counts['canonical_positive_recall']:.1f}%)",
+                f"{counts['canonical_positive_predicted_positive_count']}/{positive} ({recall})",
                 f"{counts['canonical_negative_predicted_positive_count']}/{negative} "
-                f"({100 * counts['canonical_negative_false_positive_rate']:.1f}%)",
-                f"{100 * counts['canonical_label_accuracy']:.1f}%",
+                f"({false_positive})",
+                format_percent(
+                    counts["canonical_label_accuracy"], reason="no clean inputs", suffix="%"
+                ),
             ]
         )
     return _table(
@@ -65,7 +76,9 @@ def render_policy_table(comparison: Mapping[str, Any]) -> str:
                 f"{row['original_target_positive']}/{originals}",
                 f"{row['source_gated_flips']:,}",
                 f"{row['all_candidate_flips']:,}",
-                f"{100 * row['all_candidate_yield']:.1f}%",
+                format_percent(
+                    row["all_candidate_yield"], reason="no attempted trials", suffix="%"
+                ),
             ]
         )
     budget = comparison["common_pool"][0]["attempted"]
@@ -99,19 +112,11 @@ def render_objective_table(objectives: Mapping[str, Any], comparison: Mapping[st
             ("source_success_gated_verified_flip_yield", "Source-success-gated trial yield"),
         ):
             stats = pool["associations"][outcome]
-            rows.append(
-                [label, outcome_label, f"{stats['rho']:.3f}", f"{stats['two_sided_p']:.2g}"]
-            )
+            rows.append([label, outcome_label, *association_cells(stats)])
     stats = comparison["reference_pool"]["association"]
-    if stats is not None:
-        rows.append(
-            [
-                "Nine transformers",
-                "All-returned-candidate trial yield",
-                f"{stats['rho']:.3f}",
-                f"{stats['two_sided_p']:.2g}",
-            ]
-        )
+    rows.append(
+        ["Nine transformers", "All-returned-candidate trial yield", *association_cells(stats)]
+    )
     return _table(
         [
             "Pool",
@@ -138,8 +143,16 @@ def render_coverage_table(coverage: Mapping[str, Any]) -> str:
     for policy, label in policies:
         chosen = coverage["selected"][f"{policy}_originals"]
         best = coverage["comparisons"][policy]["best_originals"]
-        chosen_rate = f"{100 * chosen / denominator:.1f}%" if denominator else "undefined"
-        best_rate = f"{100 * best / denominator:.1f}%" if denominator else "undefined"
+        chosen_rate = format_percent(
+            chosen / denominator if denominator else None,
+            reason="no original target positives",
+            suffix="%",
+        )
+        best_rate = format_percent(
+            best / denominator if denominator else None,
+            reason="no original target positives",
+            suffix="%",
+        )
         rows.append(
             [
                 label,

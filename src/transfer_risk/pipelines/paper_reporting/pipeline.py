@@ -43,6 +43,7 @@ def create_pipeline() -> Pipeline:
                     "pub_results_manifest",
                     "params:attacks",
                     "pub_source_baseline_check",
+                    "pub_detector_baseline_summary",
                 ],
                 outputs="pub_checkpoint_comparison",
                 name="paper_checkpoint_comparison",

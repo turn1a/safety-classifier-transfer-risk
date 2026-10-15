@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import json
+import warnings
 from pathlib import Path
 
 import matplotlib.pyplot as plt
@@ -10,7 +11,12 @@ import pandas as pd
 import pytest
 
 from transfer_risk.pipeline_registry import register_pipelines
-from transfer_risk.pipelines.paper_reporting.nodes import build_paper_tables, plot_probe_stability
+from transfer_risk.pipelines.paper_reporting.nodes import (
+    build_paper_tables,
+    plot_audit_flow,
+    plot_objective_sensitivity,
+    plot_probe_stability,
+)
 
 _ROOT = Path(__file__).resolve().parents[2]
 
@@ -55,3 +61,59 @@ def test_probe_plot_rejects_missing_surrogates() -> None:
             plot_probe_stability(_artifact("target_audit_summary.json"), training)
     finally:
         plt.close("all")
+
+
+@pytest.mark.parametrize("case", ["undefined", "zero", "empty", "probability"])
+def test_objective_plot_handles_undefined_and_empty_outcomes(case: str) -> None:
+    """Nullable outcomes and zero-size ranges produce readable figures without warnings."""
+    objectives = _artifact("pool_objective_sensitivity.json")
+    comparison = _artifact("checkpoint_comparison.json")
+    pool = objectives["pools"]["surrogate_excluded"]
+    for row in objectives["surrogate_rows"]:
+        row["macro_conditional_verified_flip_rate"] = None if case == "undefined" else 0.0
+        row["source_success_gated_verified_flip_yield"] = 0.0
+    for row in comparison["reference_pool"]["surrogate_rows"]:
+        row["all_candidate_yield"] = 0.0
+    for stats in pool["associations"].values():
+        stats.update(rho=None, two_sided_p=None, reason="constant or absent outcomes")
+        if case == "probability":
+            stats["rho"] = 0.5
+    comparison["reference_pool"]["association"] = None
+    if case == "empty":
+        pool["surrogates"] = []
+    with warnings.catch_warnings():
+        warnings.simplefilter("error")
+        figure = plot_objective_sensitivity(objectives, comparison)
+        figure.canvas.draw()
+    try:
+        labels = " ".join(text.get_text() for axis in figure.axes for text in axis.texts)
+        assert "Undefined" in labels
+        assert "constant or absent outcomes" in labels
+        if case == "probability":
+            assert "0.500" in labels
+            assert "p = Undefined" in labels
+        assert all(axis.get_ylim()[1] > 0 for axis in figure.axes)
+    finally:
+        plt.close(figure)
+
+
+def test_audit_flow_explains_undefined_probabilities() -> None:
+    """An empty cohort renders denominator reasons in both displayed rates."""
+    summary = _artifact("target_audit_summary.json")
+    for name in (
+        "source_successful",
+        "target_original_benign",
+        "target_original_injection",
+        "target_perturbed_benign",
+        "true_target_flips",
+    ):
+        summary["full_cohort"][name] = 0
+    summary["full_cohort"].update(true_target_flip_rate=None, conditional_target_benign_rate=None)
+    figure = plot_audit_flow(summary, _artifact("run_metrics.json"))
+    try:
+        figure.canvas.draw()
+        labels = " ".join(text.get_text() for text in figure.axes[0].texts)
+        assert "Undefined (no original target injections)" in labels
+        assert "Undefined (no successful source attacks)" in labels
+    finally:
+        plt.close(figure)

@@ -86,3 +86,32 @@ def test_surrogate_table_uses_rounded_rates_and_excludes_private_fields() -> Non
     assert "140 / 246" in table
     assert "0.5567388639729065" not in table
     assert "PRIVATE_FIXTURE" not in table
+
+
+def test_sensitivity_table_explains_null_rates_correlations_and_probabilities() -> None:
+    """Undefined statistics remain visible when a saved cohort has no target injections."""
+    summary = _saved_summary()
+    training = json.loads(
+        (_ROOT / "docs/artifacts/training_probe_similarity_sensitivity.json").read_text()
+    )
+    reduced = exclude_surrogates(summary, ["bilstm-attention"])
+    reduced.update(true_target_flip_rate=None, target_original_injection=0, true_target_flips=0)
+    reduced["mean_cka_association"].update(
+        rho=None, two_sided_p=None, reason="constant input sequences"
+    )
+    rendered = render_sensitivity_table(summary, training, reduced)
+    assert "Undefined (no original target injections)" in rendered
+    assert "Undefined (constant input sequences)" in rendered
+
+
+@pytest.mark.parametrize("outcome", [None, 0.0])
+def test_surrogate_exclusion_keeps_undefined_constant_association(outcome: float | None) -> None:
+    """A missing or constant macro outcome produces a reasoned null correlation."""
+    summary = _saved_summary()
+    for row in summary["full_cohort"]["surrogate_macro"]["rows"]:
+        row["true_target_flip_rate_macro_mean"] = outcome
+    reduced = exclude_surrogates(summary, ["bilstm-attention"])
+    stats = reduced["mean_cka_association"]
+    assert stats["rho"] is None
+    assert stats["two_sided_p"] is None
+    assert "defined" in stats["reason"] if outcome is None else "constant" in stats["reason"]

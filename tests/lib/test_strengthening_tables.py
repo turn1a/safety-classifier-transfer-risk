@@ -1,8 +1,57 @@
+import json
+from pathlib import Path
+
 from transfer_risk.lib.strengthening_tables import (
     render_baseline_table,
     render_coverage_table,
+    render_objective_table,
     render_policy_table,
 )
+
+_ROOT = Path(__file__).resolve().parents[2] / "docs/artifacts"
+
+
+def test_objective_table_keeps_undefined_associations_and_their_reasons() -> None:
+    """Missing correlations cannot disappear from the candidate-policy comparison."""
+    objectives = json.loads((_ROOT / "pool_objective_sensitivity.json").read_text())
+    comparison = json.loads((_ROOT / "checkpoint_comparison.json").read_text())
+    stats = objectives["pools"]["all_surrogates"]["associations"][
+        "macro_conditional_verified_flip_rate"
+    ]
+    stats.update(rho=None, two_sided_p=None, reason="no defined outcomes")
+    comparison["reference_pool"]["association"] = {
+        "rho": None,
+        "two_sided_p": None,
+        "reason": "constant input sequences",
+    }
+    rendered = render_objective_table(objectives, comparison)
+    assert "Undefined (no defined outcomes)" in rendered
+    assert "All-returned-candidate trial yield | Undefined (constant input sequences)" in rendered
+
+
+def test_baseline_table_explains_empty_probability_denominators() -> None:
+    """A zero-size clean class is reported as undefined with the missing denominator."""
+    rendered = render_baseline_table(
+        {
+            "reports": [
+                {
+                    "target_id": "empty",
+                    "pooled": {
+                        "canonical_positive_count": 0,
+                        "canonical_positive_predicted_positive_count": 0,
+                        "canonical_negative_count": 0,
+                        "canonical_negative_predicted_positive_count": 0,
+                        "canonical_positive_recall": None,
+                        "canonical_negative_false_positive_rate": None,
+                        "canonical_label_accuracy": None,
+                    },
+                }
+            ]
+        }
+    )
+    assert "Undefined (no canonical-positive inputs)" in rendered
+    assert "Undefined (no canonical-benign inputs)" in rendered
+    assert "Undefined (no clean inputs)" in rendered
 
 
 def test_coverage_table_keeps_distinct_original_denominator() -> None:
