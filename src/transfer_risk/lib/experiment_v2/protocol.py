@@ -769,6 +769,27 @@ def build_execution_manifest(
             "constraints": "Clean isolated worktree; pinned inputs; recipe/input hashes checked.",
             "receipts": "Ephemeral MemoryDataset outputs force fresh checks on resumption.",
         },
+        "classifier_input": (
+            "Registered lower-trust UTF-8 text only; trusted context supports "
+            "human ground truth and optional application evaluation."
+        ),
+        "tokenization_diagnostics": (
+            "Original and returned-candidate token counts and truncation per saved "
+            "tokenizer; every attempt remains in its denominator."
+        ),
+        "inference_scope": (
+            "Group resampling conditional on the three realized training "
+            "replicates, fixed targets, pool, and recipes."
+        ),
+        "checkpoint_bundle": {
+            "payload": "payload/ contains only model and tokenizer artifacts.",
+            "metadata": "metadata.json has original non-text training evidence.",
+            "completion": "complete.json verifies payload and metadata hashes before publication.",
+            "recovery": (
+                "Verified complete staging bundles recover without training; "
+                "metadata projections can be reconstructed."
+            ),
+        },
         "phases": {
             "attack_asset_preparation": {
                 "status": "implemented",

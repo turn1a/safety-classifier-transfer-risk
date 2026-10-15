@@ -21,7 +21,6 @@ if TYPE_CHECKING:
         CorpusRecord,
         ExperimentRecords,
         HumanAnnotation,
-        HumanVote,
         ModelRealization,
         Protocol,
         RegistrationEvidence,
@@ -255,6 +254,8 @@ def _candidate_predictions(
     attempt: AttackAttempt,
     identities: dict[tuple[str, int], tuple[str, str]],
     clean: dict[tuple[str, int, str], int],
+    *,
+    require_target_audit: bool = True,
 ) -> None:
     """Validate output accounting and target audit coverage for all returned candidates.
 
@@ -263,6 +264,7 @@ def _candidate_predictions(
         attempt: One source attempt, including failures and skips.
         identities: Exact realized model/tokenizer fingerprints.
         clean: Complete original controls.
+        require_target_audit: Require completed target coverage after generation.
 
     Raises:
         ValueError: If output status, source transition, or frozen-target identity is inconsistent.
@@ -285,6 +287,28 @@ def _candidate_predictions(
     perturbed = canonical_label(protocol, attempt.source_id, str(attempt.source_raw_perturbed))
     if (attempt.status == "success") != (perturbed == 0):
         _fail("source success does not match its actual classifier transition")
+    if not require_target_audit:
+        if attempt.target_predictions:
+            _fail("generation output already contains target predictions")
+        return
+    _target_predictions(protocol, attempt, identities)
+
+
+def _target_predictions(
+    protocol: Protocol,
+    attempt: AttackAttempt,
+    identities: dict[tuple[str, int], tuple[str, str]],
+) -> None:
+    """Require every target audit under its realized model and tokenizer identity.
+
+    Args:
+        protocol: Registered target roles and raw label maps.
+        attempt: Source candidate with completed target predictions.
+        identities: Realized model/tokenizer hashes.
+
+    Raises:
+        ValueError: If target coverage, identity, or mechanical evidence differs.
+    """
     expected_targets = {role.model_id for role in protocol.target_roles}
     if {item.model_id for item in attempt.target_predictions} != expected_targets or (
         len(attempt.target_predictions) != len(expected_targets)
@@ -367,39 +391,144 @@ def _attempts(
     return attempts
 
 
-def _vote_state(vote: HumanVote) -> str:
-    """Resolve one person's semantic, intent, and task judgments conservatively.
+def remember_prediction(
+    seen: dict[tuple[str, str, str], str],
+    content: str,
+    checkpoint: str,
+    tokenizer: str,
+    label: str,
+) -> None:
+    """Require one label for identical content under identical inference identities.
 
     Args:
-        vote: A human judgment with independent dimensions.
-
-    Returns:
-        Valid, invalid, or unresolved human evidence.
-    """
-    if vote.semantic == "changed" or vote.intent == "lost" or vote.is_prompt_injection is False:
-        return "invalid"
-    if (
-        vote.semantic == "preserved"
-        and vote.intent == "retained"
-        and vote.is_prompt_injection is True
-    ):
-        return "valid"
-    return "unresolved"
-
-
-def human_state(annotation: HumanAnnotation) -> str:
-    """Resolve conjunctive validity from two independent reviewers and adjudication.
-
-    Args:
-        annotation: Non-text blinded human judgments for an exact pair.
-
-    Returns:
-        Valid when both reviewers affirm every criterion, invalid when they both reject
-        any one criterion, or unresolved pending an independent adjudication. One vote
-        alone never resolves validity.
+        seen: Prior predictions in this registered execution specification.
+        content: Exact UTF-8 content hash.
+        checkpoint: Saved model fingerprint.
+        tokenizer: Saved tokenizer fingerprint.
+        label: Actual raw classifier output.
 
     Raises:
-        ValueError: If reviewers are duplicated, unblinded, or structurally invalid.
+        ValueError: If identical content already has a different raw prediction.
+    """
+    key = content, checkpoint, tokenizer
+    if key in seen and seen[key] != label:
+        _fail("identical content has contradictory predictions under identical inference identity")
+    seen[key] = label
+
+
+def consistent_content_predictions(
+    records: ExperimentRecords, originals: dict[str, CorpusRecord]
+) -> None:
+    """Reject contradictory labels for the same bytes and model/tokenizer identities.
+
+    Args:
+        records: Complete predictions under one registered inference specification.
+        originals: Registered original hashes.
+
+    Raises:
+        ValueError: If identical content has conflicting raw labels under the same identity.
+    """
+    seen: dict[tuple[str, str, str], str] = {}
+
+    def add(content: str, checkpoint: str, tokenizer: str, label: str) -> None:
+        """Require one label for a deterministic classifier input and identity.
+
+        Args:
+            content: Exact UTF-8 content hash.
+            checkpoint: Saved model fingerprint.
+            tokenizer: Saved tokenizer fingerprint.
+            label: Actual raw classifier output.
+        """
+        remember_prediction(seen, content, checkpoint, tokenizer, label)
+
+    for row in records.clean_predictions:
+        add(
+            originals[row.original_id].content_sha256,
+            row.checkpoint_sha256,
+            row.tokenizer_sha256,
+            row.raw_label,
+        )
+    for attempt in records.attempts:
+        if attempt.candidate_sha256 is not None:
+            add(
+                attempt.candidate_sha256,
+                attempt.source_checkpoint_sha256,
+                attempt.source_tokenizer_sha256,
+                str(attempt.source_raw_perturbed),
+            )
+            for prediction in attempt.target_predictions:
+                add(
+                    attempt.candidate_sha256,
+                    prediction.checkpoint_sha256,
+                    prediction.tokenizer_sha256,
+                    prediction.raw_label,
+                )
+
+
+def validate_generation_shard(
+    protocol: Protocol,
+    attempts: list[AttackAttempt],
+    originals: dict[str, CorpusRecord],
+    identities: dict[tuple[str, int], tuple[str, str]],
+    clean: dict[tuple[str, int, str], int],
+) -> None:
+    """Check every saved source attempt before any target inference.
+
+    Args:
+        protocol: Registered model, recipe, seed, and budget axes.
+        attempts: One saved private generation shard.
+        originals: Registered phase originals.
+        identities: Verified realization fingerprints.
+        clean: Validated original predictions.
+
+    Raises:
+        ValueError: If membership, identities, status, or query accounting differs.
+    """
+    sources = {name for role in protocol.target_roles for name in role.candidate_ids}
+    seen: set[tuple[str, int, str, str]] = set()
+    ids: set[str] = set()
+    for attempt in attempts:
+        key = attempt.source_id, attempt.replicate, attempt.original_id, attempt.recipe
+        if (
+            attempt.source_id not in sources
+            or attempt.replicate not in protocol.replicates
+            or attempt.recipe not in protocol.recipes
+            or attempt.original_id not in originals
+            or originals[attempt.original_id].label != 1
+            or key in seen
+            or attempt.id in ids
+        ):
+            _fail("generation attempt coverage contains an invalid or duplicate cell")
+        seen.add(key)
+        ids.add(attempt.id)
+        minimum = 0 if attempt.status == "error" and attempt.candidate_sha256 is None else 1
+        if not minimum <= attempt.source_queries <= protocol.source_query_budget:
+            _fail("generation attempt source query budget is invalid")
+        if attempt.target_search_queries != 0:
+            _fail("generation attempt used target search queries")
+        if attempt.attack_seed != component_seed(
+            protocol.root_seed, attempt.replicate, f"attack:{attempt.source_id}:{attempt.recipe}"
+        ):
+            _fail("generation attempt attack seed differs")
+        if identities[attempt.source_id, attempt.replicate] != (
+            attempt.source_checkpoint_sha256,
+            attempt.source_tokenizer_sha256,
+        ):
+            _fail("generation attempt source identity differs")
+        _candidate_predictions(protocol, attempt, identities, clean, require_target_audit=False)
+
+
+def resolved_criteria(annotation: HumanAnnotation) -> dict[str, str | bool | None]:
+    """Resolve each criterion while preserving definite independent agreements.
+
+    Args:
+        annotation: Blinded pair judgments and an optional independent adjudicator.
+
+    Returns:
+        Definite consensus or adjudication per criterion, with None for unresolved evidence.
+
+    Raises:
+        ValueError: If identities are absent, repeated, noncanonical, or unblinded.
     """
     if not annotation.blinded:
         _fail("human pair review must be blinded to model identities and outcomes")
@@ -407,57 +536,65 @@ def human_state(annotation: HumanAnnotation) -> str:
     if (
         len(reviewers) > HUMAN_REVIEWERS
         or len(set(reviewers)) != len(reviewers)
-        or any(not reviewer or reviewer != reviewer.strip() for reviewer in reviewers)
+        or any(not name or name != name.strip() for name in reviewers)
     ):
         _fail("human pair review requires independent reviewer identities")
-    if len(reviewers) < HUMAN_REVIEWERS:
-        return "unresolved"
-    if annotation.adjudicator is not None:
-        identifier = annotation.adjudicator.reviewer_id
-        if identifier in reviewers:
+    adjudicator = annotation.adjudicator
+    if adjudicator is not None:
+        if adjudicator.reviewer_id in reviewers:
             _fail("human adjudicator must be independent of the original reviewers")
-        if not identifier or identifier != identifier.strip():
+        if (
+            not adjudicator.reviewer_id
+            or adjudicator.reviewer_id != adjudicator.reviewer_id.strip()
+        ):
             _fail("human adjudicator identity is absent or noncanonical")
-    first, second = annotation.votes
-    if (
-        first.semantic == second.semantic == "changed"
-        or first.intent == second.intent == "lost"
-        or (first.is_prompt_injection is False and second.is_prompt_injection is False)
-    ):
-        return "invalid"
-    first_judgment = first.model_dump(exclude={"reviewer_id"})
-    second_judgment = second.model_dump(exclude={"reviewer_id"})
-    if first_judgment == second_judgment:
-        return _vote_state(first)
-    if annotation.adjudicator is None:
-        return "unresolved"
-    return _vote_state(annotation.adjudicator)
-
-
-def human_review_complete(annotation: HumanAnnotation) -> bool:
-    """Check full criterion resolution separately from logical conjunction validity.
-
-    Args:
-        annotation: Structurally valid blinded human judgments for one exact pair.
-
-    Returns:
-        Whether every criterion has a definite consensus or adjudicated judgment.
-        A pair can be logically invalid while this full-review status remains false.
-    """
-    human_state(annotation)
-    if len(annotation.votes) < HUMAN_REVIEWERS:
-        return False
-    first, second = [vote.model_dump(exclude={"reviewer_id"}) for vote in annotation.votes]
-    final = annotation.adjudicator.model_dump() if annotation.adjudicator is not None else {}
+    result: dict[str, str | bool | None] = {}
     for criterion, unknown in (
         ("semantic", "uncertain"),
         ("intent", "uncertain"),
         ("is_prompt_injection", None),
     ):
-        consensus = first[criterion] == second[criterion] and first[criterion] != unknown
-        if not consensus and (criterion not in final or final[criterion] == unknown):
-            return False
-    return True
+        value = None
+        if len(reviewers) == HUMAN_REVIEWERS:
+            first, second = (getattr(vote, criterion) for vote in annotation.votes)
+            if first == second and first != unknown:
+                value = first
+            elif adjudicator is not None:
+                final = getattr(adjudicator, criterion)
+                value = final if final != unknown else None
+        result[criterion] = value
+    return result
+
+
+def human_state(annotation: HumanAnnotation) -> str:
+    """Resolve conjunctive validity using the shared criterion-level resolution.
+
+    Args:
+        annotation: Non-text blinded human judgments for an exact pair.
+
+    Returns:
+        Invalid if any criterion fails, valid if all pass, otherwise unresolved.
+    """
+    final = resolved_criteria(annotation)
+    if (
+        final["semantic"] == "changed"
+        or final["intent"] == "lost"
+        or final["is_prompt_injection"] is False
+    ):
+        return "invalid"
+    return "valid" if all(value is not None for value in final.values()) else "unresolved"
+
+
+def human_review_complete(annotation: HumanAnnotation) -> bool:
+    """Check whether every criterion has a definite consensus or adjudicated judgment.
+
+    Args:
+        annotation: Structurally valid blinded human judgments for an exact pair.
+
+    Returns:
+        Whether all criteria are resolved, separately from conjunction validity.
+    """
+    return all(value is not None for value in resolved_criteria(annotation).values())
 
 
 def _annotations(
@@ -599,6 +736,7 @@ def validate_records(
     clean = _clean_predictions(protocol, records, originals, identities)
     cka = _similarities(protocol, corpus, records, identities)
     attempts = _attempts(protocol, records, originals, identities, clean, root_seed)
+    consistent_content_predictions(records, originals)
     human = _annotations(protocol, records, originals, attempts)
     return EvidenceIndex(originals, clean, identities, attempts, human, cka)
 

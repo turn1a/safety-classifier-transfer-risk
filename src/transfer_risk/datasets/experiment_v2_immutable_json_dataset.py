@@ -26,4 +26,4 @@ class ExperimentV2ImmutableJSONDataset(ExperimentV2JSONDataset):
                 "v2 heavy-stage evidence is immutable; resume missing outputs or use a fresh run"
             )
             raise DatasetError(message)
-        super().save(data)
+        self._publish(data, immutable=True)

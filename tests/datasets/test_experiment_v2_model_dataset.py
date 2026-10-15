@@ -44,14 +44,16 @@ def test_descriptor_detects_weight_and_tokenizer_mutation_separately(tmp_path, m
     relative = "data/experiment_v2/test-run/models/model"
     root = tmp_path / relative
     _write_transformer_artifact(root)
-    dataset = _dataset_type()(filepath=relative, run_id="test-run")
-    first = dataset.load()
+    descriptor = importlib.import_module(
+        "transfer_risk.datasets.experiment_v2_model_dataset"
+    ).checkpoint_descriptor
+    first = descriptor(root)
     (root / "model.safetensors").write_bytes(b"different checkpoint bytes")
-    second = dataset.load()
+    second = descriptor(root)
     assert first["checkpoint_sha256"] != second["checkpoint_sha256"]
     assert first["tokenizer_sha256"] == second["tokenizer_sha256"]
     (root / "tokenizer_config.json").write_text('{"model_max_length":64}')
-    third = dataset.load()
+    third = descriptor(root)
     assert second["checkpoint_sha256"] == third["checkpoint_sha256"]
     assert second["tokenizer_sha256"] != third["tokenizer_sha256"]
     assert first["path"] == str(root)
@@ -65,11 +67,13 @@ def test_bilstm_vocabulary_is_part_of_tokenizer_identity(tmp_path, monkeypatch):
     config = {"vocab": {"token": 0}, "max_seq_len": 32, "padding_policy": "masked"}
     (root / "config.json").write_text(json.dumps(config))
     (root / "model.pt").write_bytes(b"synthetic checkpoint bytes")
-    dataset = _dataset_type()(filepath=relative, run_id="test-run")
-    first = dataset.load()
+    descriptor = importlib.import_module(
+        "transfer_risk.datasets.experiment_v2_model_dataset"
+    ).checkpoint_descriptor
+    first = descriptor(root)
     config["vocab"] = {"other": 0}
     (root / "config.json").write_text(json.dumps(config))
-    second = dataset.load()
+    second = descriptor(root)
     assert first["tokenizer_sha256"] != second["tokenizer_sha256"]
 
 
@@ -96,14 +100,16 @@ def test_absolute_model_paths_and_copy_sources_keep_the_captured_project_after_c
     source = Path.cwd() / "data/experiment_v2/test-run/models/prepared"
     destination = Path.cwd() / "data/experiment_v2/test-run/models/replica"
     _write_transformer_artifact(source)
-    original = _dataset_type()(filepath=str(source), run_id="test-run").load()
+    original = importlib.import_module(
+        "transfer_risk.datasets.experiment_v2_model_dataset"
+    ).checkpoint_descriptor(source)
     output = _dataset_type()(filepath=str(destination), run_id="test-run")
     monkeypatch.chdir(elsewhere)
-    output.save({"copy_from": original})
+    output.save({"copy_from": original, "_metadata": {"preparation": "synthetic"}})
     copied = output.load()
     assert copied["checkpoint_sha256"] == original["checkpoint_sha256"]
     assert copied["tokenizer_sha256"] == original["tokenizer_sha256"]
-    assert copied["path"] == str(destination)
+    assert copied["path"] == str(destination / "payload")
     assert not (elsewhere / "data").exists()
 
 
@@ -128,5 +134,58 @@ def test_model_copy_source_cannot_escape_the_captured_run(tmp_path, monkeypatch,
         source.rename(moved)
         source.symlink_to(moved, target_is_directory=True)
     with pytest.raises(DatasetError, match=r"isolated|symlink"):
-        output.save({"copy_from": descriptor})
+        output.save({"copy_from": descriptor, "_metadata": {"preparation": "synthetic"}})
     assert not (project / "data/experiment_v2/test-run/models/replica").exists()
+
+
+class _SyntheticPayload:
+    def save_pretrained(self, destination):
+        (destination / "config.json").write_text('{"num_labels":2}')
+        (destination / "model.safetensors").write_bytes(b"synthetic weights")
+        (destination / "tokenizer.json").write_text('{"vocab":{"token":0}}')
+
+
+def test_bundle_recovery_verifies_staged_payload_and_metadata(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    root = tmp_path / "data/experiment_v2/test-run/models/model"
+    dataset = _dataset_type()(filepath=str(root), run_id="test-run")
+    dataset.save(
+        {
+            "kind": "transformer",
+            "model": _SyntheticPayload(),
+            "tokenizer": _SyntheticPayload(),
+            "_metadata": {"training_seed": 123},
+        }
+    )
+    first = dataset.load()
+    assert first["_metadata"] == {"training_seed": 123}
+    assert Path(first["path"]) == root / "payload"
+    staged = root.with_name(f".{root.name}.staging")
+    root.rename(staged)
+    assert dataset.exists()
+    assert dataset.load() == first
+    assert not staged.exists()
+    (root / "metadata.json").write_text('{"training_seed":999}')
+    with pytest.raises(DatasetError, match=r"identity|corrupt"):
+        dataset.exists()
+
+
+def test_partial_model_directory_never_counts_as_completed(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    root = tmp_path / "data/experiment_v2/test-run/models/model"
+    root.mkdir(parents=True)
+    (root / "config.json").write_text("{}")
+    dataset = _dataset_type()(filepath=str(root), run_id="test-run")
+    with pytest.raises(DatasetError, match=r"complete|corrupt"):
+        dataset.exists()
+
+
+def test_bundle_cannot_complete_without_training_metadata(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    root = tmp_path / "data/experiment_v2/test-run/models/model"
+    dataset = _dataset_type()(filepath=str(root), run_id="test-run")
+    with pytest.raises(DatasetError, match="metadata"):
+        dataset.save(
+            {"kind": "transformer", "model": _SyntheticPayload(), "tokenizer": _SyntheticPayload()}
+        )
+    assert not root.exists()

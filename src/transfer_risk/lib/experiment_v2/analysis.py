@@ -206,6 +206,46 @@ def _validate_lock(
         raise ValueError(msg)
 
 
+def tokenization_summary(records: ExperimentRecords) -> dict[str, Any]:
+    """Count available truncation diagnostics while retaining every attempt denominator.
+
+    Args:
+        records: Non-text phase evidence with optional per-tokenizer diagnostics.
+
+    Returns:
+        Per-model original/candidate counts, including absent diagnostics.
+    """
+    models: dict[str, Any] = {}
+
+    def add(model: str, kind: str, diagnostic: Any) -> None:
+        """Count one tokenizer observation or explicit missing value.
+
+        Args:
+            model: Registered model id.
+            kind: Original or returned-candidate input.
+            diagnostic: Saved tokenization measurement, or None.
+        """
+        counts = models.setdefault(model, {}).setdefault(
+            kind, {"inputs": 0, "measured": 0, "missing": 0, "truncated": 0}
+        )
+        counts["inputs"] += 1
+        counts["missing" if diagnostic is None else "measured"] += 1
+        counts["truncated"] += int(diagnostic is not None and diagnostic.truncated)
+
+    for row in records.clean_predictions:
+        add(row.model_id, "originals", row.tokenization)
+    for attempt in records.attempts:
+        if attempt.candidate_sha256 is not None:
+            add(attempt.source_id, "candidates", attempt.source_candidate_tokenization)
+            for prediction in attempt.target_predictions:
+                add(prediction.model_id, "candidates", prediction.tokenization)
+    return {
+        "planned_attempts": len(records.attempts),
+        "returned_candidates": sum(row.candidate_sha256 is not None for row in records.attempts),
+        "models": models,
+    }
+
+
 def analyse_experiment(
     protocol: Protocol,
     corpus: CorpusEvidence,
@@ -256,6 +296,11 @@ def analyse_experiment(
         "execution_ref": protocol.execution_ref,
         "hardware": evaluation.hardware,
         "analysis_only": True,
+        "inference_scope": (
+            "Group resampling conditional on the three realized training "
+            "replicates, fixed targets, pool, and recipes."
+        ),
+        "tokenization_diagnostics": tokenization_summary(evaluation),
         "outcomes": _outcomes(protocol, index),
         "selection": selection,
         "protocol_decision": (

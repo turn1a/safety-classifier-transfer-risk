@@ -324,6 +324,35 @@ def prepare_target(
     }
 
 
+def prepare_target_bundle(*args: Any, **kwargs: Any) -> dict[str, Any]:
+    """Combine the independent target payload and metadata for one catalog save.
+
+    Args:
+        *args: Registered target preparation inputs.
+        **kwargs: Additional preparation arguments.
+
+    Returns:
+        Immutable target payload and non-text metadata.
+    """
+    bundle, metadata = prepare_target(*args, **kwargs)
+    return {**bundle, "_metadata": metadata}
+
+
+def project_target_metadata(receipt: dict[str, Any], descriptor: dict[str, Any]) -> dict[str, Any]:
+    """Recover original target metadata after rechecking the separate preparation gate.
+
+    Args:
+        receipt: Fresh target-preparation gate.
+        descriptor: Dataset-verified completed bundle.
+
+    Returns:
+        Original target metadata without repeated training.
+    """
+    metadata = descriptor["_metadata"]
+    export_target_preparation(receipt, descriptor, metadata)
+    return dict(metadata)
+
+
 def export_target_preparation(
     receipt: dict[str, Any], descriptor: dict[str, str], metadata: dict[str, Any]
 ) -> dict[str, Any]:

@@ -93,6 +93,15 @@ def create_models_pipeline(parameters: dict[str, Any] | None = None) -> Pipeline
             tags=["experiment_v2", "v2_models"],
         )
     ]
+    assembled.append(
+        node(
+            nodes.verify_fresh_gate,
+            "v2_models_receipt",
+            None,
+            name="v2_verify_models_gate",
+            tags=["experiment_v2", "v2_models"],
+        )
+    )
     if any(model["kind"] == "bilstm" for model in structure["models"]):
         assembled.append(
             node(
@@ -113,7 +122,8 @@ def create_models_pipeline(parameters: dict[str, Any] | None = None) -> Pipeline
             assembled.append(
                 node(
                     partial(
-                        nodes.prepare_model, cell={"model_id": identifier, "replicate": replicate}
+                        nodes.prepare_model_bundle,
+                        cell={"model_id": identifier, "replicate": replicate},
                     ),
                     inputs=[
                         "v2_models_receipt",
@@ -124,8 +134,17 @@ def create_models_pipeline(parameters: dict[str, Any] | None = None) -> Pipeline
                         backbone,
                         "params:experiment_v2_execution",
                     ],
-                    outputs=[checkpoint, metadata],
+                    outputs=checkpoint,
                     name=f"v2_prepare_{identifier}_r{replicate}",
+                    tags=["experiment_v2", "v2_models", identifier],
+                )
+            )
+            assembled.append(
+                node(
+                    nodes.project_model_metadata,
+                    ["v2_models_receipt", checkpoint],
+                    metadata,
+                    name=f"v2_project_{identifier}_r{replicate}_metadata",
                     tags=["experiment_v2", "v2_models", identifier],
                 )
             )
@@ -278,6 +297,8 @@ def _create_phase_pipeline(phase: str, parameters: dict[str, Any] | None) -> Pip
                             current,
                             private,
                             "params:experiment_v2_execution",
+                            "v2_corpus_evidence",
+                            f"v2_{phase}_clean_predictions",
                         ],
                         outputs=audited,
                         name=f"v2_{phase}_audit_{suffix}",
@@ -391,7 +412,14 @@ def create_target_prepare_pipeline(parameters: dict[str, Any] | None = None) -> 
                 tags=["experiment_v2", "v2_target_preparation"],
             ),
             node(
-                target_preparation.prepare_target,
+                nodes.verify_fresh_gate,
+                inputs="v2_target_preparation_receipt",
+                outputs=None,
+                name="v2_verify_target_preparation_gate",
+                tags=["experiment_v2", "v2_target_preparation"],
+            ),
+            node(
+                target_preparation.prepare_target_bundle,
                 inputs=[
                     "v2_target_preparation_receipt",
                     "params:experiment_v2_target_preparation",
@@ -401,8 +429,15 @@ def create_target_prepare_pipeline(parameters: dict[str, Any] | None = None) -> 
                     "v2_target_backbone",
                     "params:experiment_v2_execution",
                 ],
-                outputs=["v2_prepared_target", "v2_prepared_target_metadata"],
+                outputs="v2_prepared_target",
                 name="v2_prepare_independent_target",
+                tags=["experiment_v2", "v2_target_preparation"],
+            ),
+            node(
+                target_preparation.project_target_metadata,
+                inputs=["v2_target_preparation_receipt", "v2_prepared_target"],
+                outputs="v2_prepared_target_metadata",
+                name="v2_project_target_metadata",
                 tags=["experiment_v2", "v2_target_preparation"],
             ),
             node(

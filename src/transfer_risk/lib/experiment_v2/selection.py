@@ -393,6 +393,9 @@ def evaluate_selection(
                 comparison["lower_bound"] > protocol.minimum_effect
                 for comparison in comparisons.values()
             ),
-            "inference_scope": "Group resampling conditional on fixed targets, pool and recipes.",
+            "inference_scope": (
+                "Group resampling conditional on the three realized training "
+                "replicates, fixed targets, pool, and recipes."
+            ),
         }
     return results

@@ -134,6 +134,32 @@ def make_source_wrapper(
     )
 
 
+def tokenization_diagnostics(
+    texts: list[str], tokenizer: Any, max_tokens: int
+) -> list[dict[str, Any]]:
+    """Measure each full input before the registered token-window truncation.
+
+    Args:
+        texts: Exact lower-trust classifier inputs.
+        tokenizer: Saved transformer tokenizer, or None for the fixed BiLSTM tokenizer.
+        max_tokens: Registered inference window.
+
+    Returns:
+        Token counts, window, and truncation status without filtering any input.
+    """
+    if tokenizer is None:
+        from transfer_risk.pipelines.models.bilstm import tokenize  # noqa: PLC0415
+
+        lengths = [len(tokenize(text)) for text in texts]
+    else:
+        encoded = tokenizer(texts, truncation=False, padding=False, add_special_tokens=True)
+        lengths = [len(ids) for ids in encoded["input_ids"]]
+    return [
+        {"input_tokens": length, "max_tokens": max_tokens, "truncated": length > max_tokens}
+        for length in lengths
+    ]
+
+
 def predict_model(
     identity: ModelIdentity, descriptor: dict[str, str], texts: list[str], settings: dict[str, Any]
 ) -> list[str]:
@@ -155,6 +181,7 @@ def predict_model(
     batch_size = settings["inference_batch_size"]
     if identity.kind == "bilstm":
         wrapper = make_source_wrapper(identity, descriptor, settings)
+        tokenizer = None
         indices = []
         for start in range(0, len(texts), batch_size):
             indices.extend(np.argmax(wrapper(texts[start : start + batch_size]), axis=-1).tolist())
@@ -167,6 +194,10 @@ def predict_model(
             max_seq_len=identity.max_tokens,
             batch_size=batch_size,
             device=device,
+        )
+    if "_tokenization_diagnostics" in settings:
+        settings["_tokenization_diagnostics"].extend(
+            tokenization_diagnostics(texts, tokenizer, identity.max_tokens)
         )
     return [identity.output_labels[index] for index in indices]
 
@@ -258,6 +289,11 @@ def attack_original(
         source = model_input.get("runtime_wrapper")
         if source is None:
             source = make_source_wrapper(identity, model_input["artifact"], settings)
+        tokenizer = getattr(source, "tokenizer", None)
+        if tokenizer is not None or identity.kind == "bilstm":
+            returned["original_tokenization"] = tokenization_diagnostics(
+                [original["text"]], tokenizer, identity.max_tokens
+            )[0]
         recipes, set_seed = load_recipe_backend()
         ledger = QueryLedger(source, query_budget)
         set_seed(seed)
@@ -295,6 +331,10 @@ def attack_original(
                     "source_raw_perturbed": raw,
                 }
             )
+            if tokenizer is not None or identity.kind == "bilstm":
+                returned["candidate_tokenization"] = tokenization_diagnostics(
+                    [final.attacked_text.text], tokenizer, identity.max_tokens
+                )[0]
     except Exception as error:
         returned["error_type"] = type(error).__name__
     returned["source_queries"] = 0 if ledger is None else ledger.source_queries

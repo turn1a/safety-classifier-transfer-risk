@@ -26,7 +26,9 @@ def _canonical_bytes(value: Any) -> bytes:
     Returns:
         UTF-8 JSON with sorted keys, no whitespace, and unescaped Unicode.
     """
-    return json.dumps(value, sort_keys=True, separators=(",", ":"), ensure_ascii=False).encode()
+    return json.dumps(
+        value, sort_keys=True, separators=(",", ":"), ensure_ascii=False, allow_nan=False
+    ).encode()
 
 
 def _file_digest(path: Path) -> str:
@@ -115,16 +117,16 @@ def checkpoint_descriptor(path: Path) -> dict[str, str]:
     }
 
 
-class ExperimentV2ModelDataset(AbstractDataset[dict[str, Any], dict[str, str]]):
-    """Persist models under one local v2 run and return verified private descriptors."""
+class ExperimentV2ModelDataset(AbstractDataset[dict[str, Any], dict[str, Any]]):
+    """Publish verified immutable payload and metadata bundles within one private run."""
 
     def __init__(
         self, *, filepath: str, run_id: str, metadata: dict[str, Any] | None = None
     ) -> None:
-        """Bind a checkpoint to the exact private run root.
+        """Bind the bundle and staging directory to one isolated catalog path.
 
         Args:
-            filepath: Relative or absolute checkpoint directory in this project's private run.
+            filepath: Private bundle directory.
             run_id: Dedicated run identity.
             metadata: Optional Kedro metadata.
         """
@@ -133,61 +135,129 @@ class ExperimentV2ModelDataset(AbstractDataset[dict[str, Any], dict[str, str]]):
         )
         self._project_root = self._boundary._project_root
         self._path = self._boundary._configured_path.parent
+        self._staging = self._path.with_name(f".{self._path.name}.staging")
+        self._completion = ExperimentV2JSONDataset(
+            filepath=str(self._staging / "complete.json"), run_id=run_id
+        )
         self._run_root = self._project_root / "data" / "experiment_v2" / run_id
-        self._dataset = SurrogateModelDataset(filepath=str(self._path), metadata=metadata)
         self.metadata = metadata
 
-    def load(self) -> dict[str, str]:
-        """Return fresh fingerprints after rechecking private path isolation.
-
-        Returns:
-            A descriptor of the exact saved checkpoint and tokenizer.
-        """
-        self._boundary._assert_no_symlink()
-        return checkpoint_descriptor(self._path)
-
-    def save(self, data: dict[str, Any]) -> None:
-        """Save a new checkpoint or copy an independently prepared frozen target.
+    def _verify(self, root: Path) -> dict[str, Any]:
+        """Verify every payload byte and transactional metadata before exposing a bundle.
 
         Args:
-            data: Normal model bundle, or copy_from with a private saved descriptor.
+            root: Final or interrupted staging directory.
+
+        Returns:
+            Payload descriptor and its authenticated metadata projection.
 
         Raises:
-            DatasetError: If a checkpoint exists or a copied input escapes this run.
+            DatasetError: If completion, payload, or metadata is missing or corrupt.
+        """
+        guarded_run_path(root, project_root=self._project_root, run_id=self._run_root.name)
+        if any(item.is_symlink() for item in root.rglob("*")):
+            msg = "v2 bundle cannot contain a symlink"
+            raise DatasetError(msg)
+        try:
+            marker = json.loads((root / "complete.json").read_text())
+            metadata = json.loads((root / "metadata.json").read_text())
+            descriptor = checkpoint_descriptor(root / "payload")
+            expected = {
+                "checkpoint_sha256": descriptor["checkpoint_sha256"],
+                "tokenizer_sha256": descriptor["tokenizer_sha256"],
+                "metadata_sha256": hashlib.sha256(_canonical_bytes(metadata)).hexdigest(),
+            }
+            if marker != expected or {item.name for item in root.iterdir()} != {
+                "payload",
+                "metadata.json",
+                "complete.json",
+            }:
+                msg = "v2 bundle identity is corrupt"
+                raise DatasetError(msg)
+        except (OSError, ValueError, TypeError) as error:
+            msg = "v2 bundle is incomplete or corrupt"
+            raise DatasetError(msg) from error
+        return {**descriptor, "_metadata": metadata}
+
+    def _recover(self) -> None:
+        """Publish a verified completed staging directory left by an interrupted save.
+
+        Raises:
+            DatasetError: If staging is incomplete, corrupt, or redirected.
         """
         self._boundary._assert_no_symlink()
+        guarded_run_path(self._staging, project_root=self._project_root, run_id=self._run_root.name)
+        if self._staging.exists():
+            self._verify(self._staging)
+            if self._path.exists():
+                msg = "v2 final and staging bundles both exist; inspect the run"
+                raise DatasetError(msg)
+            self._staging.rename(self._path)
+
+    def load(self) -> dict[str, Any]:
+        """Load a completed bundle, recovering verified staged publication if necessary.
+
+        Returns:
+            Exact saved payload identities and its non-text metadata.
+        """
+        self._recover()
+        return self._verify(self._path)
+
+    def save(self, data: dict[str, Any]) -> None:
+        """Stage payload and metadata, seal their identities, then publish one bundle.
+
+        Args:
+            data: Existing model bundle or same-run copy descriptor, with _metadata.
+
+        Raises:
+            DatasetError: If immutable output exists or a copied payload changed.
+        """
         if self.exists():
-            msg = "v2 checkpoint outputs are immutable; choose a fresh run or resume missing nodes"
+            msg = "v2 checkpoint outputs are immutable; choose a fresh run"
             raise DatasetError(msg)
-        if "copy_from" not in data:
-            self._dataset.save(data)
-            return
-        descriptor = data["copy_from"]
-        source = guarded_run_path(
-            descriptor["path"], project_root=self._project_root, run_id=self._run_root.name
-        )
-        if not source.is_relative_to(self._run_root):
-            msg = "copied v2 checkpoint must belong to the same isolated private run"
-            raise DatasetError(msg)
-        if checkpoint_descriptor(source) != descriptor:
-            msg = "prepared checkpoint identity changed before copying"
-            raise DatasetError(msg)
-        self._path.parent.mkdir(parents=True, exist_ok=True)
-        shutil.copytree(source, self._path)
+        if not isinstance(data.get("_metadata"), dict) or not data["_metadata"]:
+            message = "v2 checkpoint bundle requires nonempty training or preparation metadata"
+            raise DatasetError(message)
+        metadata_bytes = _canonical_bytes(data["_metadata"])
+        if "copy_from" in data:
+            descriptor = data["copy_from"]
+            source = guarded_run_path(
+                descriptor["path"], project_root=self._project_root, run_id=self._run_root.name
+            )
+            actual = checkpoint_descriptor(source)
+            if any(actual[key] != descriptor[key] for key in actual):
+                msg = "prepared checkpoint identity changed before copying"
+                raise DatasetError(msg)
+        self._staging.mkdir(parents=True, exist_ok=False)
+        payload = self._staging / "payload"
+        if "copy_from" in data:
+            shutil.copytree(source, payload)
+        else:
+            SurrogateModelDataset(filepath=str(payload), metadata=self.metadata).save(data)
+        descriptor = checkpoint_descriptor(payload)
+        (self._staging / "metadata.json").write_bytes(metadata_bytes)
+        marker = {key: descriptor[key] for key in ("checkpoint_sha256", "tokenizer_sha256")}
+        marker["metadata_sha256"] = hashlib.sha256(metadata_bytes).hexdigest()
+        # A single atomic marker authorizes recovery; payload hashing excludes this directory.
+        self._completion._publish(marker, immutable=True)
+        self._recover()
 
     def exists(self) -> bool:
-        """Check whether immutable private checkpoint files already exist.
+        """Check verified completion, refusing partial directories as recoverable outputs.
 
         Returns:
-            Whether the checkpoint directory contains any artifacts.
+            Whether a complete immutable bundle is present.
         """
-        self._boundary._assert_no_symlink()
-        return self._path.is_dir() and any(self._path.iterdir())
+        self._recover()
+        if not self._path.exists():
+            return False
+        self._verify(self._path)
+        return True
 
     def _describe(self) -> dict[str, str]:
-        """Describe the isolated private checkpoint boundary.
+        """Describe the isolated private bundle boundary.
 
         Returns:
-            Its local filepath and exact run identity.
+            Local bundle path and exact run identity.
         """
         return {"filepath": str(self._path), "run_id": self._run_root.name}

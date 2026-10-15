@@ -16,6 +16,10 @@ from experiment_v2.fixtures import digest, evidence, records_for
 from kedro.io import DataCatalog, MemoryDataset
 from kedro.runner import SequentialRunner
 
+from transfer_risk.datasets.experiment_v2_immutable_json_dataset import (
+    ExperimentV2ImmutableJSONDataset,
+)
+from transfer_risk.datasets.experiment_v2_model_dataset import ExperimentV2ModelDataset
 from transfer_risk.lib.experiment_v2.protocol import content_digest, partition_digest
 from transfer_risk.lib.experiment_v2.schemas import ExperimentRecords
 
@@ -485,6 +489,8 @@ def test_target_audit_includes_every_failure_candidate_without_publishing_text()
         private,
         _execution_parameters(),
         predict_fn=lambda _asset, _descriptor, texts, _cfg: ["0"] * len(texts),
+        corpus_evidence=corpus.model_dump(),
+        clean_predictions=_clean_rows(protocol, corpus, receipt),
     )
     assert len(audited) == 4
     assert all(len(row["target_predictions"]) == 2 for row in audited)
@@ -1080,6 +1086,8 @@ def test_complete_synthetic_phase_emits_non_text_full_grid_without_human_verdict
                     private,
                     _execution_parameters(),
                     predict_fn=lambda _asset, _descriptor, texts, _cfg: ["0"] * len(texts),
+                    corpus_evidence=corpus.model_dump(),
+                    clean_predictions=_clean_rows(protocol, corpus, receipt),
                 )
             )
     similarities = [
@@ -1153,6 +1161,8 @@ def test_resumed_target_audit_rejects_stale_shard_execution_identity():
             private,
             _execution_parameters(),
             predict_fn=lambda _asset, _descriptor, texts, _cfg: ["0"] * len(texts),
+            corpus_evidence=corpus.model_dump(),
+            clean_predictions=_clean_rows(protocol, corpus, receipt),
         )
 
 
@@ -1193,6 +1203,12 @@ def test_offline_recipe_assets_bind_actual_cache_and_local_model_constructors(
     )
     modules = {
         "nltk": nltk,
+        "sentence_transformers": SimpleNamespace(
+            SentenceTransformer=lambda *args, **kwargs: (args, kwargs)
+        ),
+        (
+            "textattack.constraints.semantics.sentence_encoders.sentence_transformer_encoder"
+        ): SimpleNamespace(sentence_transformers=None),
         "huggingface_hub.constants": SimpleNamespace(HF_HUB_OFFLINE=False),
         "textattack.shared.utils.install": SimpleNamespace(TEXTATTACK_CACHE_DIR="host cache"),
         "textattack.shared.utils": SimpleNamespace(
@@ -1225,6 +1241,14 @@ def test_offline_recipe_assets_bind_actual_cache_and_local_model_constructors(
         threshold=0.840845057,
         metric="angular",
     )
+    backend = modules[
+        "textattack.constraints.semantics.sentence_encoders.sentence_transformer_encoder"
+    ].sentence_transformers
+    assert backend is not None
+    assert backend.SentenceTransformer("local-encoder")[1] == {
+        "device": "cpu",
+        "local_files_only": True,
+    }
     assert encoder["model_name"] == descriptor["paths"]["semantic_encoder"]
     assert encoder["threshold"] == 0.840845057 and encoder["metric"] == "angular"
     install = modules["textattack.shared.utils.install"]
@@ -1262,3 +1286,364 @@ def test_recipe_backend_refuses_an_unconfigured_offline_asset_boundary(monkeypat
     runtime = importlib.import_module("transfer_risk.pipelines.experiment_v2_execute.runtime")
     with pytest.raises(module.OfflineAssetError, match=r"offline|configured|registered"):
         runtime.load_recipe_backend()
+
+
+@pytest.mark.filterwarnings("ignore:The node producing outputs.*partial:UserWarning")
+@pytest.mark.parametrize("target", [False, True])
+def test_production_model_graph_resumes_missing_metadata_without_retraining(
+    tmp_path, monkeypatch, target
+):
+
+    monkeypatch.chdir(tmp_path)
+    graph = importlib.import_module("transfer_risk.pipelines.experiment_v2_execute.pipeline")
+    target_module = graph.target_preparation
+    protocol, corpus, registration = _execution_evidence()
+    context = {**_context(protocol), "project_root": str(tmp_path)}
+    calls = {"trainer": 0, "gate": 0}
+
+    class Payload:
+        def save_pretrained(self, path):
+            (path / "config.json").write_text('{"num_labels":2}')
+            (path / "model.safetensors").write_bytes(b"synthetic model")
+            (path / "tokenizer.json").write_text('{"vocab":{"token":0}}')
+
+    def train(*_args):
+        calls["trainer"] += 1
+        return {"kind": "transformer", "model": Payload(), "tokenizer": Payload()}, {}
+
+    monkeypatch.setattr(graph.nodes.runtime, "train_model", train)
+    if target:
+        plan, target_evidence = _target_evidence(protocol, corpus)
+        original_gate = target_module.gate_target_preparation
+
+        def gate(*args, **kwargs):
+            calls["gate"] += 1
+            return original_gate(*args, **kwargs)
+
+        monkeypatch.setattr(target_module, "gate_target_preparation", gate)
+        pipeline = graph.create_target_prepare_pipeline(protocol.model_dump())
+        checkpoint, metadata = "v2_prepared_target", "v2_prepared_target_metadata"
+        target_corpus = target_module.CorpusEvidence.model_validate(target_evidence["corpus"])
+        values = {
+            "params:experiment_v2_target_preparation": plan,
+            "v2_target_preparation_evidence": target_evidence,
+            "v2_target_private_train": _texts(target_corpus, "train"),
+            "v2_target_private_validation": _texts(target_corpus, "validation"),
+            "v2_target_backbone": {
+                "input_identity": {
+                    key: plan[key]
+                    for key in (
+                        "repository",
+                        "revision",
+                        "tokenizer_repository",
+                        "tokenizer_revision",
+                    )
+                }
+            },
+        }
+    else:
+        original_gate = graph.nodes.gate_models
+
+        def gate(*args, **kwargs):
+            calls["gate"] += 1
+            return original_gate(*args, **kwargs)
+
+        monkeypatch.setattr(graph.nodes, "gate_models", gate)
+        pipeline = graph.create_models_pipeline(protocol.model_dump())
+        checkpoint, metadata = "v2_model__source_0__r0", "v2_model_meta__source_0__r0"
+        # Retain the production gate and one complete training/projection branch.
+        names = [
+            row.name
+            for row in pipeline.nodes
+            if row.name
+            in {
+                "v2_gate_models",
+                "v2_verify_models_gate",
+                "v2_prepare_source_0_r0",
+                "v2_project_source_0_r0_metadata",
+            }
+        ]
+        pipeline = pipeline.only_nodes(*names)
+        model = next(row for row in protocol.models if row.id == "source_0")
+        values = {
+            "v2_registration_evidence": registration.model_dump(),
+            "v2_attack_asset_manifest": _assets(protocol, str(tmp_path)),
+            "v2_private_train": _texts(corpus, "train"),
+            "v2_private_validation": _texts(corpus, "validation"),
+            "v2_hub__source_0": {
+                "input_identity": {
+                    key: getattr(model, key)
+                    for key in (
+                        "repository",
+                        "revision",
+                        "tokenizer_repository",
+                        "tokenizer_revision",
+                    )
+                }
+            },
+        }
+    values.update(
+        {
+            "params:experiment_v2": protocol.model_dump(),
+            "v2_corpus_evidence": corpus.model_dump(),
+            "v2_execution_context": context,
+            "params:seed": protocol.root_seed,
+            "params:experiment_v2_execution": _execution_parameters(),
+        }
+    )
+    root = tmp_path / protocol.private_root
+    output = ExperimentV2ModelDataset(filepath=str(root / "models/model"), run_id=protocol.run_id)
+    meta_path = root / "model_metadata/model.json"
+
+    class InterruptedMetadata(ExperimentV2ImmutableJSONDataset):
+        def save(self, _data):
+            msg = "synthetic interruption before metadata projection"
+            raise RuntimeError(msg)
+
+    def catalog(interrupt):
+        result = {name: MemoryDataset(value) for name, value in values.items()}
+        for name in pipeline.datasets() - set(result):
+            result[name] = MemoryDataset()
+        result[checkpoint] = output
+        cls = InterruptedMetadata if interrupt else ExperimentV2ImmutableJSONDataset
+        result[metadata] = cls(filepath=str(meta_path), run_id=protocol.run_id)
+        if target:
+            result["v2_target_preparation_record"] = ExperimentV2ImmutableJSONDataset(
+                filepath=str(root / "target_preparation/record.json"), run_id=protocol.run_id
+            )
+        return DataCatalog(result)
+
+    with pytest.raises(Exception, match="synthetic interruption"):
+        SequentialRunner().run(pipeline, catalog(interrupt=True), only_missing_outputs=True)
+    assert output.exists() and not meta_path.exists()
+    SequentialRunner().run(pipeline, catalog(interrupt=False), only_missing_outputs=True)
+    assert meta_path.exists()
+    assert calls == {"trainer": 1, "gate": 2}
+    SequentialRunner().run(pipeline, catalog(interrupt=False), only_missing_outputs=True)
+    assert calls == {"trainer": 1, "gate": 3}
+
+
+@pytest.mark.parametrize("corruption", ["hash", "budget", "source_identity", "target_queries"])
+def test_candidate_corruption_is_rejected_before_any_target_prediction(corruption):
+    module = _nodes()
+    protocol, corpus, registration = _execution_evidence()
+    manifest = _models(protocol, corpus)
+    receipt = module.gate_calibration(
+        protocol.model_dump(),
+        corpus.model_dump(),
+        registration.model_dump(),
+        _context(protocol),
+        manifest,
+        _execution_parameters(),
+        _assets(protocol),
+    )
+    private = module.run_attack_shard(
+        receipt,
+        protocol.model_dump(),
+        corpus.model_dump(),
+        manifest,
+        _texts(corpus, "calibration"),
+        _execution_parameters(),
+        cell={
+            "phase": "calibration",
+            "source_id": "source_0",
+            "replicate": 0,
+            "recipe": "textfooler",
+        },
+        attack_fn=lambda *_args: {
+            "status": "failed",
+            "source_queries": 3,
+            "candidate_text": "synthetic candidate",
+            "source_raw_perturbed": "1",
+        },
+    )
+    if corruption == "hash":
+        private[-1]["candidate_text"] = "corrupted synthetic candidate"
+    elif corruption == "budget":
+        private[-1]["attempt"]["source_queries"] = protocol.source_query_budget + 1
+    elif corruption == "source_identity":
+        private[-1]["attempt"]["source_checkpoint_sha256"] = digest("wrong")
+    else:
+        private[-1]["attempt"]["target_search_queries"] = 1
+    predictor = Mock(return_value=["0"] * len(private))
+    with pytest.raises(ValueError):
+        module.audit_attack_shard(
+            receipt,
+            protocol.model_dump(),
+            manifest,
+            private,
+            _execution_parameters(),
+            corpus.model_dump(),
+            _clean_rows(protocol, corpus, receipt),
+            predict_fn=predictor,
+        )
+    predictor.assert_not_called()
+
+
+def _clean_rows(protocol, corpus, receipt):
+    return [
+        {**row.model_dump(), "_execution": _nodes().execution_header(receipt)}
+        for row in records_for(receipt["phase"], protocol, corpus).clean_predictions
+    ]
+
+
+def test_classifier_predictor_records_untruncated_token_counts_without_changing_text(monkeypatch):
+    module = importlib.import_module("transfer_risk.pipelines.experiment_v2_execute.runtime")
+    modeling = importlib.import_module("transfer_risk.modeling")
+    protocol, _corpus, _registration = evidence()
+    identity = protocol.models[0].model_copy(update={"max_tokens": 4})
+    texts = ["one two", "one two three four five"]
+    seen = []
+
+    def tokenizer(batch, **kwargs):
+        seen.append((batch, kwargs))
+        return {"input_ids": [[0, *range(len(text.split())), 9] for text in batch]}
+
+    monkeypatch.setattr(modeling, "load_transformer", lambda *_: (object(), tokenizer))
+    monkeypatch.setattr(
+        modeling, "predict", lambda _model, _tokenizer, batch, **_kwargs: [1] * len(batch)
+    )
+    diagnostics = []
+    labels = module.predict_model(
+        identity,
+        {"path": "/synthetic/payload"},
+        texts,
+        {**_execution_parameters(), "_tokenization_diagnostics": diagnostics},
+    )
+    assert labels == [identity.output_labels[1]] * 2
+    assert diagnostics == [
+        {"input_tokens": 4, "max_tokens": 4, "truncated": False},
+        {"input_tokens": 7, "max_tokens": 4, "truncated": True},
+    ]
+    assert seen == [(texts, {"truncation": False, "padding": False, "add_special_tokens": True})]
+
+
+def test_input_policy_explicitly_serializes_only_registered_lower_trust_text():
+    protocol, _corpus, _registration = evidence()
+    expected = {
+        "text_encoding": "utf-8",
+        "content_hash": "sha256",
+        "normalization": "none",
+        "character_clipping": None,
+        "tokenizer_truncation": "registered_max_tokens",
+        "model_windows": {model.id: model.max_tokens for model in protocol.models},
+        "grouping": "separate_registered_evidence",
+        "classifier_input": "registered_lower_trust_text_only",
+        "trusted_context": "human_ground_truth_and_optional_application_only",
+    }
+    assert _nodes().input_policy_digest(protocol) == content_digest(expected)
+
+
+def test_clean_and_candidate_nodes_persist_tokenizer_diagnostics():
+    module = _nodes()
+    protocol, corpus, registration = _execution_evidence()
+    manifest = _models(protocol, corpus)
+    receipt = module.gate_calibration(
+        protocol.model_dump(),
+        corpus.model_dump(),
+        registration.model_dump(),
+        _context(protocol),
+        manifest,
+        _execution_parameters(),
+        _assets(protocol),
+    )
+    diagnostic = {"input_tokens": 600, "max_tokens": 512, "truncated": True}
+
+    def predict(_model, _descriptor, texts, settings):
+        settings["_tokenization_diagnostics"].extend([diagnostic.copy() for _ in texts])
+        return ["1"] * len(texts)
+
+    clean = module.score_phase_originals(
+        receipt,
+        protocol.model_dump(),
+        corpus.model_dump(),
+        manifest,
+        _texts(corpus, "calibration"),
+        _execution_parameters(),
+        predict_fn=predict,
+    )
+    assert all(row["tokenization"] == diagnostic for row in clean)
+    private = module.run_attack_shard(
+        receipt,
+        protocol.model_dump(),
+        corpus.model_dump(),
+        manifest,
+        _texts(corpus, "calibration"),
+        _execution_parameters(),
+        cell={
+            "phase": "calibration",
+            "source_id": "source_0",
+            "replicate": 0,
+            "recipe": "textfooler",
+        },
+        attack_fn=lambda *_: {
+            "status": "failed",
+            "source_queries": 3,
+            "candidate_text": "synthetic candidate",
+            "source_raw_perturbed": "1",
+            "original_tokenization": diagnostic,
+            "candidate_tokenization": diagnostic,
+        },
+    )
+    assert private[0]["attempt"]["source_candidate_tokenization"] == diagnostic
+    audited = module.audit_attack_shard(
+        receipt,
+        protocol.model_dump(),
+        manifest,
+        private,
+        _execution_parameters(),
+        corpus.model_dump(),
+        clean,
+        predict_fn=predict,
+    )
+    assert all(
+        prediction["tokenization"] == diagnostic
+        for row in audited
+        for prediction in row["target_predictions"]
+    )
+
+
+def test_audit_rejects_conflicting_predictions_for_duplicate_candidate_content():
+    module = _nodes()
+    protocol, corpus, registration = _execution_evidence()
+    manifest = _models(protocol, corpus)
+    receipt = module.gate_calibration(
+        protocol.model_dump(),
+        corpus.model_dump(),
+        registration.model_dump(),
+        _context(protocol),
+        manifest,
+        _execution_parameters(),
+        _assets(protocol),
+    )
+    private = module.run_attack_shard(
+        receipt,
+        protocol.model_dump(),
+        corpus.model_dump(),
+        manifest,
+        _texts(corpus, "calibration"),
+        _execution_parameters(),
+        cell={
+            "phase": "calibration",
+            "source_id": "source_0",
+            "replicate": 0,
+            "recipe": "textfooler",
+        },
+        attack_fn=lambda *_: {
+            "status": "failed",
+            "source_queries": 3,
+            "candidate_text": "same synthetic candidate",
+            "source_raw_perturbed": "1",
+        },
+    )
+    with pytest.raises(ValueError, match="identical content"):
+        module.audit_attack_shard(
+            receipt,
+            protocol.model_dump(),
+            manifest,
+            private,
+            _execution_parameters(),
+            corpus.model_dump(),
+            _clean_rows(protocol, corpus, receipt),
+            predict_fn=lambda _model, _descriptor, texts, _settings: ["0", "1"] * (len(texts) // 2),
+        )

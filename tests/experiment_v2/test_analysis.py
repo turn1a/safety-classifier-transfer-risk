@@ -7,6 +7,7 @@ import pytest
 from transfer_risk.lib.experiment_v2.analysis import analyse_experiment, freeze_selection
 from transfer_risk.lib.experiment_v2.protocol import content_digest
 from transfer_risk.lib.experiment_v2.records import validate_records
+from transfer_risk.lib.experiment_v2.schemas import TokenizationDiagnostic
 from transfer_risk.lib.experiment_v2.selection import utility
 
 from .fixtures import digest, evidence, records_for
@@ -222,17 +223,15 @@ def test_target_benign_original_is_a_baseline_error_and_zero_primary_policy_yiel
     evaluation = parts[4]
     clean = [
         item.model_copy(update={"raw_label": "0"})
-        if item.model_id == "target_a"
-        and item.replicate == 0
-        and item.original_id == "evaluation_1_0"
+        if item.model_id == "target_a" and item.original_id == "evaluation_1_0"
         else item
         for item in evaluation.clean_predictions
     ]
     parts[4] = evaluation.model_copy(update={"clean_predictions": clean})
     report = analyse_fixture(parts)
-    assert report["outcomes"]["primary"]["target_original_positive"] == 88
-    assert report["outcomes"]["primary"]["raw_target_flips"] == 13
-    assert report["selection"]["primary"]["cka_yield"] == pytest.approx(11 / 12)
+    assert report["outcomes"]["primary"]["target_original_positive"] == 72
+    assert report["outcomes"]["primary"]["raw_target_flips"] == 9
+    assert report["selection"]["primary"]["cka_yield"] == pytest.approx(3 / 4)
     assert report["selection"]["primary"]["evaluation_positive_originals"] == 4
 
 
@@ -336,3 +335,31 @@ def test_joint_transitions_keep_logically_valid_and_unresolved_counts_separate()
     assert result["joint_source_target_flips"] == 3
     assert result["valid_joint_source_target_flips"] == 2
     assert result["unresolved_joint_source_target_flips"] == 1
+
+
+def test_truncation_report_preserves_attempt_denominators_and_realized_seed_scope():
+    parts = list(complete_fixture())
+    evaluation = parts[4]
+
+    diagnostic = TokenizationDiagnostic(input_tokens=600, max_tokens=512, truncated=True)
+    clean = evaluation.clean_predictions[0].model_copy(update={"tokenization": diagnostic})
+    attempt = evaluation.attempts[0]
+    prediction = attempt.target_predictions[0].model_copy(update={"tokenization": diagnostic})
+    attempt = attempt.model_copy(
+        update={
+            "source_candidate_tokenization": diagnostic,
+            "target_predictions": [prediction, *attempt.target_predictions[1:]],
+        }
+    )
+    parts[4] = evaluation.model_copy(
+        update={
+            "clean_predictions": [clean, *evaluation.clean_predictions[1:]],
+            "attempts": [attempt, *evaluation.attempts[1:]],
+        }
+    )
+    report = analyse_fixture(parts)
+    diagnostics = report["tokenization_diagnostics"]
+    assert diagnostics["planned_attempts"] == len(evaluation.attempts)
+    assert diagnostics["models"][clean.model_id]["originals"]["truncated"] == 1
+    assert diagnostics["models"][prediction.model_id]["candidates"]["truncated"] == 1
+    assert "three realized training replicates" in report["inference_scope"]

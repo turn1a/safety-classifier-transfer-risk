@@ -7,6 +7,7 @@ import sys
 from functools import partial
 from importlib import import_module
 from pathlib import Path
+from types import SimpleNamespace
 from typing import Any, NoReturn
 
 from transfer_risk.datasets.experiment_v2_attack_assets_dataset import (
@@ -145,12 +146,13 @@ def _restrict_nltk(nltk: Any, root: str) -> None:
     nltk.download = cached_resource
 
 
-def _restrict_textattack(paths: dict[str, str], manifest: AttackAssetManifest) -> None:
+def _restrict_textattack(paths: dict[str, str], manifest: AttackAssetManifest, device: str) -> None:
     """Keep existing algorithms and thresholds while binding every auxiliary load.
 
     Args:
         paths: Verified local cache and model directories.
         manifest: Registered byte inventory used to restrict cache requests.
+        device: Explicit resolved device for the lazy sentence-transformer constructor.
     """
     install: Any = import_module("textattack.shared.utils.install")
     utils: Any = import_module("textattack.shared.utils")
@@ -211,6 +213,15 @@ def _restrict_textattack(paths: dict[str, str], manifest: AttackAssetManifest) -
     encoders.SentenceTransformerEncoder = partial(
         encoders.SentenceTransformerEncoder, model_name=paths["semantic_encoder"]
     )
+    encoder: Any = import_module(
+        "textattack.constraints.semantics.sentence_encoders.sentence_transformer_encoder"
+    )
+    backend: Any = import_module("sentence_transformers")
+    encoder.sentence_transformers = SimpleNamespace(
+        SentenceTransformer=partial(
+            backend.SentenceTransformer, device=device, local_files_only=True
+        )
+    )
 
 
 def configure_offline_assets(descriptor: dict[str, Any] | None, device: str) -> None:
@@ -262,7 +273,7 @@ def configure_offline_assets(descriptor: dict[str, Any] | None, device: str) -> 
     hub.HF_HOME = expected["huggingface"]
     hub.HF_HUB_CACHE = environment["HF_HUB_CACHE"]
     hub.HF_ASSETS_CACHE = environment["HF_ASSETS_CACHE"]
-    _restrict_textattack(expected, manifest)
+    _restrict_textattack(expected, manifest, device)
     # TextAttack's install module overwrites HF_HOME; restore the dedicated cache.
     os.environ.update(environment)
     _STATE = identity

@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import Literal
 
-from pydantic import BaseModel, ConfigDict, Field
+from pydantic import BaseModel, ConfigDict, Field, model_validator
 
 Partition = Literal["train", "validation", "probe", "calibration", "evaluation"]
 CanonicalLabel = Literal["benign", "prompt_injection"]
@@ -72,6 +72,7 @@ class ApplicationStudy(EvidenceRecord):
     context_sha256: str | None = None
     objective_id: str | None = None
     checker_sha256: str | None = None
+    benign_control_input_sha256: str | None = None
 
 
 class Protocol(EvidenceRecord):
@@ -179,6 +180,29 @@ class ModelRealization(EvidenceRecord):
     execution_ref: str
 
 
+class TokenizationDiagnostic(EvidenceRecord):
+    """Count the exact untruncated input under one saved tokenizer and window."""
+
+    input_tokens: int = Field(ge=0)
+    max_tokens: int = Field(gt=0)
+    truncated: bool
+
+    @model_validator(mode="after")
+    def check_truncation(self) -> TokenizationDiagnostic:
+        """Require truncation status to agree with the recorded count and window.
+
+        Returns:
+            This validated diagnostic.
+
+        Raises:
+            ValueError: If the flag contradicts the exact token count.
+        """
+        if self.truncated != (self.input_tokens > self.max_tokens):
+            msg = "tokenization truncation flag contradicts its count and window"
+            raise ValueError(msg)
+        return self
+
+
 class CleanPrediction(EvidenceRecord):
     """Record a clean original prediction under one realized model identity."""
 
@@ -188,6 +212,7 @@ class CleanPrediction(EvidenceRecord):
     raw_label: str
     checkpoint_sha256: str
     tokenizer_sha256: str
+    tokenization: TokenizationDiagnostic | None = None
 
 
 class SimilarityRecord(EvidenceRecord):
@@ -211,6 +236,7 @@ class CandidatePrediction(EvidenceRecord):
     raw_label: str
     checkpoint_sha256: str
     tokenizer_sha256: str
+    tokenization: TokenizationDiagnostic | None = None
 
 
 class AttackAttempt(EvidenceRecord):
@@ -232,6 +258,8 @@ class AttackAttempt(EvidenceRecord):
     target_predictions: list[CandidatePrediction]
     mechanical_screen: Literal["passed", "failed", "unassessable"]
     mechanical_evidence_sha256: str | None
+    source_original_tokenization: TokenizationDiagnostic | None = None
+    source_candidate_tokenization: TokenizationDiagnostic | None = None
 
 
 class HumanVote(EvidenceRecord):
@@ -261,12 +289,18 @@ class ApplicationControl(EvidenceRecord):
     task_pass: bool | None
     attacker_objective: bool | None
     execution_sha256: str | None
+    input_sha256: str | None = None
+    binding_sha256: str | None = None
 
 
 class ApplicationRecord(EvidenceRecord):
     """Record benign, original, and perturbed controls in one fixed local task."""
 
     attempt_id: str
+    original_sha256: str | None = None
+    candidate_sha256: str | None = None
+    trusted_instruction_sha256: str | None = None
+    benign_control_input_sha256: str | None = None
     decoder_sha256: str | None
     tokenizer_sha256: str | None
     decoding_spec_sha256: str | None

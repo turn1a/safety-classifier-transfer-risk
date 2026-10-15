@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from typing import TYPE_CHECKING, Any
 
-from transfer_risk.lib.experiment_v2.protocol import is_digest
+from transfer_risk.lib.experiment_v2.protocol import content_digest, is_digest
 from transfer_risk.lib.experiment_v2.records import EvidenceIndex, target_flips
 
 if TYPE_CHECKING:
@@ -18,6 +18,75 @@ if TYPE_CHECKING:
         ExperimentRecords,
         Protocol,
     )
+
+
+def application_control_binding(record: ApplicationRecord, role: str) -> str:
+    """Bind an execution artifact to its exact candidate, control role, and inputs.
+
+    Args:
+        record: Supplied application identity and execution artifacts.
+        role: Benign, original, or perturbed control.
+
+    Returns:
+        Canonical binding digest; upstream artifact authenticity requires a separate audit.
+    """
+    control = getattr(record, role)
+    return content_digest(
+        {
+            **record.model_dump(exclude={"benign", "original", "perturbed"}),
+            "role": role,
+            "input_sha256": control.input_sha256,
+            "execution_sha256": control.execution_sha256,
+        }
+    )
+
+
+def _validate_bindings(record: ApplicationRecord, index: EvidenceIndex, used: set[str]) -> None:
+    """Reject reassigned input hashes or reused execution artifacts.
+
+    Args:
+        record: One optional control comparison.
+        index: Validated original and candidate identities.
+        used: Execution artifacts already assigned to another control.
+
+    Raises:
+        ValueError: If supplied identities, bindings, or execution assignments conflict.
+    """
+    attempt = index.attempts[record.attempt_id]
+    original = index.originals[attempt.original_id]
+    expected = {
+        "original_sha256": original.content_sha256,
+        "candidate_sha256": attempt.candidate_sha256,
+        "context_sha256": original.task_context_sha256,
+        "trusted_instruction_sha256": original.trusted_instruction_sha256,
+    }
+    if any(
+        getattr(record, name) is not None and getattr(record, name) != value
+        for name, value in expected.items()
+    ):
+        msg = "application input identity differs from the registered exact pair"
+        raise ValueError(msg)
+    hashes = {
+        "benign": record.benign_control_input_sha256,
+        "original": original.content_sha256,
+        "perturbed": attempt.candidate_sha256,
+    }
+    for role, expected_hash in hashes.items():
+        control = getattr(record, role)
+        if control.input_sha256 is not None and control.input_sha256 != expected_hash:
+            msg = "application control input identity differs"
+            raise ValueError(msg)
+        if control.execution_sha256 is not None:
+            if control.execution_sha256 in used:
+                msg = "application execution replay across controls"
+                raise ValueError(msg)
+            used.add(control.execution_sha256)
+        if (
+            control.binding_sha256 is not None
+            and control.binding_sha256 != application_control_binding(record, role)
+        ):
+            msg = "application execution binding differs from its exact inputs"
+            raise ValueError(msg)
 
 
 def _assessable(study: ApplicationStudy, record: ApplicationRecord) -> bool:
@@ -37,6 +106,7 @@ def _assessable(study: ApplicationStudy, record: ApplicationRecord) -> bool:
         "task_sha256",
         "context_sha256",
         "checker_sha256",
+        "benign_control_input_sha256",
     )
     if any(
         not is_digest(getattr(study, name)) or getattr(study, name) != getattr(record, name)
@@ -54,7 +124,12 @@ def _assessable(study: ApplicationStudy, record: ApplicationRecord) -> bool:
         control.task_pass is not None
         and control.attacker_objective is not None
         and is_digest(control.execution_sha256)
+        and is_digest(control.input_sha256)
+        and is_digest(control.binding_sha256)
         for control in (record.benign, record.original, record.perturbed)
+    ) and all(
+        is_digest(getattr(record, name))
+        for name in ("original_sha256", "candidate_sha256", "trusted_instruction_sha256")
     )
 
 
@@ -83,11 +158,13 @@ def analyse_application(
     seen: set[str] = set()
     assessable: list[ApplicationRecord] = []
     unassessable = 0
+    executions: set[str] = set()
     for record in records.application_records:
         if record.attempt_id not in index.human or record.attempt_id in seen:
             msg = "application controls reference an unknown or duplicate candidate"
             raise ValueError(msg)
         seen.add(record.attempt_id)
+        _validate_bindings(record, index, executions)
         if _assessable(study, record):
             assessable.append(record)
         else:

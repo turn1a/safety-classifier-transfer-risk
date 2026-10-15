@@ -2,9 +2,13 @@
 
 from __future__ import annotations
 
+import json
+import os
+import tempfile
+from pathlib import Path
 from typing import Any, Literal
 
-from kedro.io import AbstractDataset
+from kedro.io import AbstractDataset, DatasetError
 from kedro_datasets.json import JSONDataset
 
 from transfer_risk.datasets.experiment_v2_paths import current_project_root, guarded_run_path
@@ -42,10 +46,11 @@ class ExperimentV2JSONDataset(AbstractDataset[Any, Any]):
         self._filepath = self._configured_path
         self._run_id = run_id
         self._visibility = visibility
+        self._save_args = {"indent": 2, **(save_args or {}), "allow_nan": False}
         self._assert_no_symlink()
         self._dataset = JSONDataset(
             filepath=str(self._configured_path),
-            save_args={"indent": 2, "allow_nan": False, **(save_args or {})},
+            save_args=self._save_args,
             metadata=metadata,
         )
 
@@ -77,8 +82,40 @@ class ExperimentV2JSONDataset(AbstractDataset[Any, Any]):
         Args:
             data: JSON-compatible evidence or public aggregate artifact.
         """
+        self._publish(data, immutable=False)
+
+    def _publish(self, data: Any, *, immutable: bool) -> None:
+        """Serialize finite JSON before atomically publishing its complete bytes.
+
+        Args:
+            data: JSON-compatible evidence.
+            immutable: Refuse replacement through an atomic no-clobber link.
+
+        Raises:
+            DatasetError: If an immutable destination already exists.
+        """
+        encoded = json.dumps(data, **self._save_args).encode("utf-8")
         self._assert_no_symlink()
-        self._dataset.save(data)
+        self._configured_path.parent.mkdir(parents=True, exist_ok=True)
+        temporary = None
+        try:
+            with tempfile.NamedTemporaryFile(dir=self._configured_path.parent, delete=False) as out:
+                temporary = Path(out.name)
+                out.write(encoded)
+                out.flush()
+                os.fsync(out.fileno())
+            self._assert_no_symlink()
+            if immutable:
+                try:
+                    os.link(temporary, self._configured_path)
+                except FileExistsError as error:
+                    message = "v2 heavy-stage evidence is immutable; use a fresh run"
+                    raise DatasetError(message) from error
+            else:
+                temporary.replace(self._configured_path)
+        finally:
+            if temporary is not None and temporary.exists():
+                temporary.unlink()
 
     def exists(self) -> bool:
         """Check existence only after validating the isolated path.

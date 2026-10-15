@@ -6,7 +6,12 @@ import pytest
 
 from transfer_risk.lib.experiment_v2 import records as record_contract
 from transfer_risk.lib.experiment_v2.protocol import validate_preflight
-from transfer_risk.lib.experiment_v2.records import human_state, validate_records
+from transfer_risk.lib.experiment_v2.records import (
+    human_review_complete,
+    human_state,
+    validate_records,
+)
+from transfer_risk.lib.experiment_v2.schemas import TokenizationDiagnostic
 from transfer_risk.lib.experiment_v2.selection import group_vector
 
 from .fixtures import digest, evidence, records_for
@@ -306,3 +311,68 @@ def test_exact_pair_adjudications_cannot_disagree_across_duplicate_seed_cells():
     )
     with pytest.raises(ValueError, match=r"exact pair.*contradictory"):
         validate_records(protocol, corpus, registration, records, 20260616)
+
+
+def test_equal_initial_uncertainty_can_be_resolved_by_independent_adjudication():
+
+    protocol, corpus, _ = evidence()
+    review = records_for("evaluation", protocol, corpus).annotations[0]
+    uncertain = [vote.model_copy(update={"semantic": "uncertain"}) for vote in review.votes]
+    adjudicator = review.votes[0].model_copy(update={"reviewer_id": "independent"})
+    final = review.model_copy(update={"votes": uncertain, "adjudicator": adjudicator})
+    assert human_state(final) == "valid"
+    assert human_review_complete(final) is True
+
+
+def test_partial_adjudication_preserves_definite_agreements_in_both_review_states():
+
+    protocol, corpus, _ = evidence()
+    review = records_for("evaluation", protocol, corpus).annotations[0]
+    first = review.votes[0].model_copy(update={"semantic": "uncertain"})
+    adjudicator = first.model_copy(
+        update={
+            "reviewer_id": "independent",
+            "semantic": "preserved",
+            "intent": "uncertain",
+            "is_prompt_injection": None,
+        }
+    )
+    final = review.model_copy(
+        update={"votes": [first, review.votes[1]], "adjudicator": adjudicator}
+    )
+    assert human_state(final) == "valid"
+    assert human_review_complete(final) is True
+
+
+@pytest.mark.parametrize("unchanged", [False, True])
+def test_identical_content_under_identical_inference_identity_cannot_change_label(unchanged):
+    protocol, corpus, registration = evidence()
+    records = records_for("evaluation", protocol, corpus)
+    first = records.attempts[0]
+    if unchanged:
+        content = next(row.content_sha256 for row in corpus.records if row.id == first.original_id)
+        records.attempts[0] = first.model_copy(update={"candidate_sha256": content})
+    else:
+        # Frozen targets share their identity across training replicates.
+        other = next(
+            i
+            for i, row in enumerate(records.attempts)
+            if row.replicate != first.replicate and row.original_id == first.original_id
+        )
+        copied = records.attempts[other]
+        prediction = copied.target_predictions[0].model_copy(update={"raw_label": "1"})
+        records.attempts[other] = copied.model_copy(
+            update={
+                "candidate_sha256": first.candidate_sha256,
+                "target_predictions": [prediction, *copied.target_predictions[1:]],
+            }
+        )
+    records = records.model_copy(update={"annotations": []})
+    with pytest.raises(ValueError, match="identical content"):
+        validate_records(protocol, corpus, registration, records, protocol.root_seed)
+
+
+def test_tokenization_evidence_rejects_inconsistent_truncation_flag():
+
+    with pytest.raises(ValueError, match="truncation"):
+        TokenizationDiagnostic(input_tokens=600, max_tokens=512, truncated=False)

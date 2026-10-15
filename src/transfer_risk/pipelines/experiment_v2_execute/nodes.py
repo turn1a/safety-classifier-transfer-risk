@@ -25,7 +25,12 @@ from transfer_risk.lib.experiment_v2.protocol import (
     require_valid_preflight,
     validate_preflight,
 )
-from transfer_risk.lib.experiment_v2.records import validate_records
+from transfer_risk.lib.experiment_v2.records import (
+    canonical_label,
+    remember_prediction,
+    validate_generation_shard,
+    validate_records,
+)
 from transfer_risk.lib.experiment_v2.schemas import (
     AttackAttempt,
     CandidatePrediction,
@@ -36,6 +41,7 @@ from transfer_risk.lib.experiment_v2.schemas import (
     ModelRealization,
     Protocol,
     RegistrationEvidence,
+    TokenizationDiagnostic,
 )
 from transfer_risk.pipelines.experiment_v2_execute import runtime
 
@@ -95,6 +101,7 @@ def execution_spec_digest(protocol: Protocol, settings: dict[str, Any]) -> str:
             "input_text_policy": "exact_registered_utf8",
             "attack_assets_sha256": protocol.attack_assets_sha256,
             "strict_offline_assets": True,
+            "auxiliary_sentence_encoder_device": "resolved_device_policy",
         }
     )
 
@@ -117,6 +124,8 @@ def input_policy_digest(protocol: Protocol) -> str:
             "tokenizer_truncation": "registered_max_tokens",
             "model_windows": {model.id: model.max_tokens for model in protocol.models},
             "grouping": "separate_registered_evidence",
+            "classifier_input": "registered_lower_trust_text_only",
+            "trusted_context": "human_ground_truth_and_optional_application_only",
         }
     )
 
@@ -742,6 +751,45 @@ def prepare_model(
     }
 
 
+def prepare_model_bundle(*args: Any, **kwargs: Any) -> dict[str, Any]:
+    """Combine a prepared payload and metadata for transactional catalog persistence.
+
+    Args:
+        *args: Registered model preparation inputs.
+        **kwargs: Bound model cell.
+
+    Returns:
+        One immutable checkpoint bundle with its metadata.
+    """
+    bundle, metadata = prepare_model(*args, **kwargs)
+    return {**bundle, "_metadata": metadata}
+
+
+def project_model_metadata(receipt: dict[str, Any], descriptor: dict[str, Any]) -> dict[str, Any]:
+    """Reconstruct model metadata from a verified bundle after a fresh gate.
+
+    Args:
+        receipt: Current model gate.
+        descriptor: Dataset-verified bundle.
+
+    Returns:
+        Original immutable training metadata.
+    """
+    metadata = descriptor["_metadata"]
+    _check_artifact_execution(metadata.get("_execution"), receipt)
+    return dict(metadata)
+
+
+def verify_fresh_gate(receipt: dict[str, Any]) -> None:
+    """Keep a fresh gate required even when all persistent stage outputs exist.
+
+    Args:
+        receipt: Current validated model or target-preparation gate.
+    """
+    if not receipt.get("execution_ref"):
+        _fail("fresh execution gate lacks source identity")
+
+
 def collect_models(
     receipt: dict[str, Any],
     parameters: dict[str, Any],
@@ -836,8 +884,12 @@ def score_phase_originals(
     for model in protocol.models:
         for replicate in protocol.replicates:
             descriptor = manifest["artifacts"][_model_key(model.id, replicate)]
+            diagnostics: list[dict[str, Any]] = []
+            runtime_settings["_tokenization_diagnostics"] = diagnostics
             labels = predict_fn(model, descriptor, frame["text"].tolist(), runtime_settings)
-            for original, raw in zip(frame["id"], labels, strict=True):
+            if diagnostics and len(diagnostics) != len(frame):
+                _fail("original tokenizer diagnostic coverage is incomplete")
+            for index, (original, raw) in enumerate(zip(frame["id"], labels, strict=True)):
                 result.append(
                     {
                         **CleanPrediction(
@@ -847,6 +899,9 @@ def score_phase_originals(
                             raw_label=raw,
                             checkpoint_sha256=descriptor["checkpoint_sha256"],
                             tokenizer_sha256=descriptor["tokenizer_sha256"],
+                            tokenization=TokenizationDiagnostic.model_validate(diagnostics[index])
+                            if diagnostics
+                            else None,
                         ).model_dump(),
                         "_execution": execution_header(receipt),
                     }
@@ -972,6 +1027,8 @@ def run_attack_shard(
             target_predictions=[],
             mechanical_screen="unassessable",
             mechanical_evidence_sha256=None,
+            source_original_tokenization=returned.get("original_tokenization"),
+            source_candidate_tokenization=returned.get("candidate_tokenization"),
         )
         minimum_queries = 0 if attempt.status == "error" and text is None else 1
         if not minimum_queries <= attempt.source_queries <= protocol.source_query_budget:
@@ -993,6 +1050,8 @@ def audit_attack_shard(
     manifest: dict[str, Any],
     private_attempts: list[dict[str, Any]],
     settings: dict[str, Any],
+    corpus_evidence: dict[str, Any],
+    clean_predictions: list[dict[str, Any]],
     *,
     predict_fn: PredictFn = runtime.predict_model,
 ) -> list[dict[str, Any]]:
@@ -1004,16 +1063,73 @@ def audit_attack_shard(
         manifest: Exact realized target artifact descriptors.
         private_attempts: Source generation outputs with private candidate texts.
         settings: Registered target inference settings.
+        corpus_evidence: Registered original content and partition identities.
+        clean_predictions: Complete clean controls from this execution identity.
         predict_fn: Expensive inference adapter replaced by synthetic fixtures in tests.
 
     Returns:
         Non-text complete attempts with target audit predictions.
     """
     protocol = Protocol.model_validate(parameters)
-    _check_receipt(receipt, protocol, settings=settings)
+    corpus = CorpusEvidence.model_validate(corpus_evidence)
+    _check_receipt(receipt, protocol, corpus, settings=settings)
+    _check_manifest(protocol, corpus, manifest, receipt["project_root"])
+    model_receipt = {
+        key: value
+        for key, value in receipt.items()
+        if key != "phase" and not key.startswith("selection_")
+    }
+    _check_artifact_execution(manifest.get("_execution"), model_receipt)
+    originals = {row.id: row for row in corpus.records if row.partition == receipt["phase"]}
+    identities = {
+        (row["model_id"], row["replicate"]): (row["checkpoint_sha256"], row["tokenizer_sha256"])
+        for row in manifest["realizations"]
+    }
+    clean = {}
+    predictions_seen: dict[tuple[str, str, str], str] = {}
+    for row in clean_predictions:
+        _check_artifact_execution(row.get("_execution"), receipt)
+        item = CleanPrediction.model_validate({k: v for k, v in row.items() if k != "_execution"})
+        key = item.model_id, item.replicate, item.original_id
+        if (
+            key in clean
+            or item.original_id not in originals
+            or key[:2] not in identities
+            or identities[key[:2]] != (item.checkpoint_sha256, item.tokenizer_sha256)
+        ):
+            _fail("clean audit control has an invalid identity or coverage")
+        clean[key] = canonical_label(protocol, item.model_id, item.raw_label)
+        remember_prediction(
+            predictions_seen,
+            originals[item.original_id].content_sha256,
+            item.checkpoint_sha256,
+            item.tokenizer_sha256,
+            item.raw_label,
+        )
+    if set(clean) != {(*key, original) for key in identities for original in originals}:
+        _fail("clean audit controls have incomplete coverage")
     for row in private_attempts:
         _check_artifact_execution(row.get("_execution"), receipt)
     attempts = [AttackAttempt.model_validate(row["attempt"]) for row in private_attempts]
+    validate_generation_shard(protocol, attempts, originals, identities, clean)
+    for row, attempt in zip(private_attempts, attempts, strict=True):
+        text = row["candidate_text"]
+        if (text is None) != (attempt.candidate_sha256 is None) or (
+            text is not None
+            and (
+                not isinstance(text, str)
+                or hashlib.sha256(text.encode()).hexdigest() != attempt.candidate_sha256
+            )
+        ):
+            _fail("private candidate content changed before target audit")
+        if attempt.candidate_sha256 is not None:
+            remember_prediction(
+                predictions_seen,
+                attempt.candidate_sha256,
+                attempt.source_checkpoint_sha256,
+                attempt.source_tokenizer_sha256,
+                str(attempt.source_raw_perturbed),
+            )
     candidates = [
         (index, row["candidate_text"])
         for index, row in enumerate(private_attempts)
@@ -1030,16 +1146,28 @@ def audit_attack_shard(
         for target_id in sorted({role.model_id for role in protocol.target_roles}):
             target = next(model for model in protocol.models if model.id == target_id)
             descriptor = manifest["artifacts"][_model_key(target_id, replicate)]
+            diagnostics: list[dict[str, Any]] = []
+            runtime_settings["_tokenization_diagnostics"] = diagnostics
             labels = predict_fn(target, descriptor, texts, runtime_settings)
-            for (index, text), raw in zip(subset, labels, strict=True):
-                if hashlib.sha256(text.encode()).hexdigest() != attempts[index].candidate_sha256:
-                    _fail("private candidate content changed before target audit")
+            if diagnostics and len(diagnostics) != len(texts):
+                _fail("candidate tokenizer diagnostic coverage is incomplete")
+            for position, ((index, _text), raw) in enumerate(zip(subset, labels, strict=True)):
+                remember_prediction(
+                    predictions_seen,
+                    str(attempts[index].candidate_sha256),
+                    descriptor["checkpoint_sha256"],
+                    descriptor["tokenizer_sha256"],
+                    raw,
+                )
                 attempts[index].target_predictions.append(
                     CandidatePrediction(
                         model_id=target_id,
                         raw_label=raw,
                         checkpoint_sha256=descriptor["checkpoint_sha256"],
                         tokenizer_sha256=descriptor["tokenizer_sha256"],
+                        tokenization=TokenizationDiagnostic.model_validate(diagnostics[position])
+                        if diagnostics
+                        else None,
                     )
                 )
     return [

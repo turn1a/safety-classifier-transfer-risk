@@ -11,6 +11,10 @@ from kedro.framework.hooks.manager import _create_hook_manager
 from kedro.io import DatasetError
 from kedro.runner import SequentialRunner
 
+import transfer_risk.datasets.experiment_v2_json_dataset as module
+from transfer_risk.datasets.experiment_v2_immutable_json_dataset import (
+    ExperimentV2ImmutableJSONDataset,
+)
 from transfer_risk.datasets.experiment_v2_json_dataset import ExperimentV2JSONDataset
 from transfer_risk.pipeline_registry import register_pipelines
 from transfer_risk.pipelines.experiment_v2_preflight.pipeline import create_pipeline
@@ -217,3 +221,61 @@ def test_real_catalog_public_wrapper_logs_only_its_checked_absolute_path(
         assert (run / "summary.json").is_file()
         assert not (elsewhere / "docs").exists()
         log_artifact.assert_called_once_with(str(run / "summary.json"), "experiment_v2")
+
+
+@pytest.mark.parametrize("immutable", [False, True])
+@pytest.mark.parametrize("bad", [float("nan"), object()])
+def test_failed_serialization_preserves_existing_json_and_leaves_no_new_artifact(
+    tmp_path, monkeypatch, immutable, bad
+):
+
+    monkeypatch.chdir(tmp_path)
+    cls = ExperimentV2ImmutableJSONDataset if immutable else ExperimentV2JSONDataset
+    path = tmp_path / "data/experiment_v2/safe-run/evidence.json"
+    dataset = cls(filepath=str(path), run_id="safe-run", save_args={"allow_nan": True})
+    with pytest.raises((DatasetError, ValueError, TypeError)):
+        dataset.save({"partial": [1, bad]})
+    assert not path.exists()
+    dataset.save({"complete": 1})
+    if not immutable:
+        with pytest.raises((DatasetError, ValueError, TypeError)):
+            dataset.save({"partial": [1, bad]})
+    assert dataset.load() == {"complete": 1}
+
+
+def test_immutable_publication_does_not_clobber_a_concurrent_writer(tmp_path, monkeypatch):
+
+    monkeypatch.chdir(tmp_path)
+    path = tmp_path / "data/experiment_v2/safe-run/evidence.json"
+    dataset = ExperimentV2ImmutableJSONDataset(filepath=str(path), run_id="safe-run")
+    monkeypatch.setattr(dataset, "exists", lambda: False)
+    dataset.save({"first": 1})
+    with pytest.raises(DatasetError, match="immutable"):
+        dataset.save({"second": 2})
+    assert dataset.load() == {"first": 1}
+
+
+@pytest.mark.parametrize("immutable", [False, True])
+def test_interrupted_atomic_json_publication_preserves_destination(
+    tmp_path, monkeypatch, immutable
+):
+
+    monkeypatch.chdir(tmp_path)
+    path = tmp_path / "data/experiment_v2/safe-run/evidence.json"
+    cls = ExperimentV2ImmutableJSONDataset if immutable else ExperimentV2JSONDataset
+    dataset = cls(filepath=str(path), run_id="safe-run")
+    if not immutable:
+        dataset.save({"previous": 1})
+
+    def interrupted(*_args):
+        msg = "synthetic interrupted publication"
+        raise OSError(msg)
+
+    monkeypatch.setattr(module.os, "link" if immutable else "replace", interrupted)
+    with pytest.raises((DatasetError, OSError), match="interrupted publication"):
+        dataset.save({"new": 2})
+    if immutable:
+        assert not path.exists()
+    else:
+        assert dataset.load() == {"previous": 1}
+    assert list(path.parent.iterdir()) == ([] if immutable else [path])
