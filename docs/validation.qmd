@@ -19,7 +19,49 @@ A detector prediction change is observable from model outputs. Preserved meaning
 
 No computational score is used as a semantic-validity label. A later calibration can compare scores with human judgments using original-level held-out groups. Thresholds chosen on reviewed examples would need a separate evaluation group before they could support automatic labeling. Different perturbations of one original must stay in the same group.
 
-## Saved sample and review status
+## Staged review of target-changing pairs
+
+The separate changed-candidate cohort has 1,318 exact pairs representing 1,403 target-changing trial occurrences among 8,595 nine-transformer attempts. The source-success-gated subset has 998 changed occurrences. All actual human judgments remain pending. The existing broad 278-pair audit below remains available with its own files, tools, and browser state.
+
+The first stage draws 300 changed occurrences uniformly without replacement from the 1,403-occurrence frame. Deduplication after sampling produces 291 display pairs. Review then continues through the remaining 1,027 distinct pairs. The draw, multiplicities, population, and display order are frozen privately. Sampling 300 pairs directly from 1,318 pairs would be a different design.
+
+![The changed-trial sample is drawn before display deduplication; completion and validity resolution have separate counts.](figures/fig_flip_review_coverage.png){fig-alt="The fixed draw has 300 occurrences from 1,403 changed trials, producing 291 display pairs. The complete cohort has 1,318 pairs, with 1,027 remaining." width=100%}
+
+{{< include tables/flip_review_outcomes.qmd >}}
+
+The fixed sample estimates all-candidate valid yield and source-success-gated valid yield over all 8,595 attempts. Both policies use the same occurrence sample; the gated binary outcome is source success AND human validity. Pair judgments are expanded using sampled occurrence multiplicities. Exact equal-tailed hypergeometric 95% population-count intervals are divided by the attempted-trial denominator. Unresolved judgments widen the limits over every compatible success count and can prevent a point estimate. With all 300 sampled outcomes resolved, the maximum interval endpoint distance is about 0.85 percentage points of yield. This is a property of the design; no observed validity result is available.
+
+Full-cohort review reports confirmed-valid, invalid, and unresolved counts for both policies, cells, surrogates, and recipes, plus distinct-original union bounds. Unchanged trials contribute zero while all attempted denominators remain. Logical census bounds are separate from sample confidence intervals. Interim evidence supplies neither precise per-cell validity nor distinct-original validity estimates. Designed-pool validity associations require all contributing outcomes to resolve. Two complete answer sets can still contain uncertainty or conflict, so review completion and validity resolution are reported separately.
+
+The new private directory is `data/08_reporting/private/semantic_flip_audit/`. Preparation retains `cohort-v1.json` and separate `reviewer_1.html` and `reviewer_2.html` tools. These are independent of the old broad-review tools.
+
+```bash
+just prepare-flip-review
+just build-flip-review-tools
+just review-flips reviewer_1
+just review-flips reviewer_2
+```
+
+Run each server in its own terminal. The verified browser route is `http://127.0.0.1:8767/` for reviewer one and `http://127.0.0.1:8768/` for reviewer two. Each tool uses a fixed role, synthetic calibration, independent-review attestation, stage progress, and browser autosave. Reviewers see exact texts and the rubric without model, source, recipe, classifier-outcome, or computational-score metadata. Raw text is rendered as inert text. The tools make no outgoing network requests.
+
+Export progress JSON before changing browsers or origins. Restore only the backup for the same reviewer and cohort. Export CSV for analysis, then import both independently completed exports:
+
+```bash
+just import-flip-reviews /absolute/reviewer_1.csv /absolute/reviewer_2.csv
+just flip-review-results
+```
+
+Explicit imports retain nonempty prior answers and refuse contradictions. Genuine old exports can be reused only when the exact pair text and fixed role match their original dataset fingerprint:
+
+```bash
+uv run python -m transfer_risk.scripts.semantic_flip_review_server combine --reuse-older-1 /absolute/old_reviewer_1.csv --reuse-older-2 /absolute/old_reviewer_2.csv --finalize
+```
+
+Either role may be imported alone. Reuse creates separate `reviewer_1_progress.json` and `reviewer_2_progress.json` backups. Each reviewer may restore only their own matching file through `Import my progress JSON`. Old browser answers are not read or cleared automatically. Role, dataset, or answer conflicts are refused before replacement.
+
+Preparation publishes only `semantic_flip_review_preparation.json`. The finalized `semantic_flip_review_summary.json` is intentionally absent until explicit finalization. Public reporting accepts that absence and uses preparation; a present finalized summary must match the opaque preparation binding, population, and fixed sampling design. Malformed or mismatched final evidence fails. The binding is domain-separated from the private cohort fingerprint. Public outputs exclude raw texts, pair identifiers, private fingerprints, annotations, and notes. Pending confirmed-valid counts do not establish an observed zero validity rate.
+
+## Broad sample and review status
 
 The saved sweep has 9,550 attempted trials and 8,137 distinct exact original/perturbed pairs. Sampling draws two pairs independently within each of the 150 source/surrogate/recipe strata, then deduplicates pairs selected through more than one stratum. The resulting fixed sample has 278 pairs. Its private linkage retains each pair's union-inclusion probability and design weight.
 
@@ -43,7 +85,7 @@ A pair is confirmed valid only when both reviewers independently give all three 
 
 ## Run the private tools
 
-The two HTML tools and pair dataset are stored under ignored `data/08_reporting/private/semantic_audit/`. They are separate from the public site and MLflow artifacts. The current tools are already generated; rebuilding reads the same saved sample.
+The broad audit's two HTML tools and pair dataset are stored under ignored `data/08_reporting/private/semantic_audit/`. They are separate from the public site and MLflow artifacts. The current tools are already generated; rebuilding reads the same saved sample.
 
 ```bash
 just build-review-tools
@@ -56,7 +98,7 @@ Open `http://127.0.0.1:8765/` for the first review. In a second terminal, start 
 just review-pairs reviewer_2 8766
 ```
 
-Open `http://127.0.0.1:8766/` for the second review. The servers bind to loopback and serve only the role's HTML page. The partner can also receive the private `reviewer_2.html` file and open it in their own browser. The tool contains the complete selected texts and makes no network requests.
+Open `http://127.0.0.1:8766/` for the second review. The servers bind to loopback and serve only the role's HTML page. The partner can also receive the private role-specific `reviewer_2.html` file for their own browser. Standalone-file behavior has not been browser-verified; the tested route serves the tool over loopback HTTP. The tool contains the complete selected texts and makes no network requests.
 
 Progress is saved in that browser's local storage, keyed by the sample fingerprint and reviewer role. Use the same browser and address to resume. Before changing browsers or clearing browser data, export a progress JSON backup; import that file into the matching reviewer role to restore your answers. CSV exports supply the labels for analysis. Untouched rows are omitted from review coverage.
 

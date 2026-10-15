@@ -40,7 +40,8 @@ src/transfer_risk/
 │   ├── similarity_audit         # serial training-only CKA sensitivity
 │   ├── retrospective_audit      # local saved-candidate and clean-input checks
 │   ├── semantic_audit           # private sample, independent tools and human review
-│   └── semantic_screening       # pinned local sample diagnostics, hidden from review
+│   ├── semantic_screening       # pinned local sample diagnostics, hidden from review
+│   └── semantic_flip_audit      # staged changed-trial sample and full pair review
 ├── pipeline_registry.py
 └── settings.py
 conf/base/                       # catalog, parameters, MLflow
@@ -66,7 +67,8 @@ infra/                           # Terraform cloud sweep documentation
 - `paper_reporting` reads public aggregates only. It generates manuscript tables, explanatory figures, and the BiLSTM-excluded sensitivity without model, prompt, attack, or checkpoint inputs.
 - `similarity_audit_prepare` materializes the saved training split. `similarity_audit` runs serially on MPS, recomputes CKA over a training-only probe, and creates no attacks or training.
 - `retrospective_audit` requires the historical reference-cell count check before publication. Additional target roles exclude their own source candidates. `detector_baseline_audit` and `retrospective_policy_coverage` use saved checkpoints or predictions.
-- `semantic_audit`, `semantic_review_tools`, `semantic_audit_review`, and `semantic_screening` are opt-in and excluded from `__default__`. Raw pairs, review HTML, annotations, notes, and per-pair scores remain private and are never MLflow artifacts.
+- `semantic_audit`, `semantic_review_tools`, `semantic_audit_review`, `semantic_screening`, `semantic_flip_audit`, `semantic_flip_review_tools`, and `semantic_flip_review` are opt-in and excluded from `__default__`. Raw pairs, review HTML, annotations, notes, and per-pair scores remain private and are never MLflow artifacts.
+- The staged flip review samples changed trial occurrences before deduplicating reviewer display. Preserve the frozen sample and multiplicities. Review completion and validity resolution are separate states. Preparation and finalized summaries share an opaque public binding derived from the private cohort fingerprint; private fingerprints and pair identities remain unpublished. An absent finalized artifact remains absent evidence; a present mismatched artifact must fail.
 - Human review must preserve missing, uncertain, and conflicting evidence as unresolved. Computational scores are hidden from reviewers and are never substituted for human labels.
 - Every public artifact must be catalog-owned and wrapped in `MlflowArtifactDataset`. Do not publish raw prompts, perturbations, model checkpoints, or private CKA matrices.
 - `qualitative_examples.json` is a redacted audit artifact. It may contain only surrogate, recipe, edit count, categorical label, change summary, and audit note. Do not quote, paraphrase, or recreate underlying prompt text in public documentation.
@@ -103,7 +105,7 @@ infra/                           # Terraform cloud sweep documentation
 - `just lint` and `just type` must pass for source changes.
 - Tests assert behavioral invariants. CKA tests cover self-similarity, rotation, and scaling. DBS tests cover diagonal and full-box behavior. Audit tests cover aggregate-only output and target-free reporting.
 - The coverage gate applies to `transfer_risk.lib`; heavy model and attack nodes use focused pipeline tests.
-- Commits require both register passes for changed Markdown, Quarto source, text, and SVG labels, plus a commit-message pass. `just register --all` runs the full authored-prose check. The language checker and rules come from `~/dev/vl-branding`; the independent reader uses Codex and the model pinned in `.register-model`. Failed or incomplete reads block approval. This personal project uses independent visual styling.
+- Commits require both register passes for changed Markdown, Quarto source, text, and SVG labels, plus a commit-message pass. `just register --all` runs the full authored-prose check. The language checker and rules come from `~/dev/vl-branding`; the repository adapter calls the installed `checks/register-pass.sh` with its qualified Codex `gpt-6.1-sol` high default and ChatGPT subscription authentication. The adapter ignores inherited provider/model/effort overrides; provider failure must refuse approval without API billing. Failed or incomplete reads block approval. This personal project uses independent visual styling.
 - Main preserves the historical model and attack implementation, including unmasked BiLSTM padding and uncontrolled fresh-head initialization. Corrected saved-data reductions and reporting belong on main. Changes requiring retraining or new attacks belong on `codex/methodology-recompute` until a separate rerun supplies replacement evidence.
 - On the recomputation branch, new BiLSTMs use masked padding and historical configs without `padding_policy` load with `legacy_unmasked`. Initialize fresh transformer task heads after the derived seed and respect configured token limits. Never report synthetic regression tests as corrected experiment outcomes.
 - A rerun requires an isolated worktree and separate catalog output paths. Existing ignored checkpoints and attack files do not change when Git branches change; `--only-missing-outputs` can reuse defective historical models.

@@ -73,7 +73,8 @@ Marked terms on the site show these definitions on hover or keyboard focus. Foll
 | [Source baseline check](artifacts/source_baseline_check.json) | Current positive-input misses match saved skipped trials in all 135 source/model/recipe strata; count agreement does not prove historical weight identity |
 | [Distinct-original coverage](artifacts/original_policy_coverage.json) | Candidate-policy unions and all 84 equal-budget three-transformer subsets |
 | [Computational pair screens](artifacts/semantic_screen_summary.json) | Sample embedding/NLI score distributions, pinned identities, and truncation coverage |
-| [Human review preparation](artifacts/semantic_review_preparation.json) | Sampling design and explicitly pending judgment coverage |
+| [Broad human review preparation](artifacts/semantic_review_preparation.json) | Stratified 278-pair audit and explicitly pending judgment coverage |
+| [Staged flip review preparation](artifacts/semantic_flip_review_preparation.json) | Fixed 300-occurrence draw, 291 first-stage pairs, 1,027 remaining pairs, and pending validity bounds over 8,595 attempts |
 | [Results manifest](artifacts/results_manifest.json) | Run scope and original cloud execution provenance |
 
 CSV and JSON artifacts retain full numerical precision for reanalysis. The paper and site round displayed values. Raw originals, perturbations, private CKA matrices, and model checkpoints are excluded from the public artifacts. The [implementation page](pipeline.qmd) explains the catalog and pipeline boundaries.

@@ -6,6 +6,10 @@ All notable changes to this project are documented here. The format follows [Kee
 
 ### Added
 
+- A separate frozen 1,318-pair review of 1,403 changed trials, with a fixed 300-occurrence SRS displayed as 291 pairs, followed by 1,027 remaining pairs. Independent exports retain role/text provenance and unresolved judgments. Aggregate-only preparation and finalized summaries have separate lifecycles; actual labels remain pending.
+
+- Catalog-generated review-coverage and validity-outcome reporting that distinguishes completed reviews from resolved validity, supports an absent final summary, and refuses mismatched preparation identities or designs.
+
 - Saved-pool conditional versus fixed-trial yield analyses, complete three-source subset enumeration, model-omission sensitivities, and distinct-original union coverage.
 
 - Serial local inference over all returned transformer candidates, including failed source searches, with a 45-cell historical reference check and aggregate common-source checkpoint comparison.
@@ -22,7 +26,7 @@ All notable changes to this project are documented here. The format follows [Kee
 
 - An explicit `paper_reporting` stage that generates manuscript table includes, an outcome diagram, an annotated cell heatmap, a probe comparison, a synthetic DBS selector diagram, and a nine-transformer sensitivity from public aggregates and configuration without model inference or attacks.
 
-- Commit hooks requiring the checker and a Codex read-through for authored prose, including Quarto `.qmd`, plus a commit-message register check. The reader model is pinned in `.register-model`; failed and incomplete reads block approval. Diagram labels are checked independently of VL visual branding.
+- Commit hooks requiring the checker and a Codex read-through for authored prose, including Quarto `.qmd`, plus a commit-message register check. The repository adapter uses the installed subscription reader and its qualified Codex default; failed and incomplete reads block approval. Diagram labels are checked independently of VL visual branding.
 
 - Reporting tests for complete probe comparisons, configurable exclusion labels, reconciled transitions, rounded table values, and changed-during-review language subjects.
 
@@ -39,6 +43,10 @@ All notable changes to this project are documented here. The format follows [Kee
 - Two redacted qualitative audit entries with metadata and audit notes only. Underlying prompt text remains private.
 
 ### Changed
+
+- Saved-data checkpoint comparison now validates current reference-cell digests, aggregate counts, and current clean-input checkpoint/tokenizer identities and inference settings. Historical weight identity remains unverified. Undefined statistics render with their reasons.
+
+- The prospective branch verifies transactional model bundles, recovery and resumed gates, candidate evidence before inference, registered token windows, criterion-level adjudication, and exact application-control bindings. Its application executor remains disabled and unimplemented; synthetic tests supply no replacement experiment results.
 
 - The paper distinguishes conditional transfer, source-success-gated trial yield, all-returned-candidate outcomes, and distinct-original coverage. Nine-transformer CKA associations are 0.800, 0.400, and 0.733 for the first three outcomes, respectively.
 
