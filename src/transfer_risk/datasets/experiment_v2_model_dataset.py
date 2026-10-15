@@ -85,7 +85,7 @@ def _tokenizer_payload_present(path: Path) -> bool:
 
 
 def _check_transformer_weights(path: Path) -> None:
-    """Require weight payloads and every shard referenced by a saved weight index.
+    """Require a loader-supported single weight file or complete indexed serialization.
 
     Args:
         path: Model payload directory with all symlinks already rejected.
@@ -106,9 +106,15 @@ def _check_transformer_weights(path: Path) -> None:
     if not weights:
         message = "v2 checkpoint requires actual saved model weights"
         raise DatasetError(message)
-    for index in path.glob("*.index.json"):
-        if not index.name.endswith((".safetensors.index.json", ".bin.index.json")):
-            continue
+    indexes = [
+        path / name
+        for name in ("model.safetensors.index.json", "pytorch_model.bin.index.json")
+        if (path / name).is_file()
+    ]
+    if not (weights & {"model.safetensors", "pytorch_model.bin"}) and not indexes:
+        message = "v2 checkpoint shards require a supported complete weight index"
+        raise DatasetError(message)
+    for index in indexes:
         try:
             manifest = json.loads(index.read_text())
             mapping = manifest.get("weight_map") if isinstance(manifest, dict) else None
